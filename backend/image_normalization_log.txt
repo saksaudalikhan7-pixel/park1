@@ -1,0 +1,192 @@
+IMAGE URL NORMALIZATION LOG
+============================================================
+Mode: LIVE
+Total changes: 37
+Missing files: 11
+
+CHANGES:
+------------------------------------------------------------
+✓ Activity.image_url (ID: 36)
+  OLD: http://localhost:8000/media/uploads/20251206_212150_fe55de4f_attraction6.jpeg
+  NEW: uploads/20251206_212150_fe55de4f_attraction6.jpeg
+
+✓ Activity.image_url (ID: 37)
+  OLD: http://localhost:8000/media/uploads/20251206_212222_7e768e5b_attraction11.jpeg
+  NEW: uploads/20251206_212222_7e768e5b_attraction11.jpeg
+
+✓ Activity.image_url (ID: 38)
+  OLD: http://localhost:8080/media/uploads/20251224_025405_49e6ddaf_1763947163648.jpg
+  NEW: uploads/20251224_025405_49e6ddaf_1763947163648.jpg
+
+✓ Activity.image_url (ID: 39)
+  OLD: http://localhost:8000/media/uploads/20251206_212311_7225e49f_attraction1.jpeg
+  NEW: uploads/20251206_212311_7225e49f_attraction1.jpeg
+
+✓ Activity.image_url (ID: 44)
+  OLD: http://localhost:8000/media/uploads/20251207_091409_4db31295_attraction7wallclimbing.jpeg
+  NEW: uploads/20251207_091409_4db31295_attraction7wallclimbing.jpeg
+
+✓ Activity.image_url (ID: 47)
+  OLD: http://localhost:8000/media/uploads/20251205_141324_d9eda80b_attraction1.jpeg
+  NEW: uploads/20251205_141324_d9eda80b_attraction1.jpeg
+
+✓ Activity.image_url (ID: 48)
+  OLD: http://localhost:8000/media/uploads/20251206_212434_49af383f_game1.jpeg
+  NEW: uploads/20251206_212434_49af383f_game1.jpeg
+
+✓ Activity.image_url (ID: 52)
+  OLD: http://localhost:8000/media/uploads/20251205_133605_61d5c552_enterdino.jpeg
+  NEW: uploads/20251205_133605_61d5c552_enterdino.jpeg
+
+✓ Activity.image_url (ID: 53)
+  OLD: http://localhost:8000/media/uploads/20251205_140842_0eb9e4d6_attraction6.jpeg
+  NEW: uploads/20251205_140842_0eb9e4d6_attraction6.jpeg
+
+✗ MISSING Activity.image_url (ID: 57)
+  OLD: http://localhost:8000/media/uploads/20251207_155807_41e43632_WhatsApp%20Image%202025-11-26%20at%203.24.23%20AM.jpeg
+  NEW: uploads/20251207_155807_41e43632_WhatsApp%20Image%202025-11-26%20at%203.24.23%20AM.jpeg
+
+✓ Activity.image_url (ID: 58)
+  OLD: http://localhost:8000/media/uploads/20251205_133456_2a794495_bigslide .jpeg
+  NEW: uploads/20251205_133456_2a794495_bigslide .jpeg
+
+✓ Activity.image_url (ID: 59)
+  OLD: http://localhost:8000/media/uploads/20251205_132226_c26b1787_attraction2.jpeg
+  NEW: uploads/20251205_132226_c26b1787_attraction2.jpeg
+
+✓ Activity.image_url (ID: 60)
+  OLD: http://localhost:8000/media/uploads/20251206_220639_ff0d1565_attraction3.jpeg
+  NEW: uploads/20251206_220639_ff0d1565_attraction3.jpeg
+
+✓ Activity.image_url (ID: 61)
+  OLD: http://localhost:8000/media/uploads/20251207_064945_56077e49_attraction4.jpeg
+  NEW: uploads/20251207_064945_56077e49_attraction4.jpeg
+
+✗ MISSING Activity.image_url (ID: 63)
+  OLD: http://localhost:8000/media/uploads/20251219_015558_619aa921_bigestslide.jpeg
+  NEW: uploads/20251219_015558_619aa921_bigestslide.jpeg
+
+✗ MISSING Banner.image_url (ID: 2)
+  OLD: https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1920&h=600&fit=crop
+  NEW: https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1920&h=600&fit=crop
+
+✗ MISSING Banner.image_url (ID: 4)
+  OLD: https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1920
+  NEW: https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1920
+
+✓ GalleryItem.image_url (ID: 25)
+  OLD: http://localhost:8000/media/uploads/20251210_160007_1b570d5a_1763947163648.jpg
+  NEW: uploads/20251210_160007_1b570d5a_1763947163648.jpg
+
+✓ GalleryItem.image_url (ID: 27)
+  OLD: http://localhost:8000/media/uploads/20251210_160041_ac5e178c_1763947047133.jpg
+  NEW: uploads/20251210_160041_ac5e178c_1763947047133.jpg
+
+✓ GalleryItem.image_url (ID: 28)
+  OLD: http://localhost:8000/media/uploads/20251210_160156_9687db56_bigestslide.jpeg
+  NEW: uploads/20251210_160156_9687db56_bigestslide.jpeg
+
+✓ GalleryItem.image_url (ID: 29)
+  OLD: http://localhost:8000/media/uploads/20251210_160157_633f30c9_wipeoutvid.jpeg
+  NEW: uploads/20251210_160157_633f30c9_wipeoutvid.jpeg
+
+✓ GalleryItem.image_url (ID: 30)
+  OLD: http://localhost:8000/media/uploads/20251210_160157_ce4047ef_enterdino.jpeg
+  NEW: uploads/20251210_160157_ce4047ef_enterdino.jpeg
+
+✓ GalleryItem.image_url (ID: 31)
+  OLD: http://localhost:8000/media/uploads/20251210_160158_e59ac9eb_overview.jpeg
+  NEW: uploads/20251210_160158_e59ac9eb_overview.jpeg
+
+✓ GalleryItem.image_url (ID: 32)
+  OLD: http://localhost:8000/media/uploads/20251210_160158_93503054_ninja.jpeg
+  NEW: uploads/20251210_160158_93503054_ninja.jpeg
+
+✗ MISSING GalleryItem.image_url (ID: 33)
+  OLD: http://localhost:8000/media/uploads/20251210_160159_82703492_WhatsApp%20Image%202025-11-26%20at%203.24.23%20AM.jpeg
+  NEW: uploads/20251210_160159_82703492_WhatsApp%20Image%202025-11-26%20at%203.24.23%20AM.jpeg
+
+✓ GalleryItem.image_url (ID: 34)
+  OLD: http://localhost:8000/media/uploads/20251210_160451_011360c9_1763947002913.jpg
+  NEW: uploads/20251210_160451_011360c9_1763947002913.jpg
+
+✗ MISSING InstagramReel.thumbnail_url (ID: 10)
+  OLD: /media/uploads/reels/utm_sourceig_web_copy_link_thumbnail.jpg
+  NEW: uploads/reels/utm_sourceig_web_copy_link_thumbnail.jpg
+
+✗ MISSING InstagramReel.thumbnail_url (ID: 13)
+  OLD: /media/uploads/reels/DReBX23iROi_thumbnail.jpg
+  NEW: uploads/reels/DReBX23iROi_thumbnail.jpg
+
+✗ MISSING InstagramReel.thumbnail_url (ID: 12)
+  OLD: /media/uploads/reels/DRwfrtTjDtu_thumbnail.jpg
+  NEW: uploads/reels/DRwfrtTjDtu_thumbnail.jpg
+
+✓ PageSection.image_url (ID: 2)
+  OLD: http://localhost:8000/media/uploads/20251205_132326_48cf3a03_entere.jpeg
+  NEW: uploads/20251205_132326_48cf3a03_entere.jpeg
+
+✗ MISSING PageSection.image_url (ID: 5)
+  OLD: http://localhost:8000/media/uploads/20251207_195732_c66169a0_WhatsApp%20Image%202025-11-24%20at%206.31.02%20AM%20(2).jpeg
+  NEW: uploads/20251207_195732_c66169a0_WhatsApp%20Image%202025-11-24%20at%206.31.02%20AM%20(2).jpeg
+
+✓ PageSection.image_url (ID: 7)
+  OLD: http://localhost:8000/media/uploads/20251206_225933_e72aaa89_Gemini_Generated_Image_gvi0uogvi0uogvi0.png
+  NEW: uploads/20251206_225933_e72aaa89_Gemini_Generated_Image_gvi0uogvi0uogvi0.png
+
+✓ PageSection.image_url (ID: 1)
+  OLD: http://localhost:8000/media/uploads/20251207_085248_e1751e6d_entere.jpeg
+  NEW: uploads/20251207_085248_e1751e6d_entere.jpeg
+
+✗ MISSING PageSection.image_url (ID: 9)
+  OLD: http://localhost:8000/media/uploads/20251207_180519_ad434a39_WhatsApp%20Image%202025-11-26%20at%203.24.06%20AM.jpeg
+  NEW: uploads/20251207_180519_ad434a39_WhatsApp%20Image%202025-11-26%20at%203.24.06%20AM.jpeg
+
+✓ PageSection.image_url (ID: 6)
+  OLD: http://localhost:8000/media/uploads/20251207_055052_473fb540_Gemini_Generated_Image_jjyfsljjyfsljjyf.png
+  NEW: uploads/20251207_055052_473fb540_Gemini_Generated_Image_jjyfsljjyfsljjyf.png
+
+✗ MISSING FacilityItem.image_url (ID: 1)
+  OLD: http://localhost:8000/media/uploads/20251219_020124_577c79bf_attraction9.jpeg
+  NEW: uploads/20251219_020124_577c79bf_attraction9.jpeg
+
+✓ FacilityItem.image_url (ID: 2)
+  OLD: http://localhost:8000/media/uploads/20251207_160214_dec6a332_enter.jpeg
+  NEW: uploads/20251207_160214_dec6a332_enter.jpeg
+
+
+MISSING FILES:
+------------------------------------------------------------
+Activity #57 - image_url
+  Path: uploads/20251207_155807_41e43632_WhatsApp%20Image%202025-11-26%20at%203.24.23%20AM.jpeg
+
+Activity #63 - image_url
+  Path: uploads/20251219_015558_619aa921_bigestslide.jpeg
+
+Banner #2 - image_url
+  Path: https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1920&h=600&fit=crop
+
+Banner #4 - image_url
+  Path: https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1920
+
+GalleryItem #33 - image_url
+  Path: uploads/20251210_160159_82703492_WhatsApp%20Image%202025-11-26%20at%203.24.23%20AM.jpeg
+
+InstagramReel #10 - thumbnail_url
+  Path: uploads/reels/utm_sourceig_web_copy_link_thumbnail.jpg
+
+InstagramReel #13 - thumbnail_url
+  Path: uploads/reels/DReBX23iROi_thumbnail.jpg
+
+InstagramReel #12 - thumbnail_url
+  Path: uploads/reels/DRwfrtTjDtu_thumbnail.jpg
+
+PageSection #5 - image_url
+  Path: uploads/20251207_195732_c66169a0_WhatsApp%20Image%202025-11-24%20at%206.31.02%20AM%20(2).jpeg
+
+PageSection #9 - image_url
+  Path: uploads/20251207_180519_ad434a39_WhatsApp%20Image%202025-11-26%20at%203.24.06%20AM.jpeg
+
+FacilityItem #1 - image_url
+  Path: uploads/20251219_020124_577c79bf_attraction9.jpeg
+
