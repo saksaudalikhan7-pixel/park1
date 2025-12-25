@@ -34,7 +34,7 @@ def get_env_list(name, default=''):
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key-fallback')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = get_env_bool('DEBUG', False)
+DEBUG = True  # TEMPORARY: Re-enabled to debug 500 error
 
 # Azure App Service will set WEBSITE_HOSTNAME
 ALLOWED_HOSTS = get_env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1')
