@@ -232,7 +232,7 @@ if USE_AZURE_STORAGE:
             },
         },
         "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
         },
     }
     MEDIA_URL = f"https://ninjapark.blob.core.windows.net/media/"
