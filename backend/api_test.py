@@ -37,13 +37,17 @@ def main():
         "Activities": f"{BASE_URL}/api/v1/cms/activities/",
         "Banners": f"{BASE_URL}/api/v1/cms/banners/",
         "FAQs": f"{BASE_URL}/api/v1/cms/faqs/",
-        "Testimonials": f"{BASE_URL}/api/v1/cms/testimonials/",
         "Social Links": f"{BASE_URL}/api/v1/cms/social-links/",
         "Gallery": f"{BASE_URL}/api/v1/cms/gallery/",
         "Instagram Reels": f"{BASE_URL}/api/v1/cms/instagram-reels/",
         "Pricing Plans": f"{BASE_URL}/api/v1/cms/pricing-plans/",
         "Party Packages": f"{BASE_URL}/api/v1/cms/party-packages/",
         "Contact Info": f"{BASE_URL}/api/v1/cms/contact-info/",
+        "Stat Cards": f"{BASE_URL}/api/v1/cms/stat-cards/",
+        "Menu Sections": f"{BASE_URL}/api/v1/cms/menu-sections/",
+        "Group Packages": f"{BASE_URL}/api/v1/cms/group-packages/",
+        "Legal Documents": f"{BASE_URL}/api/v1/cms/legal-documents/",
+        "Page Sections": f"{BASE_URL}/api/v1/cms/page-sections/",
     }
     
     cms_passed = 0
@@ -56,9 +60,10 @@ def main():
     print("-" * 70)
     booking_endpoints = {
         "Customers": f"{BASE_URL}/api/v1/bookings/customers/",
-        "Session Bookings": f"{BASE_URL}/api/v1/bookings/sessions/",
-        "Party Bookings": f"{BASE_URL}/api/v1/bookings/parties/",
-        "Booking Blocks": f"{BASE_URL}/api/v1/bookings/blocks/",
+        "Bookings": f"{BASE_URL}/api/v1/bookings/bookings/",
+        "Booking Blocks": f"{BASE_URL}/api/v1/bookings/booking-blocks/",
+        "Transactions": f"{BASE_URL}/api/v1/bookings/transactions/",
+        "Waivers": f"{BASE_URL}/api/v1/bookings/waivers-old/",
     }
     
     booking_passed = 0
