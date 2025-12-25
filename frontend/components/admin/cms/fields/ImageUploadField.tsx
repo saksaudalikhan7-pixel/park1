@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { FieldSchema } from '@/lib/cms/types';
 import { Upload, X, Image as ImageIcon, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { getMediaUrl } from '@/lib/media-utils';
 
 
 interface ImageUploadFieldProps {
@@ -102,7 +103,7 @@ export function ImageUploadField({ field, value, onChange, error }: ImageUploadF
                 {value ? (
                     <div className="relative w-32 h-32 bg-slate-100 rounded-lg overflow-hidden border border-slate-200 group">
                         <img
-                            src={value}
+                            src={getMediaUrl(value)}
                             alt="Preview"
                             className="w-full h-full object-cover"
                             onError={(e) => {

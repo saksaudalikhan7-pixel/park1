@@ -41,6 +41,10 @@ ALLOWED_HOSTS = get_env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1')
 if 'WEBSITE_HOSTNAME' in os.environ:
     ALLOWED_HOSTS.append(os.environ['WEBSITE_HOSTNAME'])
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://ninjainflablepark-gbhwbbdna5hjgvf9.centralindia-01.azurewebsites.net',
+]
+
 
 # Application definition
 
@@ -102,20 +106,18 @@ WSGI_APPLICATION = 'ninja_backend.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 # Use PostgreSQL if DB_ENGINE is set in environment, otherwise use SQLite
-DB_ENGINE = os.getenv('DB_ENGINE', 'django.db.backends.sqlite3')
+# Use PostgreSQL by default for production readiness
+DB_ENGINE = os.getenv('DB_ENGINE', 'django.db.backends.postgresql')
 
 if DB_ENGINE == 'django.db.backends.postgresql':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME', 'postgres'),
+            'NAME': os.getenv('DB_NAME', 'ninjapark_db'),
             'USER': os.getenv('DB_USER', 'postgres'),
-            'PASSWORD': os.getenv('DB_PASSWORD', ''),
+            'PASSWORD': os.getenv('DB_PASSWORD', 'admin@786'),
             'HOST': os.getenv('DB_HOST', 'localhost'),
             'PORT': os.getenv('DB_PORT', '5432'),
-            'OPTIONS': {
-                'sslmode': os.getenv('DB_SSL_MODE', 'prefer'),
-            },
         }
     }
 else:
@@ -214,5 +216,27 @@ if 'WEBSITE_HOSTNAME' in os.environ:
 CORS_ALLOW_CREDENTIALS = True
 # CORS_ALLOW_ALL_ORIGINS = True  # Disabled to allowing credentials
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# Azure Storage Configuration
+# FORCE ENABLE AZURE FOR MIGRATION
+USE_AZURE_STORAGE = True 
+
+if USE_AZURE_STORAGE:
+    # Production: Use Azure Blob Storage
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.azure_storage.AzureStorage",
+            "OPTIONS": {
+                "connection_string": os.getenv("AZURE_CONNECTION_STRING"),
+                "azure_container": "media",
+                "overwrite_files": False,
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+    MEDIA_URL = f"https://ninjapark.blob.core.windows.net/media/"
+else:
+    # Local Development: Use Filesystem
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

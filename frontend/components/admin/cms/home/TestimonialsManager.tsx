@@ -5,6 +5,7 @@ import { createTestimonial, deleteTestimonial, updateTestimonial } from '@/app/a
 import { Loader2, Plus, Trash2, Star, Edit2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { CMSField } from '@/components/admin/cms/CMSField';
+import { getMediaUrl } from '@/lib/media-utils';
 
 interface TestimonialsManagerProps {
     items: any[];
@@ -159,7 +160,7 @@ export function TestimonialsManager({ items: initialItems }: TestimonialsManager
                             <div className="flex items-start justify-between mb-2">
                                 <div className="flex items-center gap-2">
                                     {item.image_url ? (
-                                        <img src={item.image_url} alt={item.name} className="w-10 h-10 rounded-full object-cover" />
+                                        <img src={getMediaUrl(item.image_url)} alt={item.name} className="w-10 h-10 rounded-full object-cover" />
                                     ) : (
                                         <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 font-bold">
                                             {item.name.charAt(0)}
