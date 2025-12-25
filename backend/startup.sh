@@ -1,5 +1,8 @@
-#!/bin/bash
-cd backend
+# Navigate to backend if we aren't already there
+if [ ! -f "manage.py" ] && [ -d "backend" ]; then
+    cd backend
+fi
+
 python manage.py migrate
 python manage.py collectstatic --noinput
 # Create superuser if it doesn't exist (using environment variables)
