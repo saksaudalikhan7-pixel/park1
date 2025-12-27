@@ -32,7 +32,7 @@ jobs:
       - name: Prepare standalone deployment
         run: |
           cd frontend
-          mkdir -p deploy
+          mkdir -p deploy/.next
           cp -r .next/standalone/* deploy/
           cp -r .next/static deploy/.next/static
           cp -r public deploy/public
