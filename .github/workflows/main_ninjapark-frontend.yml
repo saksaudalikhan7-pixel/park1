@@ -25,12 +25,12 @@ jobs:
 
       - name: npm install and build
         run: |
-          cd frontend
           npm install
+          cd frontend
           npm run build --if-present
 
       - name: Zip artifact for deployment
-        run: cd frontend && zip -r ../release.zip .next standalone public package.json node_modules
+        run: cd frontend && zip -r ../release.zip .next standalone public package.json package-lock.json node_modules
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
