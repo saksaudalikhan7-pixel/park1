@@ -29,11 +29,21 @@ jobs:
           cd frontend
           npm run build
 
+      - name: Prepare standalone deployment
+        run: |
+          cd frontend
+          mkdir -p deploy
+          cp -r .next/standalone/* deploy/
+          cp -r .next/static deploy/.next/static
+          cp -r public deploy/public
+          cp startup.sh deploy/
+          chmod +x deploy/startup.sh
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: frontend
+          path: frontend/deploy
 
   deploy:
     runs-on: ubuntu-latest

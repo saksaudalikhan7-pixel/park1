@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    // No output: 'export' - App Service supports full Next.js
+    output: 'standalone', // Create self-contained deployment for Azure
     typescript: {
         ignoreBuildErrors: true, // Temporarily bypass TypeScript errors
     },
