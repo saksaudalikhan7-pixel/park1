@@ -79,7 +79,7 @@ jobs:
       
       - name: Unzip artifact for deployment
         run: |
-          unzip -o node-app/release.zip -d deploy
+          unzip -o release.zip -d deploy
           ls -la deploy/
           ls -la deploy/.next/ || echo "No .next directory found!"
 
