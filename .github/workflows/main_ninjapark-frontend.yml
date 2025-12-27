@@ -33,7 +33,7 @@ jobs:
         run: |
           cd frontend
           mkdir -p deploy
-          # Copy standalone build to .next/standalone subdirectory
+          # Copy standalone build to .next/standalone (where wrapper expects it)
           mkdir -p deploy/.next/standalone
           cp -r .next/standalone/. deploy/.next/standalone/
           # Copy static files
@@ -45,6 +45,10 @@ jobs:
           cp server.js deploy/server.js
           # Remove package.json to prevent Azure from running npm install
           rm -f deploy/package.json deploy/package-lock.json
+          # List structure for debugging
+          echo "Deployment structure:"
+          ls -la deploy/
+          ls -la deploy/.next/ || true
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
