@@ -50,11 +50,19 @@ jobs:
           ls -la deploy/
           ls -la deploy/.next/ || true
 
+      - name: Create deployment package
+        run: |
+          cd frontend/deploy
+          zip -r ../../release.zip .
+          cd ../..
+          echo "Package contents:"
+          unzip -l release.zip | head -20
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: frontend/deploy/
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -68,6 +76,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
+      
+      - name: Unzip artifact for deployment
+        run: |
+          unzip -o node-app/release.zip -d deploy
+          ls -la deploy/
+          ls -la deploy/.next/ || echo "No .next directory found!"
 
       - name: Login to Azure
         uses: azure/login@v2
