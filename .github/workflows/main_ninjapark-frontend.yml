@@ -33,13 +33,16 @@ jobs:
         run: |
           cd frontend
           mkdir -p deploy
-          # Copy standalone server files to root
-          cp -r .next/standalone/. deploy/
-          # Copy static files to .next/static
+          # Copy standalone build to .next/standalone subdirectory
+          mkdir -p deploy/.next/standalone
+          cp -r .next/standalone/. deploy/.next/standalone/
+          # Copy static files
           mkdir -p deploy/.next/static
           cp -r .next/static/. deploy/.next/static/
           # Copy public files
           cp -r public deploy/public
+          # Copy server wrapper to root (this is what Azure will run)
+          cp server.js deploy/server.js
           # Remove package.json to prevent Azure from running npm install
           rm -f deploy/package.json deploy/package-lock.json
 
