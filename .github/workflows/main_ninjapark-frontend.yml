@@ -38,6 +38,9 @@ jobs:
           cp -r public deploy/public
           cp startup.sh deploy/
           chmod +x deploy/startup.sh
+          # Remove package.json to prevent Azure from running npm install
+          # Standalone build is self-contained and doesn't need it
+          rm -f deploy/package.json deploy/package-lock.json
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
