@@ -32,14 +32,15 @@ jobs:
       - name: Prepare standalone deployment
         run: |
           cd frontend
-          mkdir -p deploy/.next
-          cp -r .next/standalone/* deploy/
-          cp -r .next/static deploy/.next/static
+          mkdir -p deploy
+          # Copy standalone server files to root
+          cp -r .next/standalone/. deploy/
+          # Copy static files to .next/static
+          mkdir -p deploy/.next/static
+          cp -r .next/static/. deploy/.next/static/
+          # Copy public files
           cp -r public deploy/public
-          cp startup.sh deploy/
-          chmod +x deploy/startup.sh
           # Remove package.json to prevent Azure from running npm install
-          # Standalone build is self-contained and doesn't need it
           rm -f deploy/package.json deploy/package-lock.json
 
       - name: Upload artifact for deployment job
