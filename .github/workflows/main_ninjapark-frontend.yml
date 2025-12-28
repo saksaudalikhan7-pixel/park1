@@ -33,22 +33,23 @@ jobs:
         run: |
           cd frontend
           mkdir -p deploy
-          # Copy standalone build to .next/standalone (where wrapper expects it)
+          # Copy standalone build with all its contents
           mkdir -p deploy/.next/standalone
           cp -r .next/standalone/. deploy/.next/standalone/
-          # Copy static files
+          # Copy static files to root .next/static (for serving)
           mkdir -p deploy/.next/static
           cp -r .next/static/. deploy/.next/static/
           # Copy public files
           cp -r public deploy/public
           # Copy server wrapper to root (this is what Azure will run)
           cp server.js deploy/server.js
-          # Remove package.json to prevent Azure from running npm install
-          rm -f deploy/package.json deploy/package-lock.json
+          # Create minimal package.json for Express dependency
+          echo '{"name":"ninjapark-frontend","version":"1.0.0","private":true,"scripts":{"start":"node server.js"},"dependencies":{"express":"^4.18.2"},"engines":{"node":">=18.0.0"}}' > deploy/package.json
           # List structure for debugging
           echo "Deployment structure:"
           ls -la deploy/
           ls -la deploy/.next/ || true
+          ls -la deploy/.next/standalone/frontend/ || true
 
       - name: Create deployment package
         run: |
