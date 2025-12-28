@@ -8,7 +8,7 @@ console.log('Starting Next.js server on port', PORT);
 console.log('Current directory:', __dirname);
 
 // Start the Next.js standalone server
-const server = spawn('node', [path.join(__dirname, '.next/standalone/server.js')], {
+const server = spawn('node', [path.join(__dirname, '.next/standalone/frontend/server.js')], {
     env: { ...process.env, PORT },
     stdio: 'inherit'
 });
