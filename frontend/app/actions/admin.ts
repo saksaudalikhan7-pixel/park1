@@ -114,7 +114,9 @@ export async function loginAdmin(formData: FormData) {
     }
 
     // Use the API_URL environment variable for production
-    const targetUrl = `${API_URL}/token/`;
+    // Token endpoint is at /api/token/, not /api/v1/token/
+    const baseUrl = API_URL.replace('/api/v1', '');
+    const targetUrl = `${baseUrl}/api/token/`;
     console.log('[Login Debug] Target URL:', targetUrl);
 
     try {
