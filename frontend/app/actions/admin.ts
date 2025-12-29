@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { fetchAPI } from "../lib/server-api";
 
-const API_URL = process.env.API_URL || 'http://localhost:8000/api/v1';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:8000/api/v1';
 
 export async function updateBooking(id: string | number, data: any) {
     try {
@@ -113,9 +113,9 @@ export async function loginAdmin(formData: FormData) {
         return { error: "Email and password are required" };
     }
 
-    // Hardcoding to known working local address for stability
-    const targetUrl = 'http://127.0.0.1:8000/api/token/';
-    console.log('[Login Debug] Force Target URL:', targetUrl);
+    // Use the API_URL environment variable for production
+    const targetUrl = `${API_URL}/token/`;
+    console.log('[Login Debug] Target URL:', targetUrl);
 
     try {
         const res = await fetch(targetUrl, {
