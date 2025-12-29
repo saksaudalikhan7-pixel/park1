@@ -50,19 +50,25 @@ export default function AdminBookings() {
         try {
             setLoading(true);
 
-            // Use client-side fetch instead of server action
-            const { fetchBookingsClient } = await import('@/lib/client-api');
-            const data = await fetchBookingsClient('SESSION');
+            // Use API route proxy instead of client-side fetch
+            const response = await fetch('/api/bookings?type=SESSION', {
+                credentials: 'include',
+                cache: 'no-store',
+            });
 
-            if (!data || data.length === 0) {
-                // No bookings found
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to load bookings');
             }
 
+            const data = await response.json();
             setBookings(data as any[]);
             setFilteredBookings(data as any[]);
         } catch (error) {
-            console.error(error);
+            console.error('[Bookings Page] Error:', error);
             toast.error('Failed to load bookings: ' + (error as Error).message);
+            setBookings([]);
+            setFilteredBookings([]);
         } finally {
             setLoading(false);
         }
