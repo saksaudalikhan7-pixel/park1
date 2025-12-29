@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Check, X, Printer, Mail, Users, User, CheckCircle, FileSignature, Cake } from "lucide-react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+// Removed - using API routes instead
 
 export default function PartyBookingDetailPage({ params }: { params: { id: string } }) {
     const router = useRouter();
@@ -16,9 +16,10 @@ export default function PartyBookingDetailPage({ params }: { params: { id: strin
     useEffect(() => {
         async function loadBookingData() {
             try {
-                // Fetch party booking details
-                const bookingResponse = await fetch(`${API_URL}/bookings/party-bookings/${params.id}/`, {
+                // Fetch party booking details via API route
+                const bookingResponse = await fetch(`/api/bookings/${params.id}?type=PARTY`, {
                     credentials: 'include',
+                    cache: 'no-store',
                 });
 
                 if (bookingResponse.ok) {
@@ -26,8 +27,9 @@ export default function PartyBookingDetailPage({ params }: { params: { id: strin
                     setBooking(bookingData);
 
                     // Fetch waivers for this party booking
-                    const waiversResponse = await fetch(`${API_URL}/bookings/waivers/`, {
+                    const waiversResponse = await fetch(`/api/waivers`, {
                         credentials: 'include',
+                        cache: 'no-store',
                     });
 
                     if (waiversResponse.ok) {
@@ -52,11 +54,12 @@ export default function PartyBookingDetailPage({ params }: { params: { id: strin
 
     const handleUpdateStatus = async (status: string) => {
         try {
-            const response = await fetch(`${API_URL}/bookings/party-bookings/${params.id}/`, {
+            const response = await fetch(`/api/bookings/${params.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ status: status })
+                body: JSON.stringify({ type: 'PARTY', status: status }),
+                cache: 'no-store',
             });
             if (response.ok) {
                 // Reload booking data
