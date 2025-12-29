@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from apps.bookings.permissions import IsStaffUser
+from apps.core.permissions import IsContentManagerOrAdmin
 from .models import (
     Banner, Activity, Faq, SocialLink, GalleryItem,
     StatCard, InstagramReel, MenuSection, GroupPackage, GuidelineCategory, LegalDocument,
@@ -22,10 +23,10 @@ from .serializers import (
 
 class BaseCmsViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
-        # Allow public read access, require staff authentication for write operations
+        # Allow public read access, require CONTENT_MANAGER or ADMIN for write operations
         if self.action in ['list', 'retrieve']:
             return [permissions.AllowAny()]
-        return [IsStaffUser()]  # Allow managers to manage CMS content
+        return [IsContentManagerOrAdmin()]  # Allow CONTENT_MANAGER and ADMIN to manage CMS content
 
 class BannerViewSet(BaseCmsViewSet):
     queryset = Banner.objects.all()
@@ -251,7 +252,7 @@ class UploadView(APIView):
     Handle file uploads for CMS images.
     Validates file type, size, and saves to media storage.
     """
-    permission_classes = [permissions.IsAdminUser]  # Require admin authentication
+    permission_classes = [IsContentManagerOrAdmin]  # Require CONTENT_MANAGER or ADMIN
     parser_classes = (MultiPartParser, FormParser)
     
     # Configuration
@@ -328,7 +329,7 @@ class UploadView(APIView):
             )
 
 class ReorderView(APIView):
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsContentManagerOrAdmin]
 
     def post(self, request, *args, **kwargs):
         """
