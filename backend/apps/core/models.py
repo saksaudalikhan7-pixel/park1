@@ -2,19 +2,28 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 class User(AbstractUser):
+    ROLE_CHOICES = [
+        ('ADMIN', 'Admin'),
+        ('MANAGER', 'Manager'),
+        ('CONTENT_MANAGER', 'Content Manager'),
+        ('STAFF', 'Staff'),
+        ('EMPLOYEE', 'Employee'),
+    ]
+    
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     profile_pic = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
-    role = models.CharField(max_length=50, default='STAFF')
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='STAFF')
     
     # Use email as the unique identifier
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'name']
 
     def save(self, *args, **kwargs):
-        # Automatically set is_staff for employees, managers, and content managers
-        if self.role in ['STAFF', 'EMPLOYEE', 'MANAGER', 'CONTENT_MANAGER', 'ADMIN']:
-            self.is_staff = True
+        # Automatically set is_staff for all roles, and is_superuser for ADMIN
+        self.is_staff = True
+        if self.role == 'ADMIN':
+            self.is_superuser = True
         super().save(*args, **kwargs)
 
     def __str__(self):
