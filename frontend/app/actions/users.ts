@@ -95,10 +95,23 @@ export async function deleteUser(id: string) {
 
 export async function createAdminUser(data: any) {
     await requirePermission('users', 'write');
+
+    // Generate username from email if not provided
+    const username = data.username || data.email.split('@')[0];
+
+    const payload = {
+        username,
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        role: data.role
+    };
+
     const res = await fetchAPI("/core/users/", {
         method: "POST",
-        body: JSON.stringify(data)
+        body: JSON.stringify(payload)
     });
+
     if (!res || !res.ok) {
         const error = await res.json();
         const errorMessage = error.detail ||
@@ -110,14 +123,18 @@ export async function createAdminUser(data: any) {
             "Failed to create user";
         throw new Error(errorMessage);
     }
+
     revalidatePath("/admin/users");
+    return await res.json();
 }
 
 export async function getRoles(): Promise<any[]> {
     return [
-        { id: 'SUPER_ADMIN', name: 'Super Admin', description: 'Full access to all settings and data' },
-        { id: 'ADMIN', name: 'Content Manager', description: 'Manage content and bookings' },
-        { id: 'EMPLOYEE', name: 'Employee', description: 'Read-only access to bookings and schedules' }
+        { id: 'ADMIN', name: 'Admin', description: 'Full access to everything' },
+        { id: 'MANAGER', name: 'Manager', description: 'Booking and dashboard access' },
+        { id: 'CONTENT_MANAGER', name: 'Content Manager', description: 'CMS management only' },
+        { id: 'STAFF', name: 'Staff', description: 'Booking management only' },
+        { id: 'EMPLOYEE', name: 'Employee', description: 'Read-only access to bookings' }
     ];
 }
 
