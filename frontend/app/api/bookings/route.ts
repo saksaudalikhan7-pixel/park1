@@ -9,26 +9,34 @@ export async function GET(request: NextRequest) {
         const token = cookies().get("admin_token")?.value;
 
         if (!token) {
+            console.error('[API Route] No authentication token found');
             return NextResponse.json(
-                { error: "Not authenticated" },
+                { error: "Not authenticated", detail: "Please log in to access this resource" },
                 { status: 401 }
             );
         }
 
         // Get query parameters
         const searchParams = request.nextUrl.searchParams;
-        const type = searchParams.get('type') || 'SESSION';
+        const type = searchParams.get('type')?.toUpperCase() || 'SESSION';
 
-        // Build API URL
+        console.log(`[API Route] Fetching ${type} bookings`);
+
+        // Build API URL based on type
         let apiUrl: string;
         if (type === 'PARTY') {
-            apiUrl = `${API_URL}/bookings/party-bookings/`;
+            apiUrl = `${API_URL}/bookings/party-bookings/?ordering=-created_at`;
+        } else if (type === 'SESSION') {
+            apiUrl = `${API_URL}/bookings/bookings/?type=SESSION&ordering=-created_at`;
         } else {
-            const params = new URLSearchParams();
-            params.append('type', type);
-            params.append('ordering', '-created_at');
-            apiUrl = `${API_URL}/bookings/bookings/?${params.toString()}`;
+            // For "ALL" type, we'll fetch both and combine
+            return NextResponse.json(
+                { error: "Use /api/bookings/all for combined bookings" },
+                { status: 400 }
+            );
         }
+
+        console.log(`[API Route] Calling: ${apiUrl}`);
 
         // Fetch from backend with token
         const response = await fetch(apiUrl, {
@@ -41,19 +49,26 @@ export async function GET(request: NextRequest) {
 
         if (!response.ok) {
             const errorText = await response.text();
+            console.error(`[API Route] Backend error ${response.status}:`, errorText);
             return NextResponse.json(
-                { error: `Backend API error: ${response.status}`, details: errorText },
+                {
+                    error: `Backend API returned ${response.status}`,
+                    details: errorText,
+                    type: type
+                },
                 { status: response.status }
             );
         }
 
         const data = await response.json();
+        console.log(`[API Route] Successfully fetched ${data.length || 0} ${type} bookings`);
+
         return NextResponse.json(data);
 
     } catch (error: any) {
-        console.error('[API Route] Error:', error);
+        console.error('[API Route] Unexpected error:', error);
         return NextResponse.json(
-            { error: error.message || 'Internal server error' },
+            { error: 'Internal server error', message: error.message },
             { status: 500 }
         );
     }

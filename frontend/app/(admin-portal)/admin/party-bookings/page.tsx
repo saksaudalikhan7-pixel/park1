@@ -52,19 +52,25 @@ export default function PartyBookingsPage() {
         try {
             setLoading(true);
 
-            // Use client-side fetch instead of server action
-            const { fetchBookingsClient } = await import('@/lib/client-api');
-            const data = await fetchBookingsClient('PARTY');
+            // Use API route proxy instead of direct backend call
+            const response = await fetch('/api/bookings?type=PARTY', {
+                credentials: 'include',
+                cache: 'no-store',
+            });
 
-            if (!data || data.length === 0) {
-                // No bookings found
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to load bookings');
             }
 
+            const data = await response.json();
             setBookings(data as any[]);
             setFilteredBookings(data as any[]);
         } catch (error) {
-            console.error(error);
+            console.error('[Party Bookings] Error:', error);
             toast.error('Failed to load bookings: ' + (error as Error).message);
+            setBookings([]);
+            setFilteredBookings([]);
         } finally {
             setLoading(false);
         }

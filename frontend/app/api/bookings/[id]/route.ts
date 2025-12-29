@@ -9,9 +9,19 @@ export async function GET(
 ) {
     const id = params.id;
     const token = cookies().get("admin_token")?.value;
+    const searchParams = request.nextUrl.searchParams;
+    const type = searchParams.get('type')?.toUpperCase() || 'SESSION';
 
     try {
-        const res = await fetch(`${BACKEND_URL}/bookings/bookings/${id}/`, {
+        // Build URL based on booking type
+        let apiUrl: string;
+        if (type === 'PARTY') {
+            apiUrl = `${BACKEND_URL}/bookings/party-bookings/${id}/`;
+        } else {
+            apiUrl = `${BACKEND_URL}/bookings/bookings/${id}/`;
+        }
+
+        const res = await fetch(apiUrl, {
             headers: {
                 "Content-Type": "application/json",
                 ...(token && { Authorization: `Bearer ${token}` }),
@@ -43,9 +53,18 @@ export async function PATCH(
     const id = params.id;
     const token = cookies().get("admin_token")?.value;
     const body = await request.json();
+    const type = body.type?.toUpperCase() || 'SESSION';
 
     try {
-        const res = await fetch(`${BACKEND_URL}/bookings/bookings/${id}/`, {
+        // Build URL based on booking type
+        let apiUrl: string;
+        if (type === 'PARTY') {
+            apiUrl = `${BACKEND_URL}/bookings/party-bookings/${id}/`;
+        } else {
+            apiUrl = `${BACKEND_URL}/bookings/bookings/${id}/`;
+        }
+
+        const res = await fetch(apiUrl, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
