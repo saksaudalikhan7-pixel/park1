@@ -3,18 +3,24 @@
 import { BookingTable } from "../components/BookingTable";
 import { getSessionBookings } from "@/app/actions/admin";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function SessionBookingsPage() {
     const [bookings, setBookings] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchBookings = async () => {
             try {
                 const data = await getSessionBookings();
                 setBookings(data as any[]);
-            } catch (error) {
-                // Error handled silently - bookings will remain empty array
+                setError(null);
+            } catch (error: any) {
+                console.error('[Session Bookings] Error:', error);
+                const errorMsg = error.message || 'Failed to load bookings';
+                setError(errorMsg);
+                toast.error(errorMsg);
                 setBookings([]);
             } finally {
                 setLoading(false);
@@ -34,6 +40,12 @@ export default function SessionBookingsPage() {
 
     return (
         <div className="space-y-6">
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+                    <p className="font-semibold">Error loading bookings</p>
+                    <p className="text-sm">{error}</p>
+                </div>
+            )}
             <BookingTable
                 bookings={bookings}
                 title="Session Bookings"

@@ -303,8 +303,9 @@ export async function getSessionBookings(filter?: { status?: string; date?: stri
     console.log('[DEBUG] getSessionBookings - Response ok:', res?.ok);
 
     if (!res || !res.ok) {
-        console.log('[DEBUG] getSessionBookings - Response not OK, returning empty array');
-        return [];
+        const errorText = await res.text().catch(() => 'Unknown error');
+        console.error('[DEBUG] getSessionBookings - Error:', errorText);
+        throw new Error(`API returned ${res?.status}: ${errorText}`);
     }
 
     const data = await res.json();
