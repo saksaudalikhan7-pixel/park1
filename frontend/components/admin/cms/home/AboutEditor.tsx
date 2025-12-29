@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { updatePageSection, createPageSection } from '@/app/actions/page-sections';
 import { CMSField } from '@/components/admin/cms/CMSField';
 import { toast } from 'sonner';
@@ -23,6 +23,24 @@ export function AboutEditor({ section: initialSection, pageSlug }: AboutEditorPr
         order: 1
     });
     const [loading, setLoading] = useState(false);
+    const [autoSaveTriggered, setAutoSaveTriggered] = useState(false);
+    const previousImageUrl = useRef(section.image_url);
+
+    // Auto-save when image changes
+    useEffect(() => {
+        if (section.image_url && section.image_url !== previousImageUrl.current) {
+            previousImageUrl.current = section.image_url;
+            setAutoSaveTriggered(true);
+        }
+    }, [section.image_url]);
+
+    // Trigger save when auto-save is needed
+    useEffect(() => {
+        if (autoSaveTriggered) {
+            handleSave();
+            setAutoSaveTriggered(false);
+        }
+    }, [autoSaveTriggered]);
 
     const handleChange = (name: string, value: any) => {
         setSection((prev: any) => ({ ...prev, [name]: value }));
