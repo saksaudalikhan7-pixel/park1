@@ -51,20 +51,20 @@ export async function getAdminSession(): Promise<AdminSession | null> {
         const user = await res.json();
 
         // Map roles to permissions
-        // Ideally this should come from the backend
         let permissions: Permission[] = [];
-        if (user.is_superuser || user.role === 'SUPER_ADMIN') {
-            // Super Admin: Full Access to Everything
+
+        if (user.role === 'ADMIN') {
+            // ADMIN: Full Access to Everything
             permissions = ['*:*'];
-        } else if (user.role === 'MANAGER') {
-            // Manager: Website Management (CMS) ONLY
+        } else if (user.role === 'CONTENT_MANAGER') {
+            // CONTENT_MANAGER: CMS Management ONLY
             permissions = [
                 'cms:read',
                 'cms:write',
                 'cms:delete',
             ];
-        } else if (user.role === 'EMPLOYEE' || user.role === 'STAFF') {
-            // Employee: Booking Management, Waivers, Dashboard, Contact Messages
+        } else if (user.role === 'STAFF') {
+            // STAFF: Booking Management ONLY
             permissions = [
                 'dashboard:read',
                 'bookings:read',
@@ -81,12 +81,24 @@ export async function getAdminSession(): Promise<AdminSession | null> {
                 'entries:read',
                 'entries:write',
             ];
-        } else if (user.role === 'ADMIN' || user.role === 'CONTENT_MANAGER') {
-            // Legacy: Content Manager (same as Manager)
+        } else if (user.role === 'MANAGER') {
+            // MANAGER: Booking + Dashboard access
             permissions = [
-                'cms:read',
-                'cms:write',
-                'cms:delete',
+                'dashboard:read',
+                'bookings:read',
+                'bookings:write',
+                'waivers:read',
+                'waivers:write',
+                'customers:read',
+                'parties:read',
+                'parties:write',
+            ];
+        } else if (user.role === 'EMPLOYEE') {
+            // EMPLOYEE: Basic booking access
+            permissions = [
+                'dashboard:read',
+                'bookings:read',
+                'waivers:read',
             ];
         } else {
             // Fallback: Minimal access
