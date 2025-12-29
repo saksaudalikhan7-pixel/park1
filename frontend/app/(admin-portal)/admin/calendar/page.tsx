@@ -20,7 +20,7 @@ const localizer = dateFnsLocalizer({
     locales,
 });
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+// Removed - using API routes instead
 
 interface CalendarEvent {
     id: string;
@@ -66,11 +66,16 @@ export default function CalendarPage() {
             const start = format(startOfMonth(date), 'yyyy-MM-dd');
             const end = format(endOfMonth(date), 'yyyy-MM-dd');
 
-            const response = await fetch(`${API_URL}/bookings/calendar/?start_date=${start}&end_date=${end}`, {
+            // Use API route proxy instead of direct backend call
+            const response = await fetch(`/api/calendar?start_date=${start}&end_date=${end}`, {
                 credentials: 'include',
+                cache: 'no-store',
             });
 
-            if (!response.ok) throw new Error('Failed to fetch bookings');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to fetch bookings');
+            }
 
             const data = await response.json();
 
@@ -84,7 +89,7 @@ export default function CalendarPage() {
             setEvents(formattedEvents);
             setSummary(data.summary);
         } catch (error) {
-            console.error('Failed to load calendar bookings:', error);
+            console.error('[Calendar] Failed to load bookings:', error);
         } finally {
             setLoading(false);
         }
