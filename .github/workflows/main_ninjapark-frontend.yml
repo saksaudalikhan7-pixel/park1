@@ -24,6 +24,8 @@ jobs:
           node-version: '20.x'
 
       - name: npm install and build
+        env:
+          NEXT_PUBLIC_API_URL: https://ninjainflablepark-gbhwbbdna5hjgvf9.centralindia-01.azurewebsites.net/api/v1
         run: |
           npm install
           cd frontend
@@ -43,8 +45,8 @@ jobs:
           cp -r public deploy/public
           # Copy server wrapper to root (this is what Azure will run)
           cp server.js deploy/server.js
-          # Create minimal package.json for Express dependency
-          echo '{"name":"ninjapark-frontend","version":"1.0.0","private":true,"scripts":{"start":"node server.js"},"dependencies":{"express":"^4.18.2"},"engines":{"node":">=18.0.0"}}' > deploy/package.json
+          # Create minimal package.json (no dependencies needed - Next.js standalone is self-contained)
+          echo '{"name":"ninjapark-frontend","version":"1.0.0","private":true,"scripts":{"start":"node server.js"},"engines":{"node":">=18.0.0"}}' > deploy/package.json
           # List structure for debugging
           echo "Deployment structure:"
           ls -la deploy/
