@@ -71,7 +71,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     permissions:
-      id-token: write
       contents: read
 
     steps:
@@ -86,17 +85,11 @@ jobs:
           ls -la deploy/
           ls -la deploy/.next/ || echo "No .next directory found!"
 
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_4CD647FF10AE4544941B0995E944D9A3 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D135D25EB3E54392A4E72CC71E74CED2 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_0AF2A0DBCD8A423487D785FEE447320A }}
-
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'ninjapark-frontend'
           slot-name: 'Production'
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: deploy
