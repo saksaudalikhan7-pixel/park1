@@ -175,20 +175,21 @@ export async function getDashboardStats() {
 
 export async function getAllBookings(filter?: { type?: string; status?: string; search?: string }): Promise<any[]> {
     try {
-        const params = new URLSearchParams();
-        if (filter?.type) params.append("type", filter.type);
-        if (filter?.status) params.append("status", filter.status);
-        if (filter?.search) params.append("search", filter.search);
+        // Fetch both session and party bookings in parallel
+        const [sessionBookings, partyBookings] = await Promise.all([
+            getBookings(filter),
+            getPartyBookings(filter)
+        ]);
 
-        const res = await fetchAPI(`/core/dashboard/all_bookings/?${params.toString()}`);
+        // Combine and sort by created_at
+        const allBookings = [...sessionBookings, ...partyBookings].sort((a, b) => {
+            const dateA = new Date(a.created_at || a.createdAt || 0).getTime();
+            const dateB = new Date(b.created_at || b.createdAt || 0).getTime();
+            return dateB - dateA;
+        });
 
-        if (!res || !res.ok) {
-            console.error('Failed to fetch bookings:', res?.status, res?.statusText);
-            return [];
-        }
-
-        const data = await res.json();
-        return data.results || [];
+        console.log('[getAllBookings] Session:', sessionBookings.length, 'Party:', partyBookings.length, 'Total:', allBookings.length);
+        return allBookings;
     } catch (error) {
         console.error('Error fetching all bookings:', error);
         return [];

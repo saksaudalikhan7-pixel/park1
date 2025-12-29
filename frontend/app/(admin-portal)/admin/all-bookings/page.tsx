@@ -43,11 +43,8 @@ export default function AllBookingsPage() {
         try {
             setLoading(true);
 
-            // Use client-side fetch instead of server action
-            const { fetchAllBookingsClient } = await import('@/lib/client-api');
-            const data = await fetchAllBookingsClient();
-
-
+            // Use server action instead of client-side fetch
+            const data = await getAllBookings();
 
             if (!data || data.length === 0) {
                 console.log('[ALL BOOKINGS PAGE] No bookings found');
@@ -208,8 +205,8 @@ export default function AllBookingsPage() {
                                     <tr key={`${booking.type}-${booking.id}`} className="hover:bg-blue-50/30 transition-all duration-200 group">
                                         <td className="px-6 py-4">
                                             <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold shadow-sm ${booking.type?.toUpperCase() === 'SESSION'
-                                                    ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                                                    : 'bg-purple-100 text-purple-700 border border-purple-200'
+                                                ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                                                : 'bg-purple-100 text-purple-700 border border-purple-200'
                                                 }`}>
                                                 {booking.type?.toUpperCase() || 'PARTY'}
                                             </span>
