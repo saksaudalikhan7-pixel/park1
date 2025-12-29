@@ -38,20 +38,29 @@ jobs:
           # Copy standalone build with all its contents
           mkdir -p deploy/.next/standalone
           cp -r .next/standalone/. deploy/.next/standalone/
-          # Copy static files to root .next/static (for serving)
-          mkdir -p deploy/.next/static
-          cp -r .next/static/. deploy/.next/static/
-          # Copy public files
-          cp -r public deploy/public
+          
+          # CRITICAL: Copy static files to where standalone server expects them
+          # The standalone server runs from .next/standalone/frontend/server.js
+          # and expects static files at .next/standalone/frontend/.next/static
+          mkdir -p deploy/.next/standalone/frontend/.next/static
+          cp -r .next/static/. deploy/.next/standalone/frontend/.next/static/
+          
+          # Copy public files to where standalone server expects them
+          mkdir -p deploy/.next/standalone/frontend/public
+          cp -r public/. deploy/.next/standalone/frontend/public/
+          
           # Copy server wrapper to root (this is what Azure will run)
           cp server.js deploy/server.js
           # Create minimal package.json (no dependencies needed - Next.js standalone is self-contained)
           echo '{"name":"ninjapark-frontend","version":"1.0.0","private":true,"scripts":{"start":"node server.js"},"engines":{"node":">=18.0.0"}}' > deploy/package.json
+          
           # List structure for debugging
           echo "Deployment structure:"
           ls -la deploy/
-          ls -la deploy/.next/ || true
           ls -la deploy/.next/standalone/frontend/ || true
+          ls -la deploy/.next/standalone/frontend/.next/ || true
+          ls -la deploy/.next/standalone/frontend/.next/static/ || true
+          ls -la deploy/.next/standalone/frontend/public/ || true
 
       - name: Create deployment package
         run: |
