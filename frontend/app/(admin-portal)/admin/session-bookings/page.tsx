@@ -1,5 +1,3 @@
-"use server";
-
 import { getSessionBookings } from "@/app/actions/admin";
 import { SessionBookingsClient } from "./client";
 
