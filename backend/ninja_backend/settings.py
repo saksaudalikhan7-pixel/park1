@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'apps.cms',
     'apps.shop',
     'apps.invitations',
+    'apps.emails',  # Email system (isolated, feature-flagged)
 ]
 
 MIDDLEWARE = [
