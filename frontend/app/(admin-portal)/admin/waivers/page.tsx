@@ -20,7 +20,7 @@ import {
     Users
 } from "lucide-react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+
 
 export default function AdminWaivers() {
     const [waivers, setWaivers] = useState<any[]>([]);
@@ -54,7 +54,16 @@ export default function AdminWaivers() {
 
     async function handleExportCSV() {
         try {
-            const response = await fetch(`${API_URL}/bookings/waivers/export_csv/`);
+            const response = await fetch('/api/waivers/export', {
+                credentials: 'include',
+                cache: 'no-store',
+            });
+
+            if (!response.ok) {
+                toast.error('Failed to export CSV');
+                return;
+            }
+
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -73,7 +82,10 @@ export default function AdminWaivers() {
 
     async function handleDownloadPDF(waiverId: string) {
         try {
-            const response = await fetch(`${API_URL}/bookings/waivers/${waiverId}/download_pdf/`);
+            const response = await fetch(`/api/waivers/${waiverId}/pdf`, {
+                credentials: 'include',
+                cache: 'no-store',
+            });
             const data = await response.json();
             toast.info(data.message || 'PDF download not yet implemented');
         } catch (error) {

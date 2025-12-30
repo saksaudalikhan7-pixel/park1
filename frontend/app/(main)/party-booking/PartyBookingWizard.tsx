@@ -44,8 +44,9 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
     useEffect(() => {
         const loadConfig = async () => {
             try {
-                const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-                const res = await fetch(`${API_URL}/cms/party-booking-config/1/`);
+                const res = await fetch('/api/party-config', {
+                    cache: 'no-store',
+                });
                 const data = await res.json();
                 setConfig(data);
             } catch (error) {
@@ -108,8 +109,7 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
         setIsSubmitting(true);
 
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-            const response = await fetch(`${API_URL}/bookings/party-bookings/${tempBookingId}/add_participants/`, {
+            const response = await fetch(`/api/party-bookings/${tempBookingId}/participants`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -121,6 +121,7 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
                     },
                     waiver_signed: data.waiverSigned
                 }),
+                cache: 'no-store',
             });
 
             if (response.ok) {
