@@ -222,30 +222,35 @@ export async function createBooking(formData: any) {
 
         const booking = await bookingRes.json();
 
-        // Create waiver
-        const waiverPayload = {
-            name: sanitizedName,
-            email: sanitizedEmail,
-            phone: sanitizedPhone,
-            dob: data.dateOfBirth || null,
-            version: "1.0",
-            minors: data.minors || [],
-            adults: data.adultGuests || [],
-            booking: booking.id
-        };
+        // Create waiver ONLY if customer accepted it
+        if (data.waiverAccepted) {
+            const waiverPayload = {
+                name: sanitizedName,
+                email: sanitizedEmail,
+                phone: sanitizedPhone,
+                dob: data.dateOfBirth || null,
+                participant_type: 'ADULT',
+                is_primary_signer: true,
+                version: "1.0",
+                minors: data.minors || [],
+                adults: data.adultGuests || [],
+                booking: booking.id
+            };
 
-        await fetch(`${API_URL}/bookings/waivers/`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(waiverPayload)
-        });
+            await fetch(`${API_URL}/bookings/waivers/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(waiverPayload)
+            });
 
-        // Update booking waiver status to SIGNED (since waiver was just created)
-        await fetch(`${API_URL}/bookings/bookings/${booking.id}/`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ waiver_status: "SIGNED" })
-        });
+            // Update booking waiver status to SIGNED (since waiver was just created)
+            await fetch(`${API_URL}/bookings/bookings/${booking.id}/`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ waiver_status: "SIGNED" })
+            });
+        }
+        // If waiver not accepted, status stays PENDING (default)
 
         // Generate QR Code for the booking
         const qrData = JSON.stringify({
