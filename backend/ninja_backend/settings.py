@@ -242,3 +242,39 @@ else:
     # Local Development: Use Filesystem
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# ====================================================
+# EMAIL SYSTEM CONFIGURATION (Azure Communication Services)
+# ====================================================
+
+# Feature Flags (ALL DISABLED BY DEFAULT)
+EMAIL_ENABLED = os.getenv('EMAIL_ENABLED', 'False').lower() == 'true'
+EMAIL_BOOKING_ENABLED = os.getenv('EMAIL_BOOKING_ENABLED', 'False').lower() == 'true'
+EMAIL_DEBUG_MODE = os.getenv('EMAIL_DEBUG_MODE', 'True').lower() == 'true'
+
+# Azure Communication Services Credentials
+AZURE_COMMUNICATION_CONNECTION_STRING = os.getenv('AZURE_COMMUNICATION_CONNECTION_STRING', '')
+AZURE_EMAIL_SENDER_ADDRESS = os.getenv('AZURE_EMAIL_SENDER_ADDRESS', '')
+AZURE_EMAIL_SENDER_NAME = os.getenv('AZURE_EMAIL_SENDER_NAME', 'Ninja Inflatable Park')
+
+# Email Retry Configuration
+EMAIL_MAX_RETRIES = int(os.getenv('EMAIL_MAX_RETRIES', '3'))
+EMAIL_RETRY_DELAY_MINUTES = int(os.getenv('EMAIL_RETRY_DELAY_MINUTES', '1'))
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'apps.emails': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
+}
+
