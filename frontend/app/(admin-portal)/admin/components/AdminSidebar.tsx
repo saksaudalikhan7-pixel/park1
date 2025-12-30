@@ -67,9 +67,9 @@ const navigation: NavGroup[] = [
         items: [
             { name: "All Bookings", href: "/admin/all-bookings", icon: Calendar, permission: { entity: 'bookings', action: 'read' } },
             { name: "Calendar", href: "/admin/calendar", icon: CalendarDays, permission: { entity: 'bookings', action: 'read' } },
-            { name: "Session Bookings", href: "/admin/session-bookings", icon: Users, permission: { entity: 'bookings', action: 'read' } },
-            { name: "Manual Session Booking", href: "/admin/session-bookings/new", icon: Users, permission: { entity: 'bookings', action: 'write' } },
-            { name: "Session Booking History", href: "/admin/session-bookings/history", icon: Clock, permission: { entity: 'bookings', action: 'read' } },
+            { name: "Session Bookings", href: "/admin/bookings", icon: Users, permission: { entity: 'bookings', action: 'read' } },
+            { name: "Manual Session Booking", href: "/admin/bookings/new", icon: Users, permission: { entity: 'bookings', action: 'write' } },
+            { name: "Session Booking History", href: "/admin/bookings/history", icon: Clock, permission: { entity: 'bookings', action: 'read' } },
             { name: "Party Bookings", href: "/admin/party-bookings", icon: PartyPopper, permission: { entity: 'parties', action: 'read' } },
             { name: "Manual Party Booking", href: "/admin/party-bookings/new", icon: PartyPopper, permission: { entity: 'parties', action: 'write' } },
             { name: "Party Booking History", href: "/admin/party-bookings/history", icon: Clock, permission: { entity: 'parties', action: 'read' } },

@@ -1,68 +1,23 @@
 "use client";
 
-import { BookingTable } from "../components/BookingTable";
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export default function SessionBookingsPage() {
-    const [bookings, setBookings] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+// This page redirects to the correct Session Bookings implementation at /admin/bookings
+// Kept for backward compatibility with old links
+export default function SessionBookingsRedirect() {
+    const router = useRouter();
 
     useEffect(() => {
-        const fetchBookings = async () => {
-            try {
-                setLoading(true);
-
-                // Call our API route instead of directly calling the backend
-                const response = await fetch('/api/bookings?type=SESSION', {
-                    credentials: 'include', // Include cookies
-                    cache: 'no-store',
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Failed to load bookings');
-                }
-
-                const data = await response.json();
-                setBookings(data as any[]);
-                setError(null);
-            } catch (error: any) {
-                console.error('[Session Bookings] Error:', error);
-                const errorMsg = error.message || 'Failed to load bookings';
-                setError(errorMsg);
-                toast.error(errorMsg);
-                setBookings([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchBookings();
-    }, []);
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-        );
-    }
+        router.replace("/admin/bookings");
+    }, [router]);
 
     return (
-        <div className="space-y-6">
-            {error && (
-                <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
-                    <p className="font-semibold">Error loading bookings</p>
-                    <p className="text-sm">{error}</p>
-                </div>
-            )}
-            <BookingTable
-                bookings={bookings}
-                title="Session Bookings"
-                type="session"
-            />
+        <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-slate-600">Redirecting to Session Bookings...</p>
+            </div>
         </div>
     );
 }
