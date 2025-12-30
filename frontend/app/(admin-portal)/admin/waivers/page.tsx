@@ -110,37 +110,13 @@ export default function AdminWaivers() {
         return age.toString();
     }
 
-    // Flatten waivers to include additional adults as their own rows
+    // No flattening needed - keep all participants grouped with primary signer
     const flattenedWaivers = useMemo(() => {
-        const flatList: any[] = [];
-        waivers.forEach((waiver: any) => {
-            // Add primary signer
-            flatList.push({
-                ...waiver,
-                isPrimary: true,
-                uniqueId: waiver.id
-            });
-
-            // Add additional adults (minors stay with primary adult)
-            if (waiver.adults && Array.isArray(waiver.adults)) {
-                waiver.adults.forEach((adult: any, index: number) => {
-                    flatList.push({
-                        ...waiver, // Inherit parent details
-                        name: adult.name,
-                        dob: adult.dob,
-                        email: adult.email || null,
-                        phone: adult.phone || null,
-                        participant_type: 'ADULT',
-                        minors: [], // Minors belong to the primary signer
-                        adults: [], // Clear to avoid recursion
-                        isPrimary: false,
-                        isAdditionalAdult: true,
-                        uniqueId: `${waiver.id}-adult-${index}`
-                    });
-                });
-            }
-        });
-        return flatList;
+        return waivers.map((waiver: any) => ({
+            ...waiver,
+            isPrimary: true,
+            uniqueId: waiver.id
+        }));
     }, [waivers]);
 
 
@@ -336,37 +312,54 @@ export default function AdminWaivers() {
 
                                         {/* 4. Group Details */}
                                         <td className="px-6 py-4">
-                                            {waiver.isPrimary ? (
-                                                <div className="flex flex-col gap-2.5">
-                                                    {/* Adults Count */}
-                                                    <div className="flex items-center gap-2 text-sm bg-blue-50 px-3 py-1.5 rounded">
+                                            <div className="flex flex-col gap-2.5">
+                                                {/* Adults Details */}
+                                                <div className="flex flex-col gap-1.5 bg-blue-50 p-3 rounded">
+                                                    <div className="flex items-center gap-2 text-sm">
                                                         <span className="font-semibold text-blue-900">
-                                                            {1 + (waiver.adults?.length || 0)} Adult{(1 + (waiver.adults?.length || 0)) > 1 ? 's' : ''}
+                                                            {1 + (waiver.adults?.length || 0)} Adult{(1 + (waiver.adults?.length || 0)) > 1 ? 's' : ''}:
                                                         </span>
                                                     </div>
-
-                                                    {/* Minors Details */}
-                                                    {waiver.minors && waiver.minors.length > 0 && (
-                                                        <div className="flex flex-col gap-1.5 bg-purple-50 p-3 rounded">
-                                                            <div className="flex items-center gap-2 text-sm">
-                                                                <span className="font-semibold text-purple-900">{waiver.minors.length} Minor{waiver.minors.length > 1 ? 's' : ''}:</span>
-                                                            </div>
-                                                            <div className="ml-1 flex flex-col gap-1.5">
-                                                                {waiver.minors.map((minor: any, idx: number) => (
-                                                                    <div key={idx} className="text-xs bg-white px-2.5 py-1.5 rounded">
-                                                                        <span className="font-semibold text-purple-900">{minor.name}</span>
-                                                                        {minor.dob && (
-                                                                            <span className="text-slate-600 ml-2">• Age {calculateAge(minor.dob)}</span>
-                                                                        )}
-                                                                    </div>
-                                                                ))}
-                                                            </div>
+                                                    <div className="ml-1 flex flex-col gap-1.5">
+                                                        {/* Primary Adult */}
+                                                        <div className="text-xs bg-white px-2.5 py-1.5 rounded">
+                                                            <span className="font-semibold text-blue-900">{waiver.name}</span>
+                                                            {waiver.dob && (
+                                                                <span className="text-slate-600 ml-2">• Age {calculateAge(waiver.dob)}</span>
+                                                            )}
+                                                            <span className="text-blue-600 ml-2 italic">(Primary)</span>
                                                         </div>
-                                                    )}
+                                                        {/* Additional Adults */}
+                                                        {waiver.adults && waiver.adults.length > 0 && waiver.adults.map((adult: any, idx: number) => (
+                                                            <div key={idx} className="text-xs bg-white px-2.5 py-1.5 rounded">
+                                                                <span className="font-semibold text-blue-900">{adult.name}</span>
+                                                                {adult.dob && (
+                                                                    <span className="text-slate-600 ml-2">• Age {calculateAge(adult.dob)}</span>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                            ) : (
-                                                <span className="text-xs text-slate-400">—</span>
-                                            )}
+
+                                                {/* Minors Details */}
+                                                {waiver.minors && waiver.minors.length > 0 && (
+                                                    <div className="flex flex-col gap-1.5 bg-purple-50 p-3 rounded">
+                                                        <div className="flex items-center gap-2 text-sm">
+                                                            <span className="font-semibold text-purple-900">{waiver.minors.length} Minor{waiver.minors.length > 1 ? 's' : ''}:</span>
+                                                        </div>
+                                                        <div className="ml-1 flex flex-col gap-1.5">
+                                                            {waiver.minors.map((minor: any, idx: number) => (
+                                                                <div key={idx} className="text-xs bg-white px-2.5 py-1.5 rounded">
+                                                                    <span className="font-semibold text-purple-900">{minor.name}</span>
+                                                                    {minor.dob && (
+                                                                        <span className="text-slate-600 ml-2">• Age {calculateAge(minor.dob)}</span>
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </td>
 
                                         {/* 5. Arrival Status */}
