@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
 from apps.bookings.models import Booking
-from apps.emails.tasks import send_booking_confirmation_email_async
+from apps.emails.tasks import send_booking_confirmation_email
 import logging
 
 logger = logging.getLogger('apps.emails')
@@ -33,7 +33,7 @@ def test_send_booking_email(request):
         logger.info(f"Test endpoint: Triggering email for booking {booking_id}")
         
         # Trigger email
-        send_booking_confirmation_email_async(booking.id)
+        send_booking_confirmation_email(booking.id)
         
         return Response({
             'success': True,

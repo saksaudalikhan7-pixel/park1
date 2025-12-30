@@ -114,9 +114,9 @@ class BookingViewSet(viewsets.ModelViewSet):
         # Trigger confirmation email if enabled
         if getattr(settings, 'EMAIL_BOOKING_ENABLED', False):
             try:
-                from apps.emails.tasks import send_booking_confirmation_email_async
+                from apps.emails.tasks import send_booking_confirmation_email
                 logger.info(f"Triggering email for booking {booking.id}")
-                send_booking_confirmation_email_async(booking.id)
+                send_booking_confirmation_email(booking.id)
                 logger.info(f"Email queued for booking {booking.id}")
             except Exception as e:
                 logger.error(f"Failed to queue email for booking {booking.id}: {str(e)}")
@@ -695,9 +695,9 @@ class PartyBookingViewSet(viewsets.ModelViewSet):
         # Trigger confirmation email if enabled
         if getattr(settings, 'EMAIL_BOOKING_ENABLED', False):
             try:
-                from apps.emails.tasks import send_party_booking_confirmation_email_async
+                from apps.emails.tasks import send_party_booking_confirmation_email
                 logger.info(f"Triggering email for party booking {party_booking.id}")
-                send_party_booking_confirmation_email_async(party_booking.id)
+                send_party_booking_confirmation_email(party_booking.id)
                 logger.info(f"Email queued for party booking {party_booking.id}")
             except Exception as e:
                 logger.error(f"Failed to queue email for party booking {party_booking.id}: {str(e)}")
