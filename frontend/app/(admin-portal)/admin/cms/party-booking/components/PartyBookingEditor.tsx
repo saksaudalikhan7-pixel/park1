@@ -8,6 +8,7 @@ import { Loader2, Save, PartyPopper, DollarSign, Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { getPageSections, updatePageSection, createPageSection } from '@/app/actions/page-sections';
 import { PageSection } from '@/lib/cms/types';
+import { cmsGet, cmsPatch } from '@/lib/cms-api';
 
 // Define party steps
 const PARTY_STEPS = [
@@ -69,14 +70,13 @@ export default function PartyBookingEditor() {
 
     const loadPricingConfig = async () => {
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-            const res = await fetch(`${API_URL}/cms/party-booking-config/1/`);
-            const data = await res.json();
+            const data = await cmsGet('/cms/party-booking-config/1/');
             setPricingConfig(data);
             setTimeSlots(data.available_time_slots || []);
             setPackageInclusions(data.package_inclusions || []);
         } catch (error) {
             console.error('Failed to load pricing config', error);
+            toast.error('Failed to load party booking configuration');
         }
     };
 
@@ -120,22 +120,11 @@ export default function PartyBookingEditor() {
     const handlePricingSave = async (data: PricingFormData) => {
         setSavingPricing(true);
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-            const res = await fetch(`${API_URL}/cms/party-booking-config/1/`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    ...data,
-                    available_time_slots: timeSlots,
-                    package_inclusions: packageInclusions
-                })
+            await cmsPatch('/cms/party-booking-config/1/', {
+                ...data,
+                available_time_slots: timeSlots,
+                package_inclusions: packageInclusions
             });
-
-            if (!res.ok) throw new Error('Failed to update pricing');
-
             await loadPricingConfig();
             toast.success('Party booking configuration updated successfully');
         } catch (error) {

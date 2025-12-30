@@ -1,7 +1,12 @@
 /**
  * Centralized API configuration for Ninja Inflatable Park
  * All backend API endpoints are defined here
+ * 
+ * IMPORTANT: This file now uses server-side authentication from lib/server-api.ts
+ * to properly handle httpOnly cookies for admin operations.
  */
+
+import { fetchAPI as serverFetchAPI, postAPI as serverPostAPI, putAPI as serverPutAPI, deleteAPI as serverDeleteAPI } from '@/app/lib/server-api';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
@@ -61,46 +66,17 @@ export const API_ENDPOINTS = {
 };
 
 /**
- * Helper to get CSRF token from cookies
- */
-function getCSRFToken(): string | null {
-    if (typeof document === 'undefined') return null;
-    const name = 'csrftoken';
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-    return null;
-}
-
-/**
- * Common headers for all requests
- */
-function getHeaders(options?: RequestInit): HeadersInit {
-    const headers: any = {
-        'Content-Type': 'application/json',
-        ...options?.headers,
-    };
-
-    // Auto-attach CSRF Token for browser requests
-    const csrfToken = getCSRFToken();
-    if (csrfToken) {
-        headers['X-CSRFToken'] = csrfToken;
-    }
-
-    return headers;
-}
-
-/**
  * Helper function to fetch data from API
+ * Uses server-side authentication with httpOnly cookies
  */
 export async function fetchAPI<T>(url: string, options?: RequestInit): Promise<T> {
-    const response = await fetch(url, {
-        ...options,
-        headers: getHeaders(options),
-    });
+    // Extract just the endpoint path from the full URL
+    const endpoint = url.replace(API_BASE_URL, '');
+    const response = await serverFetchAPI(endpoint, options);
 
     if (!response.ok) {
-        throw new Error(`API Error: ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`API Error: ${response.statusText} - ${errorText}`);
     }
 
     return response.json();
@@ -108,52 +84,47 @@ export async function fetchAPI<T>(url: string, options?: RequestInit): Promise<T
 
 /**
  * Helper function to post data to API
+ * Uses server-side authentication with httpOnly cookies
  */
 export async function postAPI<T>(url: string, data: any, options?: RequestInit): Promise<T> {
-    const response = await fetch(url, {
-        method: 'POST',
-        ...options,
-        headers: getHeaders(options),
-        body: JSON.stringify(data),
-    });
+    // Extract just the endpoint path from the full URL
+    const endpoint = url.replace(API_BASE_URL, '');
+    const result = await serverPostAPI(endpoint, data);
 
-    if (!response.ok) {
-        throw new Error(`API Error: ${response.statusText}`);
+    if (result === null) {
+        throw new Error('Authentication failed');
     }
 
-    return response.json();
+    return result as T;
 }
 
 /**
  * Helper function to update data via API
+ * Uses server-side authentication with httpOnly cookies
  */
 export async function putAPI<T>(url: string, data: any, options?: RequestInit): Promise<T> {
-    const response = await fetch(url, {
-        method: 'PUT',
-        ...options,
-        headers: getHeaders(options),
-        body: JSON.stringify(data),
-    });
+    // Extract just the endpoint path from the full URL
+    const endpoint = url.replace(API_BASE_URL, '');
+    const result = await serverPutAPI(endpoint, data);
 
-    if (!response.ok) {
-        throw new Error(`API Error: ${response.statusText}`);
+    if (result === null) {
+        throw new Error('Authentication failed');
     }
 
-    return response.json();
+    return result as T;
 }
 
 /**
  * Helper function to delete data via API
+ * Uses server-side authentication with httpOnly cookies
  */
 export async function deleteAPI(url: string, options?: RequestInit): Promise<void> {
-    const response = await fetch(url, {
-        method: 'DELETE',
-        ...options,
-        headers: getHeaders(options),
-    });
+    // Extract just the endpoint path from the full URL
+    const endpoint = url.replace(API_BASE_URL, '');
+    const result = await serverDeleteAPI(endpoint);
 
-    if (!response.ok) {
-        throw new Error(`API Error: ${response.statusText}`);
+    if (result === null || result === false) {
+        throw new Error('Failed to delete resource');
     }
 }
 

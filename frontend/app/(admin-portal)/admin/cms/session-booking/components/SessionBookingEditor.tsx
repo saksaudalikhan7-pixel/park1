@@ -8,6 +8,7 @@ import { Loader2, Save, Layout, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
 import { getPageSections, updatePageSection, createPageSection } from '@/app/actions/page-sections';
 import { PageSection } from '@/lib/cms/types';
+import { cmsGet, cmsPatch } from '@/lib/cms-api';
 
 // Define the steps we want to make editable
 const SESSION_STEPS = [
@@ -66,12 +67,11 @@ export default function SessionBookingEditor() {
 
     const loadPricingConfig = async () => {
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-            const res = await fetch(`${API_URL}/cms/session-booking-config/1/`);
-            const data = await res.json();
+            const data = await cmsGet('/cms/session-booking-config/1/');
             setPricingConfig(data);
         } catch (error) {
             console.error('Failed to load pricing config', error);
+            toast.error('Failed to load pricing configuration');
         }
     };
 
@@ -115,18 +115,7 @@ export default function SessionBookingEditor() {
     const handlePricingSave = async (data: PricingFormData) => {
         setSavingPricing(true);
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-            const res = await fetch(`${API_URL}/cms/session-booking-config/1/`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify(data)
-            });
-
-            if (!res.ok) throw new Error('Failed to update pricing');
-
+            await cmsPatch('/cms/session-booking-config/1/', data);
             await loadPricingConfig();
             toast.success('Pricing configuration updated successfully');
         } catch (error) {
