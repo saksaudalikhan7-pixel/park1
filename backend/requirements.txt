@@ -18,7 +18,7 @@ azure-storage-blob==12.24.0
 
 # Static Files
 whitenoise==6.5.0
-azure-communication-email==1.0.02
+azure-communication-email==1.0.0
 
 # Server
 gunicorn==23.0.0
