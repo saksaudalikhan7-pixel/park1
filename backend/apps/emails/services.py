@@ -63,6 +63,18 @@ class EmailService:
             EmailLog instance
         """
         
+        # Create a JSON-serializable copy of context (without model instances)
+        serializable_context = {}
+        for key, value in context.items():
+            # Skip model instances - they're already linked via foreign keys
+            if hasattr(value, '_meta'):  # Django model instance
+                continue
+            # Convert dates/times to strings
+            if hasattr(value, 'isoformat'):
+                serializable_context[key] = value.isoformat()
+            else:
+                serializable_context[key] = value
+        
         # Create EmailLog entry
         email_log = EmailLog.objects.create(
             email_type=email_type,
@@ -70,7 +82,7 @@ class EmailService:
             recipient_name=recipient_name,
             subject=subject,
             template_name=template_name,
-            context_data=context,
+            context_data=serializable_context,  # Use serializable version
             status='PENDING',
             booking=booking,
             party_booking=party_booking,
@@ -88,12 +100,12 @@ class EmailService:
             logger.info(f"[DEBUG MODE] Would send email: {email_type} to {recipient_email}")
             logger.info(f"[DEBUG MODE] Subject: {subject}")
             logger.info(f"[DEBUG MODE] Template: {template_name}")
-            logger.info(f"[DEBUG MODE] Context: {context}")
+            logger.info(f"[DEBUG MODE] Context: {serializable_context}")
             email_log.mark_failed("Debug mode enabled - email not sent")
             return email_log
         
         try:
-            # Render email template
+            # Render email template (use full context with model instances)
             html_content = render_to_string(template_name, context)
             
             # Send via Azure Communication Services
