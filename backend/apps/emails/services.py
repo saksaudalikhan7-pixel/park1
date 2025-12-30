@@ -178,6 +178,24 @@ class EmailService:
         except Exception as e:
             raise Exception(f"Azure email sending failed: {str(e)}")
     
+    def _render_template(self, template_name: str, context: Dict[str, Any]) -> str:
+        """
+        Render email template to HTML string.
+        
+        Args:
+            template_name: Template file path
+            context: Template context variables
+        
+        Returns:
+            Rendered HTML content
+        """
+        from datetime import datetime
+        
+        # Add current year to context
+        context['current_year'] = datetime.now().year
+        
+        return render_to_string(template_name, context)
+    
     def send_booking_confirmation(self, booking):
         """
         Send session booking confirmation email.
