@@ -1,10 +1,9 @@
-# Navigate to backend if we aren't already there
-if [ ! -f "manage.py" ] && [ -d "backend" ]; then
-    cd backend
-fi
+#!/bin/bash
+# Azure deploys backend files directly to /home/site/wwwroot
+# No need to cd to backend directory
 
-python manage.py migrate
+python manage.py migrate --noinput
 python manage.py collectstatic --noinput
-# Create superuser if it doesn't exist (using environment variables)
-python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(email='admin@example.com').exists() or User.objects.create_superuser('admin@example.com', 'admin123')"
-gunicorn --bind=0.0.0.0 --timeout 600 ninja_backend.wsgi
+
+# Start gunicorn
+gunicorn --bind=0.0.0.0:8000 --timeout 600 --workers 4 ninja_backend.wsgi
