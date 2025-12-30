@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Check, X, Printer, Mail, Users, User, CheckCircle, FileSignature } from "lucide-react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-
 export default function BookingDetailPage({ params }: { params: { id: string } }) {
     const router = useRouter();
     const [booking, setBooking] = useState<any>(null);
@@ -16,25 +14,25 @@ export default function BookingDetailPage({ params }: { params: { id: string } }
     useEffect(() => {
         async function loadBookingData() {
             try {
-                // Fetch booking details
-                const bookingResponse = await fetch(`${API_URL}/bookings/bookings/${params.id}/`, {
+                // Fetch booking details via API route proxy
+                const bookingResponse = await fetch(`/api/bookings/${params.id}`, {
                     credentials: 'include',
+                    cache: 'no-store',
                 });
 
                 if (bookingResponse.ok) {
                     const bookingData = await bookingResponse.json();
                     setBooking(bookingData);
 
-                    // Fetch waivers for this booking
-                    const waiversResponse = await fetch(`${API_URL}/bookings/waivers/`, {
+                    // Fetch waivers for this booking via API route proxy
+                    const waiversResponse = await fetch(`/api/waivers?booking_id=${bookingData.id}`, {
                         credentials: 'include',
+                        cache: 'no-store',
                     });
 
                     if (waiversResponse.ok) {
-                        const allWaivers = await waiversResponse.json();
-                        // Filter waivers for this booking
-                        const bookingWaivers = allWaivers.filter((w: any) => w.booking === bookingData.id);
-                        setWaivers(bookingWaivers);
+                        const waiversData = await waiversResponse.json();
+                        setWaivers(Array.isArray(waiversData) ? waiversData : []);
                     }
                 }
             } catch (error) {
@@ -52,11 +50,12 @@ export default function BookingDetailPage({ params }: { params: { id: string } }
 
     const handleUpdateStatus = async (status: string) => {
         try {
-            const response = await fetch(`${API_URL}/bookings/bookings/${params.id}/`, {
+            const response = await fetch(`/api/bookings/${params.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ booking_status: status })
+                body: JSON.stringify({ booking_status: status }),
+                cache: 'no-store',
             });
             if (response.ok) {
                 // Reload booking data
