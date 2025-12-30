@@ -9,10 +9,13 @@ from django.dispatch import receiver
 from django.db import transaction
 from django.conf import settings
 
+# Import models
+from apps.bookings.models import Booking, PartyBooking
+
 logger = logging.getLogger(__name__)
 
 
-@receiver(post_save, sender='bookings.Booking')
+@receiver(post_save, sender=Booking)
 def send_booking_confirmation_on_create(sender, instance, created, **kwargs):
     """
     Send confirmation email when a new session booking is created.
@@ -41,7 +44,7 @@ def send_booking_confirmation_on_create(sender, instance, created, **kwargs):
     transaction.on_commit(send_email)
 
 
-@receiver(post_save, sender='bookings.PartyBooking')
+@receiver(post_save, sender=PartyBooking)
 def send_party_booking_confirmation_on_create(sender, instance, created, **kwargs):
     """
     Send confirmation email when a new party booking is created.
