@@ -10,13 +10,15 @@ import {
     Search,
     Filter,
     Download,
-    Loader2
+    Loader2,
+    CheckCircle,
+    Circle
 } from "lucide-react";
 import { StatusBadge } from "./StatusBadge";
 import Link from "next/link";
 import { exportBookingsToCSV } from "../../../../lib/export-csv";
 import { DateFilter, filterBookingsByDate } from "@/components/admin/DateFilter";
-import { deletePartyBooking, deleteBooking } from "@/app/actions/admin";
+import { deletePartyBooking, deleteBooking, toggleBookingArrival } from "@/app/actions/admin";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -40,6 +42,7 @@ interface Booking {
     customerPhone?: string;
     bookingStatus?: string;
     createdAt?: string;
+    has_arrived?: boolean;
 }
 
 interface BookingTableProps {
@@ -55,6 +58,7 @@ export function BookingTable({ bookings, title, type, readOnly = false }: Bookin
     const [statusFilter, setStatusFilter] = useState("ALL");
     const [dateFilter, setDateFilter] = useState("all");
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [togglingArrival, setTogglingArrival] = useState<string | null>(null);
 
     let filteredBookings = bookings.filter(booking => {
         const matchesSearch =
@@ -100,6 +104,23 @@ export function BookingTable({ bookings, title, type, readOnly = false }: Bookin
     const handleEdit = (id: string) => {
         // Navigate to edit page (you can implement this later)
         router.push(`/admin/${type}-bookings/${id}/edit`);
+    };
+
+    const handleToggleArrival = async (id: string, currentStatus: boolean) => {
+        setTogglingArrival(id);
+        try {
+            const result = await toggleBookingArrival(id, type, !currentStatus);
+            if (result.success) {
+                toast.success(currentStatus ? "Marked as not arrived" : "Marked as arrived");
+                router.refresh();
+            } else {
+                toast.error("Failed to update arrival status");
+            }
+        } catch (error) {
+            toast.error("An error occurred");
+        } finally {
+            setTogglingArrival(null);
+        }
     };
 
     return (
@@ -217,7 +238,27 @@ export function BookingTable({ bookings, title, type, readOnly = false }: Bookin
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="flex items-center justify-end gap-2">
+                                            {/* Arrived Toggle */}
+                                            <button
+                                                onClick={() => handleToggleArrival(booking.id, booking.has_arrived || false)}
+                                                disabled={togglingArrival === booking.id}
+                                                className={`p-2 rounded-lg transition-colors ${booking.has_arrived
+                                                        ? 'text-green-600 bg-green-50 hover:bg-green-100'
+                                                        : 'text-slate-400 hover:text-green-600 hover:bg-green-50'
+                                                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                                title={booking.has_arrived ? "Arrived" : "Mark as Arrived"}
+                                            >
+                                                {togglingArrival === booking.id ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                ) : booking.has_arrived ? (
+                                                    <CheckCircle className="w-4 h-4" />
+                                                ) : (
+                                                    <Circle className="w-4 h-4" />
+                                                )}
+                                            </button>
+
+                                            {/* View Button */}
                                             <Link
                                                 href={`/admin/${type}-bookings/${booking.id}`}
                                                 className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
@@ -225,6 +266,7 @@ export function BookingTable({ bookings, title, type, readOnly = false }: Bookin
                                             >
                                                 <Eye className="w-4 h-4" />
                                             </Link>
+
                                             {!readOnly && type !== 'party' && (
                                                 <>
                                                     <button
