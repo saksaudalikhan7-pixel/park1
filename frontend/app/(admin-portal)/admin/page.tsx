@@ -72,7 +72,7 @@ export default async function AdminDashboard() {
                     trendUp={true}
                     color="emerald"
                 />
-                <Link href="/admin/contact-messages" className="block">
+                <Link href="/admin/cms/contact-messages" className="block">
                     <StatCard
                         title="Unread Messages"
                         value={stats.unreadMessages.toString()}
@@ -202,7 +202,7 @@ export default async function AdminDashboard() {
                         </div>
 
                         {stats.unreadMessages > 0 && (
-                            <Link href="/admin/contact-messages">
+                            <Link href="/admin/cms/contact-messages">
                                 <div className="p-4 bg-purple-50 border-2 border-purple-200 rounded-xl flex items-start gap-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
                                     <div className="p-2.5 bg-purple-100 rounded-lg shrink-0 shadow-sm">
                                         <MessageSquare size={18} className="text-purple-600" />
