@@ -17,7 +17,8 @@ psycopg2-binary==2.9.10
 azure-storage-blob==12.24.0
 
 # Static Files
-whitenoise==6.8.2
+whitenoise==6.5.0
+azure-communication-email==1.0.02
 
 # Server
 gunicorn==23.0.0
