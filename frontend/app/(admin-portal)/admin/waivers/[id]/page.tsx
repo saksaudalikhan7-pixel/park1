@@ -21,7 +21,6 @@ import {
     X
 } from "lucide-react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 export default function WaiverDetailsPage({ params }: { params: { id: string } }) {
     const router = useRouter();
@@ -173,7 +172,10 @@ export default function WaiverDetailsPage({ params }: { params: { id: string } }
 
     async function handleDownloadPDF() {
         try {
-            const response = await fetch(`${API_URL}/bookings/waivers/${params.id}/download_pdf/`);
+            const response = await fetch(`/api/waivers/${params.id}/pdf`, {
+                credentials: 'include',
+                cache: 'no-store',
+            });
             const data = await response.json();
             alert(data.message || 'PDF download not yet implemented');
         } catch (error) {
