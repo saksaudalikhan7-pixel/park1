@@ -1,14 +1,14 @@
 #!/bin/bash
 set -e
 
-echo "Starting Django application..."
+echo "Running database migrations..."
+python manage.py migrate --noinput
 
-# Run migrations
-python manage.py migrate --noinput || echo "Migration failed, continuing..."
+echo "Running emails app migration explicitly..."
+python manage.py migrate emails --noinput
 
-# Collect static files
-python manage.py collectstatic --noinput || echo "Collectstatic failed, continuing..."
+echo "Collecting static files..."
+python manage.py collectstatic --noinput
 
-# Start gunicorn on port 8000 (Azure default)
+echo "Starting Gunicorn..."
 exec gunicorn --bind=0.0.0.0:8000 --timeout 600 --workers 2 --access-logfile - --error-logfile - ninja_backend.wsgi:application
-
