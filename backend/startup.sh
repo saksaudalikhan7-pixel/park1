@@ -1,9 +1,14 @@
 #!/bin/bash
-# Azure deploys backend files directly to /home/site/wwwroot
-# No need to cd to backend directory
+set -e
 
-python manage.py migrate --noinput
-python manage.py collectstatic --noinput
+echo "Starting Django application..."
 
-# Start gunicorn
-gunicorn --bind=0.0.0.0:8000 --timeout 600 --workers 4 ninja_backend.wsgi
+# Run migrations
+python manage.py migrate --noinput || echo "Migration failed, continuing..."
+
+# Collect static files
+python manage.py collectstatic --noinput || echo "Collectstatic failed, continuing..."
+
+# Start gunicorn on port 8000 (Azure default)
+exec gunicorn --bind=0.0.0.0:8000 --timeout 600 --workers 2 --access-logfile - --error-logfile - ninja_backend.wsgi:application
+
