@@ -41,15 +41,15 @@ export const ArrivedToggle = ({ bookingId, arrived, onToggle, type = 'session' }
     }
 
     if (currentStatus) {
+        // Once arrived, show as permanent badge (non-clickable)
         return (
-            <button
-                onClick={handleToggle}
-                className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500 text-white rounded-full text-sm font-semibold hover:bg-emerald-600 transition-all duration-200 shadow-sm hover:shadow-md"
-                title="Click to mark as not arrived"
+            <div
+                className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500 text-white rounded-full text-sm font-semibold shadow-sm cursor-default"
+                title="Customer has arrived"
             >
                 <CheckCircle className="w-4 h-4 fill-current" />
                 <span>Arrived</span>
-            </button>
+            </div>
         );
     }
 
