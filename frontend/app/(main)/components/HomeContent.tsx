@@ -231,6 +231,11 @@ export default function HomeContent({ stats, gallery, banners, reels, settings, 
                                     Plan a Party
                                 </BouncyButton>
                             </Link>
+                            <Link href="/kiosk/waiver">
+                                <BouncyButton size="lg" variant="primary" as="div">
+                                    Sign Waiver
+                                </BouncyButton>
+                            </Link>
                             <div className="w-full sm:w-auto text-center sm:text-left">
                                 <p className="text-sm text-white/60 mb-1">Questions?</p>
                                 <a
