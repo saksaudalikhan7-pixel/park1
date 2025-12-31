@@ -100,28 +100,35 @@ class BookingViewSet(viewsets.ModelViewSet):
             return [permissions.AllowAny()]
         return [IsStaffUser()]  # Allow employees to access bookings
     
-    def perform_create(self, serializer):
-        """Override to trigger confirmation email after booking is created"""
+    def create(self, request, *args, **kwargs):
+        """Override create to trigger confirmation email"""
         from django.conf import settings
         import logging
         
         logger = logging.getLogger('apps.emails')
+        logger.info("=== BookingViewSet.create() called ===")
         
-        # Save the booking first
-        booking = serializer.save()
-        logger.info(f"Booking {booking.id} created, checking email settings")
+        # Call parent create method
+        response = super().create(request, *args, **kwargs)
         
-        # Trigger confirmation email if enabled
-        if getattr(settings, 'EMAIL_BOOKING_ENABLED', False):
-            try:
-                from apps.emails.tasks import send_booking_confirmation_email
-                logger.info(f"Triggering email for booking {booking.id}")
-                send_booking_confirmation_email(booking.id)
-                logger.info(f"Email queued for booking {booking.id}")
-            except Exception as e:
-                logger.error(f"Failed to queue email for booking {booking.id}: {str(e)}")
-        else:
-            logger.info(f"Email sending disabled (EMAIL_BOOKING_ENABLED=False)")
+        # Get the created booking from response
+        if response.status_code == 201:
+            booking_id = response.data.get('id')
+            logger.info(f"Booking {booking_id} created successfully")
+            
+            # Trigger confirmation email if enabled
+            if getattr(settings, 'EMAIL_BOOKING_ENABLED', False):
+                try:
+                    from apps.emails.tasks import send_booking_confirmation_email
+                    logger.info(f"EMAIL_BOOKING_ENABLED=True, triggering email for booking {booking_id}")
+                    send_booking_confirmation_email(booking_id)
+                    logger.info(f"Email queued for booking {booking_id}")
+                except Exception as e:
+                    logger.error(f"Failed to queue email for booking {booking_id}: {str(e)}", exc_info=True)
+            else:
+                logger.warning(f"EMAIL_BOOKING_ENABLED=False, skipping email")
+        
+        return response
 
     @action(detail=False, methods=['get'], url_path='ticket/(?P<uuid>[^/.]+)')
     def ticket(self, request, uuid=None):
@@ -681,28 +688,35 @@ class PartyBookingViewSet(viewsets.ModelViewSet):
             return [permissions.AllowAny()]
         return [IsStaffUser()]  # Allow employees to access party bookings
     
-    def perform_create(self, serializer):
-        """Override to trigger confirmation email after party booking is created"""
+    def create(self, request, *args, **kwargs):
+        """Override create to trigger confirmation email"""
         from django.conf import settings
         import logging
         
         logger = logging.getLogger('apps.emails')
+        logger.info("=== PartyBookingViewSet.create() called ===")
         
-        # Save the party booking first
-        party_booking = serializer.save()
-        logger.info(f"Party booking {party_booking.id} created, checking email settings")
+        # Call parent create method
+        response = super().create(request, *args, **kwargs)
         
-        # Trigger confirmation email if enabled
-        if getattr(settings, 'EMAIL_BOOKING_ENABLED', False):
-            try:
-                from apps.emails.tasks import send_party_booking_confirmation_email
-                logger.info(f"Triggering email for party booking {party_booking.id}")
-                send_party_booking_confirmation_email(party_booking.id)
-                logger.info(f"Email queued for party booking {party_booking.id}")
-            except Exception as e:
-                logger.error(f"Failed to queue email for party booking {party_booking.id}: {str(e)}")
-        else:
-            logger.info(f"Email sending disabled (EMAIL_BOOKING_ENABLED=False)")
+        # Get the created party booking from response
+        if response.status_code == 201:
+            party_booking_id = response.data.get('id')
+            logger.info(f"Party booking {party_booking_id} created successfully")
+            
+            # Trigger confirmation email if enabled
+            if getattr(settings, 'EMAIL_BOOKING_ENABLED', False):
+                try:
+                    from apps.emails.tasks import send_party_booking_confirmation_email
+                    logger.info(f"EMAIL_BOOKING_ENABLED=True, triggering email for party booking {party_booking_id}")
+                    send_party_booking_confirmation_email(party_booking_id)
+                    logger.info(f"Email queued for party booking {party_booking_id}")
+                except Exception as e:
+                    logger.error(f"Failed to queue email for party booking {party_booking_id}: {str(e)}", exc_info=True)
+            else:
+                logger.warning(f"EMAIL_BOOKING_ENABLED=False, skipping email")
+        
+        return response
 
     @action(detail=False, methods=['get'], url_path='ticket/(?P<uuid>[^/.]+)')
     def ticket(self, request, uuid=None):
