@@ -71,24 +71,33 @@ def send_booking_confirmation_email(booking_id):
     Args:
         booking_id: ID of the Booking instance
     """
+    logger.info(f"=== send_booking_confirmation_email called for booking {booking_id} ===")
     try:
         from apps.bookings.models import Booking
         
         booking = Booking.objects.get(id=booking_id)
+        logger.info(f"Retrieved booking {booking_id}: {booking.name} ({booking.email})")
         
         # Create EmailLog entry
+        logger.info(f"Calling email_service.send_booking_confirmation...")
         email_log = email_service.send_booking_confirmation(booking)
+        logger.info(f"EmailLog created! ID: {email_log.id}, Status: {email_log.status}")
         
         # Send in background thread
         if email_log.status == 'PENDING':
+            logger.info(f"Starting background thread for EmailLog {email_log.id}")
             thread = threading.Thread(target=send_email_async, args=(email_log.id,))
             thread.daemon = True
             thread.start()
+        else:
+            logger.warning(f"EmailLog {email_log.id} status is {email_log.status}, not starting thread")
         
-        logger.info(f"Queued booking confirmation email for booking {booking_id}")
+        logger.info(f"✅ Successfully queued booking confirmation email for booking {booking_id}")
         
     except Exception as e:
-        logger.error(f"Failed to queue booking confirmation for {booking_id}: {str(e)}")
+        logger.error(f"❌ Failed to queue booking confirmation for {booking_id}: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
 
 
 def send_party_booking_confirmation_email(party_booking_id):
