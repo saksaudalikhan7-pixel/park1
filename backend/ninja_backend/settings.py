@@ -68,7 +68,7 @@ INSTALLED_APPS = [
     'apps.cms',
     'apps.shop',
     'apps.invitations',
-    'apps.emails',  # Email system (isolated, feature-flagged)
+    'apps.emails.apps.EmailsConfig',  # Email system - use full path to ensure signals are registered
 ]
 
 MIDDLEWARE = [
