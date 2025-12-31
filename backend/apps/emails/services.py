@@ -64,13 +64,17 @@ class EmailService:
         """
         
         # Create a JSON-serializable copy of context (without model instances)
+        from decimal import Decimal
         serializable_context = {}
         for key, value in context.items():
             # Skip model instances - they're already linked via foreign keys
             if hasattr(value, '_meta'):  # Django model instance
                 continue
+            # Convert Decimal to string
+            elif isinstance(value, Decimal):
+                serializable_context[key] = str(value)
             # Convert dates/times to strings
-            if hasattr(value, 'isoformat'):
+            elif hasattr(value, 'isoformat'):
                 serializable_context[key] = value.isoformat()
             else:
                 serializable_context[key] = value
