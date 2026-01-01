@@ -80,9 +80,6 @@ class EmailService:
                 serializable_context[key] = value
         
         # Create EmailLog entry
-        logger.info(f"[SERVICE] BEFORE EmailLog.objects.create() for {email_type} to {recipient_email}")
-        logger.info(f"[SERVICE] Context keys: {list(serializable_context.keys())}")
-        
         email_log = EmailLog.objects.create(
             email_type=email_type,
             recipient_email=recipient_email,
@@ -96,11 +93,9 @@ class EmailService:
             contact_message=contact_message,
         )
         
-        logger.info(f"[SERVICE] AFTER EmailLog.objects.create() - EmailLog ID: {email_log.id}, PK: {email_log.pk}")
-        
         # Check if emails are enabled
         if not self.enabled:
-            logger.info(f"[SERVICE] Email disabled by feature flag: {email_type} to {recipient_email}")
+            logger.info(f"Email disabled by feature flag: {email_type} to {recipient_email}")
             email_log.mark_failed("Email sending disabled by EMAIL_ENABLED flag")
             return email_log
         
@@ -224,10 +219,6 @@ class EmailService:
         Args:
             booking: Booking instance
         """
-        # Check if booking emails are enabled
-        if not getattr(settings, 'EMAIL_BOOKING_ENABLED', False):
-            logger.info(f"[SERVICE] Booking emails disabled via EMAIL_BOOKING_ENABLED, creating EmailLog but not sending")
-        
         context = {
             'booking': booking,
             'customer_name': booking.name,
@@ -241,7 +232,7 @@ class EmailService:
             'booking_uuid': booking.uuid,
         }
         
-        email_log = self.send_email(
+        return self.send_email(
             email_type='BOOKING_CONFIRMATION',
             recipient_email=booking.email,
             recipient_name=booking.name,
@@ -250,13 +241,6 @@ class EmailService:
             context=context,
             booking=booking
         )
-        
-        # If booking emails disabled, mark as failed after creation
-        if not getattr(settings, 'EMAIL_BOOKING_ENABLED', False):
-            email_log.mark_failed("Booking emails disabled by EMAIL_BOOKING_ENABLED flag")
-        
-        return email_log
-
     
     def send_party_booking_confirmation(self, party_booking):
         """
@@ -265,10 +249,6 @@ class EmailService:
         Args:
             party_booking: PartyBooking instance
         """
-        # Check if booking emails are enabled
-        if not getattr(settings, 'EMAIL_BOOKING_ENABLED', False):
-            logger.info(f"[SERVICE] Booking emails disabled via EMAIL_BOOKING_ENABLED, creating EmailLog but not sending")
-        
         context = {
             'party_booking': party_booking,
             'customer_name': party_booking.name,
@@ -283,7 +263,7 @@ class EmailService:
             'booking_uuid': party_booking.uuid,
         }
         
-        email_log = self.send_email(
+        return self.send_email(
             email_type='PARTY_BOOKING_CONFIRMATION',
             recipient_email=party_booking.email,
             recipient_name=party_booking.name,
@@ -292,12 +272,6 @@ class EmailService:
             context=context,
             party_booking=party_booking
         )
-        
-        # If booking emails disabled, mark as failed after creation
-        if not getattr(settings, 'EMAIL_BOOKING_ENABLED', False):
-            email_log.mark_failed("Booking emails disabled by EMAIL_BOOKING_ENABLED flag")
-        
-        return email_log
 
 
 # Singleton instance
