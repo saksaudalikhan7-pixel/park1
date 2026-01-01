@@ -219,6 +219,8 @@ class EmailService:
         Args:
             booking: Booking instance
         """
+        logger.error(f"CREATING EMAILLOG FOR BOOKING {booking.id}")
+        
         context = {
             'booking': booking,
             'customer_name': booking.name,
@@ -232,7 +234,7 @@ class EmailService:
             'booking_uuid': booking.uuid,
         }
         
-        return self.send_email(
+        email_log = self.send_email(
             email_type='BOOKING_CONFIRMATION',
             recipient_email=booking.email,
             recipient_name=booking.name,
@@ -241,6 +243,14 @@ class EmailService:
             context=context,
             booking=booking
         )
+        
+        logger.error(f"EMAILLOG CREATED ID={email_log.id} STATUS={email_log.status}")
+        
+        if not getattr(settings, 'EMAIL_BOOKING_ENABLED', False):
+            logger.error(f"EMAIL_BOOKING_ENABLED=False, marking as failed")
+            email_log.mark_failed("Booking emails disabled by EMAIL_BOOKING_ENABLED flag")
+        
+        return email_log
     
     def send_party_booking_confirmation(self, party_booking):
         """
@@ -249,6 +259,8 @@ class EmailService:
         Args:
             party_booking: PartyBooking instance
         """
+        logger.error(f"CREATING EMAILLOG FOR PARTY BOOKING {party_booking.id}")
+        
         context = {
             'party_booking': party_booking,
             'customer_name': party_booking.name,
@@ -263,7 +275,7 @@ class EmailService:
             'booking_uuid': party_booking.uuid,
         }
         
-        return self.send_email(
+        email_log = self.send_email(
             email_type='PARTY_BOOKING_CONFIRMATION',
             recipient_email=party_booking.email,
             recipient_name=party_booking.name,
@@ -272,6 +284,14 @@ class EmailService:
             context=context,
             party_booking=party_booking
         )
+        
+        logger.error(f"EMAILLOG CREATED ID={email_log.id} STATUS={email_log.status}")
+        
+        if not getattr(settings, 'EMAIL_BOOKING_ENABLED', False):
+            logger.error(f"EMAIL_BOOKING_ENABLED=False, marking as failed")
+            email_log.mark_failed("Booking emails disabled by EMAIL_BOOKING_ENABLED flag")
+        
+        return email_log
 
 
 # Singleton instance
