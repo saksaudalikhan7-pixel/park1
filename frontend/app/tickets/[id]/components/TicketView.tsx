@@ -118,8 +118,8 @@ export const TicketView = ({ booking }: TicketViewProps) => {
                                 <div className="bg-gray-100 p-4 rounded-xl flex items-center gap-4">
                                     <Users className="w-6 h-6 text-gray-400" />
                                     <div className="flex gap-6">
-                                        {/* Session Booking: adults, kids, spectators */}
-                                        {(booking.adults !== undefined || booking.kids !== undefined) && (
+                                        {/* Session Booking: generic handling */}
+                                        {!booking.package_name && (booking.adults !== undefined || booking.kids !== undefined) && (
                                             <>
                                                 {booking.adults > 0 && (
                                                     <div>
@@ -141,11 +141,11 @@ export const TicketView = ({ booking }: TicketViewProps) => {
                                                 )}
                                             </>
                                         )}
-                                        {/* Party Booking: participants, spectators */}
-                                        {booking.participants !== undefined && (
+                                        {/* Party Booking: use kids as participant count */}
+                                        {booking.package_name && (
                                             <>
                                                 <div>
-                                                    <span className="block font-bold text-xl">{booking.participants}</span>
+                                                    <span className="block font-bold text-xl">{booking.kids}</span>
                                                     <span className="text-xs text-gray-500 uppercase">Participants</span>
                                                 </div>
                                                 {booking.spectators > 0 && (

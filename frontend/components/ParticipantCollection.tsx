@@ -142,17 +142,9 @@ export default function ParticipantCollection({ onSubmit, onBack, totalParticipa
                                 <User className="w-5 h-5 text-primary" />
                                 Adults ({adults.length})
                             </h3>
-                            <button
-                                type="button"
-                                onClick={addAdult}
-                                className="flex items-center gap-2 px-4 py-2 bg-primary/20 hover:bg-primary/30 text-primary rounded-lg transition-colors"
-                            >
-                                <Plus className="w-4 h-4" />
-                                Add Adult
-                            </button>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-4 mb-4">
                             {adults.map((adult, index) => (
                                 <div key={adult.id} className="bg-background-dark rounded-xl p-6 border border-surface-700">
                                     <div className="flex items-center justify-between mb-4">
@@ -241,6 +233,15 @@ export default function ParticipantCollection({ onSubmit, onBack, totalParticipa
                                 </div>
                             ))}
                         </div>
+
+                        <button
+                            type="button"
+                            onClick={addAdult}
+                            className="w-full py-3 flex items-center justify-center gap-2 bg-surface-800 border-2 border-dashed border-surface-600 hover:border-primary hover:bg-surface-700 hover:text-primary text-white/70 rounded-xl transition-all"
+                        >
+                            <Plus className="w-5 h-5" />
+                            Add Another Adult
+                        </button>
                     </div>
 
                     {/* Minors Section */}
@@ -250,18 +251,10 @@ export default function ParticipantCollection({ onSubmit, onBack, totalParticipa
                                 <User className="w-5 h-5 text-secondary" />
                                 Minors (Under 18) ({minors.length})
                             </h3>
-                            <button
-                                type="button"
-                                onClick={addMinor}
-                                className="flex items-center gap-2 px-4 py-2 bg-secondary/20 hover:bg-secondary/30 text-secondary rounded-lg transition-colors"
-                            >
-                                <Plus className="w-4 h-4" />
-                                Add Minor
-                            </button>
                         </div>
 
                         {minors.length > 0 && (
-                            <div className="space-y-4">
+                            <div className="space-y-4 mb-4">
                                 {minors.map((minor, index) => (
                                     <div key={minor.id} className="bg-background-dark rounded-xl p-6 border border-surface-700">
                                         <div className="flex items-center justify-between mb-4">
@@ -321,6 +314,15 @@ export default function ParticipantCollection({ onSubmit, onBack, totalParticipa
                                 ))}
                             </div>
                         )}
+
+                        <button
+                            type="button"
+                            onClick={addMinor}
+                            className="w-full py-3 flex items-center justify-center gap-2 bg-surface-800 border-2 border-dashed border-surface-600 hover:border-secondary hover:bg-surface-700 hover:text-secondary text-white/70 rounded-xl transition-all"
+                        >
+                            <Plus className="w-5 h-5" />
+                            Add Minor
+                        </button>
                     </div>
 
                     {/* Waiver Agreement */}

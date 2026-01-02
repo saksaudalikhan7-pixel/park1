@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ScrollReveal, BouncyButton } from "@repo/ui";
 import { motion } from "framer-motion";
 import { Calendar, Clock, Users, Mail, Phone, User, Cake, MessageSquare, PartyPopper, CheckCircle } from "lucide-react";
@@ -18,6 +19,7 @@ interface PartyBookingWizardProps {
 }
 
 export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWizardProps) {
+    const router = useRouter();
     // 1: Basic Info, 2: Participants, 3: E-Invitation, 4: Confirmation
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
@@ -201,11 +203,11 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
                             </div>
 
                             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                <BouncyButton size="lg" variant="primary" onClick={() => window.location.href = `/tickets/${bookingDetails.bookingId}`}>
+                                <BouncyButton size="lg" variant="primary" onClick={() => router.push(`/tickets/${bookingDetails.bookingId}`)}>
                                     View Ticket
                                 </BouncyButton>
                                 {/* We could also link to the public invitation page here! */}
-                                <BouncyButton size="lg" variant="secondary" onClick={() => window.location.href = "/"}>
+                                <BouncyButton size="lg" variant="secondary" onClick={() => router.push("/")}>
                                     Back to Home
                                 </BouncyButton>
                             </div>
