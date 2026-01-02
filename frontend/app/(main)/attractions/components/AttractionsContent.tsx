@@ -4,6 +4,7 @@ import { AttractionsGrid } from "@/features/attractions/components/AttractionsGr
 import { ScrollReveal, SectionDivider } from "@repo/ui";
 import { Coffee, Car, Shield, Wifi, Utensils, Users, Zap } from "lucide-react";
 import { getMediaUrl } from "@/lib/media-utils";
+import AttractionVideoSection from "@/components/AttractionVideoSection";
 
 interface AttractionsContentProps {
     activities: any[];
@@ -57,6 +58,9 @@ export default function AttractionsContent({ activities, facilities, hero }: Att
                 </div>
                 <SectionDivider position="bottom" variant="curve" color="fill-background" />
             </section>
+
+            {/* Attraction Video Section - NEW: Displays video below hero, above attractions */}
+            <AttractionVideoSection />
 
             {/* Attractions Grid - Uses the existing component but with dynamic data */}
             <AttractionsGrid activities={activities} />

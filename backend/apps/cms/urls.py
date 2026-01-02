@@ -6,7 +6,8 @@ from .views import (
     GuidelineCategoryViewSet, LegalDocumentViewSet,
     PageSectionViewSet, PricingPlanViewSet, ContactInfoViewSet, PartyPackageViewSet,
     TimelineItemViewSet, ValueItemViewSet, FacilityItemViewSet,
-    PageViewSet, UploadView, ReorderView, ContactMessageViewSet, FreeEntryViewSet, SessionBookingConfigViewSet, PartyBookingConfigViewSet
+    PageViewSet, UploadView, ReorderView, ContactMessageViewSet, FreeEntryViewSet, SessionBookingConfigViewSet, PartyBookingConfigViewSet,
+    attraction_video_view
 )
 
 router = DefaultRouter()
@@ -38,4 +39,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('upload/', UploadView.as_view(), name='cms-upload'),
     path('reorder/', ReorderView.as_view(), name='cms-reorder'),
+    path('attraction-video/', attraction_video_view, name='attraction-video'),
 ]

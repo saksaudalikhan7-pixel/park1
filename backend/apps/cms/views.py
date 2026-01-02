@@ -374,3 +374,30 @@ class ReorderView(APIView):
                 ModelClass.objects.filter(id=item_id).update(order=order)
 
         return Response({'success': True})
+
+
+from rest_framework.decorators import api_view
+from .models import AttractionVideoSection
+
+@api_view(['GET'])
+def attraction_video_view(request):
+    """
+    Returns the latest active attraction video.
+    Returns null if no active video exists.
+    """
+    try:
+        video_section = AttractionVideoSection.objects.filter(
+            is_active=True
+        ).first()
+        
+        if not video_section:
+            return Response(None, status=200)
+        
+        video_url = request.build_absolute_uri(video_section.video.url) if video_section.video else None
+        
+        return Response({
+            'title': video_section.title,
+            'video': video_url
+        })
+    except Exception as e:
+        return Response(None, status=200)
