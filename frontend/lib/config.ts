@@ -5,7 +5,7 @@ export const siteConfig = {
     ogImage: "https://ninjainflatablepark.com/og.jpg",
     links: {
         twitter: "https://instagram.com/ninjainflatablepark",
-        instagram: "https://instagram.com/ninjainflatablepark",
+        instagram: "https://www.instagram.com/ninja.inflatable",
         facebook: "https://facebook.com/ninjainflatablepark",
     },
     contact: {
