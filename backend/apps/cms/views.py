@@ -376,19 +376,35 @@ class ReorderView(APIView):
         return Response({'success': True})
 
 
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework import status
+from django.conf import settings
 from .models import AttractionVideoSection
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
 def attraction_video_view(request):
     """
-    Returns the latest active attraction video.
-    Returns null if no active video exists.
+    GET: Returns the latest attraction video.
+         - If authenticated (Admin): Returns latest created (active or inactive).
+         - If anonymous (Public): Returns latest active only.
+    POST: Updates or creates the attraction video section (Admin only).
     """
-    try:
-        video_section = AttractionVideoSection.objects.filter(
-            is_active=True
-        ).first()
+    if request.method == 'GET':
+        # Determine if user is admin/manager
+        is_admin = request.user.is_authenticated and (
+            getattr(request.user, 'role', '') in ['admin', 'manager', 'content_manager'] or 
+            request.user.is_staff or 
+            request.user.is_superuser
+        )
+
+        if is_admin:
+            # Admin grabs the absolute latest record regardless of status
+            video_section = AttractionVideoSection.objects.first()
+        else:
+            # Public only sees active
+            video_section = AttractionVideoSection.objects.filter(is_active=True).first()
         
         if not video_section:
             return Response(None, status=200)
@@ -397,7 +413,54 @@ def attraction_video_view(request):
         
         return Response({
             'title': video_section.title,
-            'video': video_url
+            'video': video_url,
+            'is_active': video_section.is_active
         })
-    except Exception as e:
-        return Response(None, status=200)
+
+    elif request.method == 'POST':
+        # Check permissions manually since we used AllowAny for GET
+        if not (request.user.is_authenticated and (
+            getattr(request.user, 'role', '') in ['admin', 'manager', 'content_manager'] or 
+            request.user.is_staff or 
+            request.user.is_superuser
+        )):
+             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+        data = request.data
+        
+        # Get latest or create
+        video_section = AttractionVideoSection.objects.first()
+        if not video_section:
+            video_section = AttractionVideoSection()
+        
+        # Update fields
+        if 'title' in data:
+            video_section.title = data['title']
+        if 'is_active' in data:
+            video_section.is_active = data['is_active']
+            
+        # Handle video URL update
+        if 'video_url' in data and data['video_url']:
+            video_url = data['video_url']
+            # If it's an absolute URL from our own server, strip domain and /media/
+            # Example: http://localhost:8000/media/uploads/foo.mp4 -> uploads/foo.mp4
+            if settings.MEDIA_URL in video_url:
+                # Find relative path start
+                try:
+                    relative_path = video_url.split(settings.MEDIA_URL)[-1]
+                    video_section.video = relative_path
+                except:
+                    pass
+            else:
+                # If it's just a filename or relative path
+                video_section.video = video_url
+                
+        video_section.save()
+        
+        # Return updated data
+        new_video_url = request.build_absolute_uri(video_section.video.url) if video_section.video else None
+        return Response({
+            'title': video_section.title,
+            'video': new_video_url,
+            'is_active': video_section.is_active
+        })

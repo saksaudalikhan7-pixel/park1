@@ -6,14 +6,17 @@ import { HeroEditor } from '@/components/admin/cms/home/HeroEditor';
 import { AttractionsManager } from '@/components/admin/cms/attractions/AttractionsManager';
 import { FacilitiesManager } from '@/components/admin/cms/attractions/FacilitiesManager';
 import { CMSBackLink } from '@/components/admin/cms/CMSBackLink';
+import { getAttractionVideo } from '@/app/actions/attraction-video';
+import { AttractionVideoManager } from '@/components/admin/cms/attractions/AttractionVideoManager';
 
 export default async function AttractionsAdminPage() {
     // Fetch all data in parallel
-    const [sections, activities, facilities] = await Promise.all([
+    const [sections, activities, facilities, videoData] = await Promise.all([
         getPageSections('attractions'),
         getActivities(),
-        getFacilityItems()
-    ]) as [any[], any[], any[]];
+        getFacilityItems(),
+        getAttractionVideo()
+    ]) as [any[], any[], any[], any];
 
     // Find hero section
     const heroSection = sections.find((s: any) => s.section_key === 'hero');
@@ -30,6 +33,11 @@ export default async function AttractionsAdminPage() {
                 {/* Hero Section Editor */}
                 <section>
                     <HeroEditor section={heroSection} pageSlug="attractions" />
+                </section>
+
+                {/* Attraction Video Manager */}
+                <section>
+                    <AttractionVideoManager initialData={videoData} />
                 </section>
 
                 {/* Attractions Manager */}
