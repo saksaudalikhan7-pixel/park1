@@ -198,6 +198,26 @@ class WaiverViewSet(viewsets.ModelViewSet):
     queryset = Waiver.objects.all()
     serializer_class = WaiverSerializer
     
+    def get_queryset(self):
+        queryset = Waiver.objects.all()
+        
+        # Filter by booking
+        booking_id = self.request.query_params.get('booking_id', None)
+        if booking_id:
+            queryset = queryset.filter(booking_id=booking_id)
+            
+        party_booking_id = self.request.query_params.get('party_booking_id', None)
+        if party_booking_id:
+            queryset = queryset.filter(party_booking_id=party_booking_id)
+            
+        ordering = self.request.query_params.get('ordering', None)
+        if ordering:
+            queryset = queryset.order_by(ordering)
+        else:
+            queryset = queryset.order_by('-created_at')
+            
+        return queryset
+    
     def get_permissions(self):
         # Allow public access for create (when customers sign waivers)
         # Require staff authentication for list/retrieve/update

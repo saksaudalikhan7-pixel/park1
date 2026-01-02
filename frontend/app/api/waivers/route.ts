@@ -14,7 +14,8 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        const apiUrl = `${API_URL}/bookings/waivers/`;
+        const searchParams = request.nextUrl.searchParams.toString();
+        const apiUrl = `${API_URL}/bookings/waivers/${searchParams ? `?${searchParams}` : ''}`;
 
         const response = await fetch(apiUrl, {
             headers: {
