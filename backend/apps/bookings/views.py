@@ -395,7 +395,18 @@ def waiver_list_view(request):
             return Response({'detail': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
         
         # List all waivers
-        waivers = Waiver.objects.all().order_by('-created_at')
+        queryset = Waiver.objects.all()
+        
+        # Filter by booking
+        booking_id = request.query_params.get('booking_id', None)
+        if booking_id:
+            queryset = queryset.filter(booking_id=booking_id)
+            
+        party_booking_id = request.query_params.get('party_booking_id', None)
+        if party_booking_id:
+            queryset = queryset.filter(party_booking_id=party_booking_id)
+            
+        waivers = queryset.order_by('-created_at')
         data = []
         for waiver in waivers:
             waiver_data = {
