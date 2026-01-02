@@ -1,5 +1,6 @@
 'use client';
 
+import { ScrollReveal } from "@repo/ui";
 // Removed: import { useEffect, useState } from 'react';
 
 interface VideoData {
@@ -30,28 +31,44 @@ export default function AttractionVideoSection({ videoData }: AttractionVideoSec
     }
 
     return (
-        <section className="w-full py-12 relative z-10">
+        <section className="w-full py-16 md:py-24 relative z-10">
             <div className="container mx-auto px-4">
                 {videoData.title && (
-                    <div className="text-center mb-8">
-                        <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">
-                            {videoData.title}
-                        </h2>
-                        <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto rounded-full" />
+                    <div className="text-center mb-10">
+                        <ScrollReveal animation="fade">
+                            <span className="inline-block py-1 px-3 rounded-full bg-white/10 text-primary font-bold text-xs md:text-sm mb-4 tracking-wider uppercase backdrop-blur-md border border-white/10">
+                                Featured Video
+                            </span>
+                        </ScrollReveal>
+                        <ScrollReveal animation="slideUp" delay={0.1}>
+                            <h2 className="text-3xl md:text-5xl font-display font-black text-white mb-4 uppercase tracking-tight">
+                                {videoData.title}
+                            </h2>
+                        </ScrollReveal>
+                        <ScrollReveal animation="slideUp" delay={0.2}>
+                            <div className="w-24 h-1.5 bg-gradient-to-r from-primary via-secondary to-accent mx-auto rounded-full" />
+                        </ScrollReveal>
                     </div>
                 )}
-                <div className="max-w-5xl mx-auto">
-                    <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-slate-900 aspect-video">
-                        <video
-                            controls
-                            preload="metadata"
-                            className="w-full h-full object-contain"
-                            src={videoData.video}
-                        >
-                            Your browser does not support the video tag.
-                        </video>
+
+                <ScrollReveal animation="scale" delay={0.2}>
+                    <div className="max-w-6xl mx-auto">
+                        <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-primary/10 border border-white/10 bg-surface-900/50 backdrop-blur-sm">
+                            {/* Decorative gradients */}
+                            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/0 via-black/0 to-black/40 pointer-events-none z-10" />
+
+                            <video
+                                controls
+                                preload="metadata"
+                                className="w-full h-auto max-h-[75vh] mx-auto object-contain bg-black/40"
+                                src={videoData.video}
+                                poster={videoData.video + '#t=0.5'} // Try to use first frame as poster
+                            >
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
                     </div>
-                </div>
+                </ScrollReveal>
             </div>
         </section>
     );
