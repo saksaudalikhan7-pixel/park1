@@ -22,18 +22,23 @@ export function GalleryManager({ items: initialItems }: GalleryManagerProps) {
         let successCount = 0;
 
         try {
-            // Import server action dynamically
-            const { uploadImage } = await import('@/app/actions/upload-image');
+            // Use streaming upload proxy (formerly video-upload, now generic)
+            // No need to import uploadImage
 
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 const formData = new FormData();
                 formData.append('file', file);
 
-                // Upload using server action
-                const result = await uploadImage(formData);
+                // Upload using streaming proxy
+                const res = await fetch('/api/cms/video-upload', {
+                    method: 'POST',
+                    body: formData,
+                });
 
-                if (result.success && result.url) {
+                const result = await res.json();
+
+                if (res.ok && result.success && result.url) {
                     // Create Gallery Item
                     const createRes = await createGalleryItem({
                         title: file.name.split('.')[0],
@@ -48,12 +53,14 @@ export function GalleryManager({ items: initialItems }: GalleryManagerProps) {
                         successCount++;
                     }
                 } else {
-                    console.error('Upload failed:', result.error);
+                    console.error('Upload failed:', result.error || 'Unknown error');
                 }
             }
 
             if (successCount > 0) {
                 toast.success(`Successfully added ${successCount} images`);
+            } else if (files.length > 0) {
+                toast.error('Failed to upload images. Check size or connection.');
             }
         } catch (error) {
             console.error('Upload error:', error);
