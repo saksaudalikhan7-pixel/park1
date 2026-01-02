@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { getCachedData, setCachedData } from "@/lib/admin-cache";
 import { verifyWaiver, toggleWaiverVerification, getWaivers } from "@/app/actions/admin";
 import { toast } from 'sonner';
@@ -19,10 +20,11 @@ import {
     User,
     Users
 } from "lucide-react";
-
-
-
 export default function AdminWaivers() {
+    const searchParams = useSearchParams();
+    const bookingParam = searchParams.get("booking");
+    const partyBookingParam = searchParams.get("party_booking");
+
     const [waivers, setWaivers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -119,7 +121,6 @@ export default function AdminWaivers() {
         }));
     }, [waivers]);
 
-
     // Filter logic
     const filteredWaivers = flattenedWaivers.filter(waiver => {
         const matchesSearch =
@@ -133,7 +134,11 @@ export default function AdminWaivers() {
             (bookingTypeFilter === "SESSION" && waiver.booking) ||
             (bookingTypeFilter === "PARTY" && waiver.party_booking);
 
-        return matchesSearch && matchesType && matchesBookingType;
+        const matchesBookingId =
+            (!bookingParam || String(waiver.booking) === String(bookingParam)) &&
+            (!partyBookingParam || String(waiver.party_booking) === String(partyBookingParam));
+
+        return matchesSearch && matchesType && matchesBookingType && matchesBookingId;
     });
 
     if (loading) {
