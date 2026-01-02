@@ -72,6 +72,7 @@ export const schemas: SchemaMap = {
         name: "Instagram Reel",
         fields: [
             { name: "title", label: "Title", type: "text", required: true },
+            { name: "thumbnail_url", label: "Cover Image", type: "image", required: true },
             { name: "reel_url", label: "Reel URL", type: "url", required: true },
             { name: "active", label: "Active", type: "boolean", defaultValue: true },
             { name: "order", label: "Order", type: "number", defaultValue: 0 },
