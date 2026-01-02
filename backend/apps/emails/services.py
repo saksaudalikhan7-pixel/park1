@@ -231,7 +231,7 @@ class EmailService:
             'kids': booking.kids,
             'spectators': booking.spectators,
             'amount': booking.amount,
-            'booking_uuid': booking.uuid,
+            'booking_uuid': str(booking.uuid),
         }
         
         email_log = self.send_email(
@@ -272,7 +272,7 @@ class EmailService:
             'amount': party_booking.amount,
             'birthday_child_name': party_booking.birthday_child_name,
             'birthday_child_age': party_booking.birthday_child_age,
-            'booking_uuid': party_booking.uuid,
+            'booking_uuid': str(party_booking.uuid),
         }
         
         email_log = self.send_email(
