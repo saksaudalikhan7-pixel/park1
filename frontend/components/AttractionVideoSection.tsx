@@ -1,7 +1,6 @@
 'use client';
 
 import { ScrollReveal } from "@repo/ui";
-// Removed: import { useEffect, useState } from 'react';
 
 interface VideoData {
     title: string | null;
@@ -52,17 +51,16 @@ export default function AttractionVideoSection({ videoData }: AttractionVideoSec
                 )}
 
                 <ScrollReveal animation="scale" delay={0.2}>
-                    <div className="max-w-6xl mx-auto">
-                        <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-primary/10 border border-white/10 bg-surface-900/50 backdrop-blur-sm">
+                    <div className="flex justify-center w-full">
+                        <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-primary/10 border border-white/10 bg-surface-900/50 backdrop-blur-sm inline-block max-w-full">
                             {/* Decorative gradients */}
                             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/0 via-black/0 to-black/40 pointer-events-none z-10" />
-
                             <video
                                 controls
                                 preload="metadata"
-                                className="w-full h-auto max-h-[75vh] mx-auto object-contain bg-black/40"
+                                className="block h-auto max-h-[75vh] w-auto max-w-full object-contain bg-black"
                                 src={videoData.video}
-                                poster={videoData.video + '#t=0.5'} // Try to use first frame as poster
+                                poster={videoData.video + '#t=0.5'}
                             >
                                 Your browser does not support the video tag.
                             </video>
