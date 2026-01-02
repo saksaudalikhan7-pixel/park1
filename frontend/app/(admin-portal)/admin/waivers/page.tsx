@@ -34,11 +34,18 @@ export default function AdminWaivers() {
 
     useEffect(() => {
         loadWaivers();
-    }, []);
+    }, [bookingParam, partyBookingParam]);
 
     async function loadWaivers() {
+        setLoading(true);
         try {
-            const data = await getWaivers();
+            // Pass undefined for search to use default or client-side search later
+            // Pass booking params for server-side filtering
+            const validBookingParam = bookingParam || undefined;
+            const validPartyBookingParam = partyBookingParam || undefined;
+
+            const data = await getWaivers(undefined, validBookingParam, validPartyBookingParam);
+
             if (Array.isArray(data)) {
                 setWaivers(data);
                 setCachedData('waivers', data);

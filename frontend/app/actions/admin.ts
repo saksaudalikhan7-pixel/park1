@@ -88,9 +88,13 @@ function transformWaiver(w: any) {
         isPrimarySigner: w.is_primary_signer,
         participantType: w.participant_type,
         isVerified: w.is_verified,
-        booking: w.booking_details ? transformBooking(w.booking_details) : null
+        // If details object exists, use it; otherwise fallback to the ID (or null)
+        booking: w.booking_details ? transformBooking(w.booking_details) : (w.booking || null),
+        partyBooking: w.party_booking_details ? transformBooking(w.party_booking_details) : (w.party_booking || null)
     };
 }
+
+// ... (other functions)
 
 function transformBookingBlock(b: any) {
     if (!b) return null;
@@ -433,9 +437,11 @@ export async function updateWaiverMinors(id: string, minors: any[]) {
     return { success: false, error: errorMessage };
 }
 
-export async function getWaivers(search?: string): Promise<any[]> {
+export async function getWaivers(search?: string, bookingId?: string, partyBookingId?: string): Promise<any[]> {
     const params = new URLSearchParams();
     if (search) params.append("search", search);
+    if (bookingId) params.append("booking_id", bookingId);
+    if (partyBookingId) params.append("party_booking_id", partyBookingId);
 
     const res = await fetchAPI(`/bookings/waivers/?${params.toString()}`);
     if (!res || !res.ok) return [];
