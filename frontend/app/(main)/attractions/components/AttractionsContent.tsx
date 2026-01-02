@@ -14,9 +14,10 @@ interface AttractionsContentProps {
         subtitle: string;
         image: string;
     };
+    videoData?: any;
 }
 
-export default function AttractionsContent({ activities, facilities, hero }: AttractionsContentProps) {
+export default function AttractionsContent({ activities, facilities, hero, videoData }: AttractionsContentProps) {
     const heroTitle = hero?.title || "Our Attractions";
     const heroSubtitle = hero?.subtitle || "From ninja obstacle courses to giant slides, we've got something for everyone. Choose your adventure!";
     // Use generic image if hero image is missing or invalid
@@ -60,7 +61,7 @@ export default function AttractionsContent({ activities, facilities, hero }: Att
             </section>
 
             {/* Attraction Video Section - NEW: Displays video below hero, above attractions */}
-            <AttractionVideoSection />
+            <AttractionVideoSection videoData={videoData} />
 
             {/* Attractions Grid - Uses the existing component but with dynamic data */}
             <AttractionsGrid activities={activities} />

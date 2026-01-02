@@ -5,16 +5,20 @@ import { getFacilityItems } from "../../actions/facility-items";
 import { getPageSections } from "../../actions/page-sections";
 
 
+import { getAttractionVideo } from "../../actions/attraction-video";
+
 export default async function AttractionsPage() {
     const [
         activitiesRaw,
         facilitiesRaw,
-        pageSectionsRaw
+        pageSectionsRaw,
+        videoData
     ] = await Promise.all([
         getActivities(),
         getFacilityItems(),
-        getPageSections('attractions')
-    ]) as [any[], any[], any[]];
+        getPageSections('attractions'),
+        getAttractionVideo()
+    ]) as [any[], any[], any[], any];
 
     // Transform activities to match Activity interface if needed, or pass as is if they match
     // Activity interface: { id, name, description, imageUrl, active, order }
@@ -50,6 +54,7 @@ export default async function AttractionsPage() {
             activities={activities}
             facilities={facilities}
             hero={hero}
+            videoData={videoData}
         />
     );
 }
