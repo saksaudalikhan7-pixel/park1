@@ -570,8 +570,9 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                                                     type="button"
                                                     whileHover={{ scale: 1.1 }}
                                                     whileTap={{ scale: 0.9 }}
-                                                    onClick={() => setValue("adults", formData.adults + 1, { shouldValidate: true })}
-                                                    className="w-12 h-12 rounded-full bg-primary text-black flex items-center justify-center font-bold text-2xl hover:bg-primary-dark transition-colors shadow-lg"
+                                                    onClick={() => totalGuests < 50 && setValue("adults", formData.adults + 1, { shouldValidate: true })}
+                                                    disabled={totalGuests >= 50}
+                                                    className={`w-12 h-12 rounded-full bg-primary text-black flex items-center justify-center font-bold text-2xl transition-colors ${totalGuests >= 50 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-dark shadow-lg'}`}
                                                 >
                                                     +
                                                 </motion.button>
@@ -606,8 +607,9 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                                                     type="button"
                                                     whileHover={{ scale: 1.1 }}
                                                     whileTap={{ scale: 0.9 }}
-                                                    onClick={() => setValue("kids", formData.kids + 1, { shouldValidate: true })}
-                                                    className="w-12 h-12 rounded-full bg-primary text-black flex items-center justify-center font-bold text-2xl hover:bg-primary-dark transition-colors shadow-lg"
+                                                    onClick={() => totalGuests < 50 && setValue("kids", formData.kids + 1, { shouldValidate: true })}
+                                                    disabled={totalGuests >= 50}
+                                                    className={`w-12 h-12 rounded-full bg-primary text-black flex items-center justify-center font-bold text-2xl transition-colors ${totalGuests >= 50 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-dark shadow-lg'}`}
                                                 >
                                                     +
                                                 </motion.button>
@@ -642,8 +644,9 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                                                     type="button"
                                                     whileHover={{ scale: 1.1 }}
                                                     whileTap={{ scale: 0.9 }}
-                                                    onClick={() => setValue("spectators", formData.spectators + 1, { shouldValidate: true })}
-                                                    className="w-12 h-12 rounded-full bg-primary text-black flex items-center justify-center font-bold text-2xl hover:bg-primary-dark transition-colors shadow-lg"
+                                                    onClick={() => totalGuests < 50 && setValue("spectators", formData.spectators + 1, { shouldValidate: true })}
+                                                    disabled={totalGuests >= 50}
+                                                    className={`w-12 h-12 rounded-full bg-primary text-black flex items-center justify-center font-bold text-2xl transition-colors ${totalGuests >= 50 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-dark shadow-lg'}`}
                                                 >
                                                     +
                                                 </motion.button>
@@ -782,13 +785,7 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                                             <h2 className="text-2xl md:text-3xl font-display font-black text-white">{getContent('step-5', 'Summary & Payment', '').title}</h2>
                                             <p className="text-white/50 text-sm">{getContent('step-5', '', 'Review your booking details').subtitle}</p>
                                         </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => setStep(4)}
-                                            className="ml-auto flex items-center gap-2 text-white/50 hover:text-primary transition-colors text-sm font-medium"
-                                        >
-                                            <ChevronLeft className="w-4 h-4" /> Modify
-                                        </button>
+
                                     </div>
 
                                     <div className="bg-surface-900/50 rounded-[2rem] p-6 md:p-8 space-y-6 border-2 border-white/10">
@@ -840,7 +837,7 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
 
                                         {/* Voucher Code */}
                                         <div className="border-t border-white/10 pt-6">
-                                            <div className="flex gap-2">
+                                            <div className="flex flex-col sm:flex-row gap-2">
                                                 <input
                                                     type="text"
                                                     value={voucher}
@@ -895,7 +892,7 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                                         type="submit"
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
-                                        className="w-full bg-gradient-to-r from-success via-success to-success/90 hover:from-success/90 hover:via-success hover:to-success text-black font-black py-5 rounded-2xl shadow-neon-lime transform transition-all text-xl uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                                        className="w-full bg-gradient-to-r from-success via-success to-success/90 hover:from-success/90 hover:via-success hover:to-success text-black font-black py-4 md:py-5 rounded-2xl shadow-neon-lime transform transition-all text-base md:text-xl uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                                         disabled={isSubmitting}
                                     >
                                         {isSubmitting ? (

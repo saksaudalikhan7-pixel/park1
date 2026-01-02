@@ -111,6 +111,7 @@ export function HeroEditor({ section: initialSection, pageSlug }: HeroEditorProp
                     field={{ name: 'image_url', label: 'Background Image', type: 'image', required: true }}
                     value={section.image_url}
                     onChange={(v: any) => handleChange('image_url', v)}
+                    idPrefix="hero"
                 />
             </div>
         </div>

@@ -11,9 +11,11 @@ interface ImageUploadFieldProps {
     value: string;
     onChange: (value: string) => void;
     error?: string;
+    idPrefix?: string;
 }
 
-export function ImageUploadField({ field, value, onChange, error }: ImageUploadFieldProps) {
+export function ImageUploadField({ field, value, onChange, error, idPrefix }: ImageUploadFieldProps) {
+    const uniqueId = idPrefix ? `${idPrefix}-${field.name}` : field.name;
     const router = useRouter();
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -144,10 +146,10 @@ export function ImageUploadField({ field, value, onChange, error }: ImageUploadF
                             onChange={handleUpload}
                             disabled={uploading}
                             className="hidden"
-                            id={`file-upload-${field.name}`}
+                            id={`file-upload-${uniqueId}`}
                         />
                         <label
-                            htmlFor={`file-upload-${field.name}`}
+                            htmlFor={`file-upload-${uniqueId}`}
                             className={`w-full px-4 py-3 bg-slate-900 text-white rounded-lg text-sm font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] ${uploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                                 }`}
                         >

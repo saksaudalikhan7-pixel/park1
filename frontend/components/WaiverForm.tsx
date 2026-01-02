@@ -1,12 +1,12 @@
 ﻿"use client";
 
 import { useFieldArray, useFormContext } from "react-hook-form";
-import { Plus, Trash2, Calendar, User, Mail, Phone, AlertCircle, Check } from "lucide-react";
+import { Plus, Trash2, Calendar, User, Mail, Phone, AlertCircle, Check, FileText } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookingFormData } from "../lib/api/types";
 
 export const WaiverForm = () => {
-    const { register, control, formState: { errors, touchedFields }, watch } = useFormContext<BookingFormData>();
+    const { register, control, formState: { errors, touchedFields }, watch, setValue } = useFormContext<BookingFormData>();
     const { fields, append, remove } = useFieldArray({
         control,
         name: "minors"
@@ -17,6 +17,18 @@ export const WaiverForm = () => {
     });
 
     const waiverAccepted = watch("waiverAccepted");
+    const date = watch("date");
+    const kidsCount = watch("kids");
+
+    // Auto-fill date of arrival
+    if (date && !watch("dateOfArrival")) {
+        setValue("dateOfArrival", date);
+    }
+
+    // Calculate max date for 18+ years
+    const maxAdultDOB = new Date();
+    maxAdultDOB.setFullYear(maxAdultDOB.getFullYear() - 18);
+    const maxAdultDate = maxAdultDOB.toISOString().split('T')[0];
 
     // Success indicator for valid fields
     const SuccessIndicator = ({ show }: { show: boolean }) => {
@@ -100,10 +112,13 @@ export const WaiverForm = () => {
                             Telephone <span className="text-red-400">*</span>
                         </label>
                         <div className="relative">
+                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-white/50 border-r border-white/10 pr-3 font-medium">
+                                +91
+                            </div>
                             <input
                                 type="tel"
                                 {...register("phone")}
-                                className={`w-full px-6 py-4 rounded-xl border-2 ${errors.phone ? 'border-red-500' : 'border-white/10 focus:border-primary'} bg-surface-900 text-white outline-none transition-all`}
+                                className={`w-full pl-20 pr-6 py-4 rounded-xl border-2 ${errors.phone ? 'border-red-500' : 'border-white/10 focus:border-primary'} bg-surface-900 text-white outline-none transition-all`}
                                 placeholder="Phone Number"
                             />
                             <SuccessIndicator show={!!touchedFields.phone && !errors.phone} />
@@ -119,6 +134,7 @@ export const WaiverForm = () => {
                             <input
                                 type="date"
                                 {...register("dateOfBirth")}
+                                max={maxAdultDate}
                                 className={`w-full px-6 py-4 rounded-xl border-2 ${errors.dateOfBirth ? 'border-red-500' : 'border-white/10 focus:border-primary'} bg-surface-900 text-white outline-none transition-all`}
                                 style={{ colorScheme: 'dark' }}
                             />
@@ -144,61 +160,63 @@ export const WaiverForm = () => {
                     </div>
                 </div>
 
-                {/* Minors Section */}
-                <div className="space-y-4">
-                    <AnimatePresence>
-                        {fields.map((field, index) => (
-                            <motion.div
-                                key={field.id}
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: "auto" }}
-                                exit={{ opacity: 0, height: 0 }}
-                                className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end bg-surface-800/30 p-4 rounded-xl border border-white/5"
-                            >
-                                <div className="md:col-span-5">
-                                    <label className="block text-xs font-bold text-white/70 mb-2 uppercase tracking-wide">
-                                        Name of minor <span className="text-red-400">*</span>
-                                    </label>
-                                    <input
-                                        {...register(`minors.${index}.name` as const)}
-                                        className="w-full px-4 py-3 rounded-lg border border-white/10 bg-surface-900 text-white focus:border-primary outline-none"
-                                        placeholder="Minor Name"
-                                    />
-                                    <ErrorMessage message={errors.minors?.[index]?.name?.message} />
-                                </div>
-                                <div className="md:col-span-5">
-                                    <label className="block text-xs font-bold text-white/70 mb-2 uppercase tracking-wide">
-                                        Date of Birth of minor <span className="text-red-400">*</span>
-                                    </label>
-                                    <input
-                                        type="date"
-                                        {...register(`minors.${index}.dob` as const)}
-                                        className="w-full px-4 py-3 rounded-lg border border-white/10 bg-surface-900 text-white focus:border-primary outline-none"
-                                        style={{ colorScheme: 'dark' }}
-                                    />
-                                    <ErrorMessage message={errors.minors?.[index]?.dob?.message} />
-                                </div>
-                                <div className="md:col-span-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => remove(index)}
-                                        className="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg flex items-center justify-center gap-2 transition-colors font-medium"
-                                    >
-                                        <Trash2 size={18} /> Remove
-                                    </button>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
+                {/* Minors Section - Only show if kids were selected */}
+                {kidsCount > 0 && (
+                    <div className="space-y-4">
+                        <AnimatePresence>
+                            {fields.map((field, index) => (
+                                <motion.div
+                                    key={field.id}
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: "auto" }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end bg-surface-800/30 p-4 rounded-xl border border-white/5"
+                                >
+                                    <div className="md:col-span-5">
+                                        <label className="block text-xs font-bold text-white/70 mb-2 uppercase tracking-wide">
+                                            Name of minor <span className="text-red-400">*</span>
+                                        </label>
+                                        <input
+                                            {...register(`minors.${index}.name` as const)}
+                                            className="w-full px-4 py-3 rounded-lg border border-white/10 bg-surface-900 text-white focus:border-primary outline-none"
+                                            placeholder="Minor Name"
+                                        />
+                                        <ErrorMessage message={errors.minors?.[index]?.name?.message} />
+                                    </div>
+                                    <div className="md:col-span-5">
+                                        <label className="block text-xs font-bold text-white/70 mb-2 uppercase tracking-wide">
+                                            Date of Birth of minor <span className="text-red-400">*</span>
+                                        </label>
+                                        <input
+                                            type="date"
+                                            {...register(`minors.${index}.dob` as const)}
+                                            className="w-full px-4 py-3 rounded-lg border border-white/10 bg-surface-900 text-white focus:border-primary outline-none"
+                                            style={{ colorScheme: 'dark' }}
+                                        />
+                                        <ErrorMessage message={errors.minors?.[index]?.dob?.message} />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => remove(index)}
+                                            className="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg flex items-center justify-center gap-2 transition-colors font-medium"
+                                        >
+                                            <Trash2 size={18} /> Remove
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
 
-                    <button
-                        type="button"
-                        onClick={() => append({ name: "", dob: "" })}
-                        className="px-6 py-3 bg-primary text-black font-bold rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
-                    >
-                        <Plus size={20} /> Add a minor
-                    </button>
-                </div>
+                        <button
+                            type="button"
+                            onClick={() => append({ name: "", dob: "" })}
+                            className="px-6 py-3 bg-primary text-black font-bold rounded-lg hover:bg-primary-dark transition-colors flex items-center gap-2"
+                        >
+                            <Plus size={20} /> Add a minor
+                        </button>
+                    </div>
+                )}
 
                 {/* Adults Section */}
                 <div className="space-y-4">
@@ -307,5 +325,5 @@ export const WaiverForm = () => {
     );
 };
 
-import { FileText } from "lucide-react";
+
 

@@ -13,9 +13,10 @@ interface CMSFieldProps {
     error?: string;
     label?: string;
     children?: React.ReactNode;
+    idPrefix?: string;
 }
 
-export function CMSField({ field, value, onChange, error, label, children }: CMSFieldProps) {
+export function CMSField({ field, value, onChange, error, label, children, idPrefix }: CMSFieldProps) {
     // If children are provided, render as a custom field wrapper
     if (children) {
         return (
@@ -48,7 +49,7 @@ export function CMSField({ field, value, onChange, error, label, children }: CMS
             return <SelectField field={field} value={value} onChange={onChange!} error={error} />;
 
         case 'image':
-            return <ImageUploadField field={field} value={value} onChange={onChange!} error={error} />;
+            return <ImageUploadField field={field} value={value} onChange={onChange!} error={error} idPrefix={idPrefix} />;
 
         case 'json_list':
             return <JSONListField field={field} value={value} onChange={onChange!} error={error} />;

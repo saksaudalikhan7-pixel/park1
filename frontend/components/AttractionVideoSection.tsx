@@ -58,7 +58,7 @@ export default function AttractionVideoSection({ videoData }: AttractionVideoSec
                             <video
                                 controls
                                 preload="metadata"
-                                className="block h-auto max-h-[60vh] md:max-h-[600px] w-auto max-w-full object-contain bg-black"
+                                className="block h-auto max-h-[80vh] w-auto max-w-full object-contain bg-black"
                                 src={videoData.video}
                                 poster={videoData.video + '#t=0.5'}
                             >

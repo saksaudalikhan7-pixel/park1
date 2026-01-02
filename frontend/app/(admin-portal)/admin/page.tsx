@@ -207,7 +207,7 @@ export default async function AdminDashboard() {
             <div className="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
                 <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-gradient-to-r from-slate-50 to-white">
                     <h2 className="text-lg font-bold text-slate-900">Recent Bookings</h2>
-                    <Link href="/admin/bookings" className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors hover:gap-2">
+                    <Link href="/admin/all-bookings" className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors hover:gap-2">
                         View All Bookings <ArrowRight size={16} />
                     </Link>
                 </div>

@@ -103,6 +103,7 @@ export function AboutEditor({ section: initialSection, pageSlug }: AboutEditorPr
                     field={{ name: 'image_url', label: 'Side Image', type: 'image', required: true }}
                     value={section.image_url}
                     onChange={(v: any) => handleChange('image_url', v)}
+                    idPrefix="about"
                 />
             </div>
         </div>
