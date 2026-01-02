@@ -160,27 +160,25 @@ class EmailService:
             raise ValueError("AZURE_EMAIL_SENDER_ADDRESS not configured")
         
         try:
-            # Import Azure SDK (will be installed in Phase 2)
+            # Import Azure SDK
             from azure.communication.email import EmailClient
-            from azure.communication.email import EmailContent, EmailAddress, EmailMessage, EmailRecipients
             
             # Create email client
             client = EmailClient.from_connection_string(self.connection_string)
             
-            # Prepare email message
-            message = EmailMessage(
-                sender=EmailAddress(
-                    address=self.sender_address,
-                    display_name=self.sender_name
-                ),
-                content=EmailContent(
-                    subject=subject,
-                    html=html_content
-                ),
-                recipients=EmailRecipients(
-                    to=[EmailAddress(address=recipient_email)]
-                )
-            )
+            # Prepare email message (dict-based API)
+            message = {
+                "content": {
+                    "subject": subject,
+                    "html": html_content
+                },
+                "recipients": {
+                    "to": [
+                        {"address": recipient_email}
+                    ]
+                },
+                "senderAddress": self.sender_address
+            }
             
             # Send email
             poller = client.begin_send(message)
