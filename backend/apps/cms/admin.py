@@ -248,3 +248,20 @@ class FacilityItemAdmin(admin.ModelAdmin):
     list_filter = ['active']
     search_fields = ['title', 'description']
     ordering = ['order']
+
+@admin.register(AttractionVideoSection)
+class AttractionVideoSectionAdmin(admin.ModelAdmin):
+    list_display = ['title', 'is_active', 'created_at', 'video']
+    list_filter = ['is_active', 'created_at']
+    search_fields = ['title']
+    readonly_fields = ['created_at']
+    
+    fieldsets = (
+        ('Video Content', {
+            'fields': ('title', 'video', 'is_active')
+        }),
+        ('Metadata', {
+            'fields': ('created_at',),
+            'classes': ('collapse',)
+        }),
+    )
