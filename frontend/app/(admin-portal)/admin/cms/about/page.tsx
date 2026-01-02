@@ -90,7 +90,7 @@ export default function AboutAdminPage() {
                 <CollectionList
                     schema={schemas.stat_card}
                     items={stats}
-                    basePath="/admin/cms/stats"
+                    basePath="/admin/cms/stat-cards"
                     titleField="label"
                     subtitleField="value"
                     showBackButton={false}
@@ -103,7 +103,7 @@ export default function AboutAdminPage() {
                 <CollectionList
                     schema={schemas.timeline_item}
                     items={timeline}
-                    basePath="/admin/cms/timeline"
+                    basePath="/admin/cms/timeline-items"
                     titleField="year"
                     subtitleField="title"
                     showBackButton={false}
@@ -116,7 +116,7 @@ export default function AboutAdminPage() {
                 <CollectionList
                     schema={schemas.value_item}
                     items={values}
-                    basePath="/admin/cms/values"
+                    basePath="/admin/cms/value-items"
                     titleField="title"
                     subtitleField="description"
                     showBackButton={false}

@@ -166,30 +166,15 @@ export default async function AdminDashboard() {
                         System Status
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {stats.pendingWaivers > 0 ? (
-                            <div className="p-4 bg-amber-50 border-2 border-amber-200 rounded-xl flex items-start gap-3 shadow-sm hover:shadow-md transition-shadow">
-                                <div className="p-2.5 bg-amber-100 rounded-lg shrink-0 shadow-sm">
-                                    <FileSignature size={18} className="text-amber-600" />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-sm font-bold text-amber-900">{stats.pendingWaivers} Waivers Pending</p>
-                                    <p className="text-xs text-amber-700 mt-1 leading-relaxed">Guests arriving soon need to sign waivers.</p>
-                                    <Link href="/admin/waivers" className="text-xs font-bold text-amber-800 mt-2 inline-flex items-center gap-1 hover:gap-2 transition-all hover:underline">
-                                        Review Waivers →
-                                    </Link>
-                                </div>
+                        <div className="p-4 bg-emerald-50 border-2 border-emerald-200 rounded-xl flex items-start gap-3 shadow-sm">
+                            <div className="p-2.5 bg-emerald-100 rounded-lg shrink-0 shadow-sm">
+                                <CheckCircle size={18} className="text-emerald-600" />
                             </div>
-                        ) : (
-                            <div className="p-4 bg-emerald-50 border-2 border-emerald-200 rounded-xl flex items-start gap-3 shadow-sm">
-                                <div className="p-2.5 bg-emerald-100 rounded-lg shrink-0 shadow-sm">
-                                    <CheckCircle size={18} className="text-emerald-600" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-bold text-emerald-900">All Waivers Signed</p>
-                                    <p className="text-xs text-emerald-700 mt-1 leading-relaxed">No pending actions required.</p>
-                                </div>
+                            <div>
+                                <p className="text-sm font-bold text-emerald-900">System Active</p>
+                                <p className="text-xs text-emerald-700 mt-1 leading-relaxed">All systems operational.</p>
                             </div>
-                        )}
+                        </div>
 
                         <div className="p-4 bg-blue-50 border-2 border-blue-200 rounded-xl flex items-start gap-3 shadow-sm">
                             <div className="p-2.5 bg-blue-100 rounded-lg shrink-0 shadow-sm">

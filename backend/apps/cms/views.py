@@ -256,9 +256,13 @@ class UploadView(APIView):
     parser_classes = (MultiPartParser, FormParser)
     
     # Configuration
-    MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
-    ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp'}
-    ALLOWED_MIME_TYPES = {'image/jpeg', 'image/jpg', 'image/png', 'image/webp'}
+    # Configuration
+    MAX_FILE_SIZE = 200 * 1024 * 1024  # 200MB (increased for videos/high-res images)
+    ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp', 'mp4', 'mov', 'webm'}
+    ALLOWED_MIME_TYPES = {
+        'image/jpeg', 'image/jpg', 'image/png', 'image/webp',
+        'video/mp4', 'video/quicktime', 'video/webm'
+    }
 
     def post(self, request, *args, **kwargs):
         file_obj = request.FILES.get('file')
