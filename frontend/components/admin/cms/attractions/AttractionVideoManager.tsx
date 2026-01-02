@@ -5,7 +5,6 @@ import { updateAttractionVideo } from '@/app/actions/attraction-video';
 import { getMediaUrl } from '@/lib/media-utils';
 import { toast } from 'sonner';
 import { Loader2, Save, Upload, Video, X } from 'lucide-react';
-import { uploadImage } from '@/app/actions/upload-image'; // Reusing generic upload action
 
 interface AttractionVideoManagerProps {
     initialData: any;
@@ -64,22 +63,25 @@ export function AttractionVideoManager({ initialData }: AttractionVideoManagerPr
             const formData = new FormData();
             formData.append('file', file);
 
-            // Reuse existing upload action
-            const result = await uploadImage(formData);
+            // Use streaming route handler
+            const res = await fetch('/api/cms/video-upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await res.json();
 
             clearInterval(interval);
             setUploadProgress(100);
 
-            if (result.success && result.url) {
+            if (res.ok && result.success && result.url) {
                 // Update state with the new URL
-                // Backend will handle stripping domain if needed
                 handleChange('video', result.url);
-                // Also trigger save for the new video URL immediately? 
-                // Better to let user click save, but for large files usually auto-save is nice.
-                // We'll let user click Save to confirm updating the section.
                 toast.success('Video uploaded successfully! Click Save to apply.');
             } else {
-                toast.error(result.error || 'Upload failed');
+                const errorMsg = result.error || 'Upload failed';
+                toast.error(errorMsg);
+                console.error('Upload Error:', errorMsg);
             }
         } catch (error: any) {
             clearInterval(interval);
