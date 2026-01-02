@@ -117,7 +117,7 @@ class StatCard(models.Model):
 class InstagramReel(models.Model):
     """Instagram reels to display on homepage"""
     title = models.CharField(max_length=255, help_text="Reel title/description")
-    thumbnail_url = models.CharField(max_length=700, help_text="Thumbnail image URL (local path or external link)")
+    thumbnail_url = models.CharField(max_length=700, blank=True, null=True, help_text="Thumbnail image URL (local path or external link)")
     reel_url = models.CharField(max_length=700, help_text="Instagram reel URL")
     active = models.BooleanField(default=True)
     order = models.IntegerField(default=0, help_text="Display order (lower numbers first)")
