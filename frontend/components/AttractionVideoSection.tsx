@@ -30,7 +30,7 @@ export default function AttractionVideoSection({ videoData }: AttractionVideoSec
     }
 
     return (
-        <section className="w-full py-16 md:py-24 relative z-10">
+        <section className="w-full py-16 md:py-20 relative z-10">
             <div className="container mx-auto px-4">
                 {videoData.title && (
                     <div className="text-center mb-10">
@@ -52,13 +52,13 @@ export default function AttractionVideoSection({ videoData }: AttractionVideoSec
 
                 <ScrollReveal animation="scale" delay={0.2}>
                     <div className="flex justify-center w-full">
-                        <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-primary/10 border border-white/10 bg-surface-900/50 backdrop-blur-sm inline-block max-w-full">
+                        <div className="relative rounded-[2rem] overflow-hidden shadow-2xl shadow-primary/20 border-4 border-white/10 bg-surface-900/50 backdrop-blur-sm inline-block max-w-full">
                             {/* Decorative gradients */}
-                            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/0 via-black/0 to-black/40 pointer-events-none z-10" />
+                            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/0 via-black/0 to-black/20 pointer-events-none z-10" />
                             <video
                                 controls
                                 preload="metadata"
-                                className="block h-auto max-h-[75vh] w-auto max-w-full object-contain bg-black"
+                                className="block h-auto max-h-[60vh] md:max-h-[600px] w-auto max-w-full object-contain bg-black"
                                 src={videoData.video}
                                 poster={videoData.video + '#t=0.5'}
                             >
