@@ -39,7 +39,13 @@ def fetch_instagram_thumbnail(sender, instance, **kwargs):
         oembed_url = f"https://www.instagram.com/api/v1/oembed/?url={instance.reel_url}"
         
         logger.info(f"Fetching Instagram thumbnail for: {instance.reel_url}")
-        response = requests.get(oembed_url, timeout=10)
+        
+        # Add headers to mimic a browser to avoid some basic bot detection
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        
+        response = requests.get(oembed_url, headers=headers, timeout=10)
         
         if response.status_code == 200:
             data = response.json()
