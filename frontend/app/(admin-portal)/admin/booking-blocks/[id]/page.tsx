@@ -183,7 +183,9 @@ export default function EditBookingBlockPage({ params }: { params: { id: string 
                         >
                             <option value="MAINTENANCE">Maintenance</option>
                             <option value="PRIVATE_EVENT">Private Event</option>
-                            <option value="CLOSED">Closed</option>
+                            <option value="CLOSED">Closed (Block All)</option>
+                            <option value="CLOSED_TODAY">Closed Today Alert (Banner)</option>
+                            <option value="OPEN_TODAY">Open Today Alert (Banner)</option>
                             <option value="OTHER">Other</option>
                         </select>
                     </div>
