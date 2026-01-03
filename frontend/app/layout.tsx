@@ -3,6 +3,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import { UIProvider } from "../state/ui/uiContext";
+import { GlobalAlert } from "../components/GlobalAlert";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
@@ -14,9 +15,7 @@ export const metadata: Metadata = {
         icon: '/favicon.png',
     },
 };
-
-export default function RootLayout({
-    children,
+children,
 }: {
     children: React.ReactNode;
 }): JSX.Element {
@@ -24,6 +23,7 @@ export default function RootLayout({
         <html lang="en" suppressHydrationWarning>
             <body className={`${inter.variable} ${outfit.variable} font-sans bg-background text-white`}>
                 <UIProvider>
+                    <GlobalAlert />
                     {children}
                 </UIProvider>
             </body>

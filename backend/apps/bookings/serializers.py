@@ -111,6 +111,28 @@ class BookingSerializer(serializers.ModelSerializer):
         if obj.waivers.exists():
             return 'SIGNED'
         return obj.waiver_status or 'PENDING'
+        
+    def validate(self, data):
+        """Check for Booking Blocks"""
+        date = data.get('date')
+        if date:
+            # Check for active blocks on this date
+            # We block if type is BLOCKED_DATE or any legacy blocking type
+            # CLOSED_TODAY and OPEN_TODAY are alerts only, not blocks
+            blocking_types = ['BLOCKED_DATE', 'CLOSED', 'MAINTENANCE', 'PRIVATE_EVENT', 'OTHER']
+            
+            blocks = BookingBlock.objects.filter(
+                start_date__lte=date,
+                end_date__gte=date,
+                active=True,
+                type__in=blocking_types
+            )
+            
+            if blocks.exists():
+                block = blocks.first()
+                raise serializers.ValidationError(f"This date is not available due to {block.reason}")
+                
+        return data
     
     def create(self, validated_data):
         """Override create to automatically create/link customer"""
@@ -189,6 +211,24 @@ class PartyBookingSerializer(serializers.ModelSerializer):
 
     def get_booking_status(self, obj):
         return obj.status
+
+    def validate(self, data):
+        """Check for Booking Blocks"""
+        date = data.get('date')
+        if date:
+            blocking_types = ['BLOCKED_DATE', 'CLOSED', 'MAINTENANCE', 'PRIVATE_EVENT', 'OTHER']
+            blocks = BookingBlock.objects.filter(
+                start_date__lte=date,
+                end_date__gte=date,
+                active=True,
+                type__in=blocking_types
+            )
+            
+            if blocks.exists():
+                block = blocks.first()
+                raise serializers.ValidationError(f"This date is not available due to {block.reason}")
+                
+        return data
     
     def create(self, validated_data):
         """Override create to automatically create/link customer"""

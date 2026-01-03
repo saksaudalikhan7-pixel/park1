@@ -577,6 +577,41 @@ class BookingBlockViewSet(viewsets.ModelViewSet):
     serializer_class = BookingBlockSerializer
     permission_classes = [IsStaffUser]  # Allow employees to manage booking blocks
 
+class PublicBookingBlockViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Public API to fetch blocked dates for the Booking Wizard.
+    Only returns active blocks that actually prevent bookings.
+    """
+    serializer_class = BookingBlockSerializer
+    permission_classes = [permissions.AllowAny]
+    
+    def get_queryset(self):
+        blocking_types = ['BLOCKED_DATE', 'CLOSED', 'MAINTENANCE', 'PRIVATE_EVENT', 'OTHER']
+        # Filter for active blocks in the future (or including today)
+        return BookingBlock.objects.filter(
+            active=True,
+            type__in=blocking_types,
+            end_date__gte=timezone.now().date()
+        )
+
+class PublicSiteAlertViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Public API to fetch 'Closed Today' or 'Open Today' alerts for the current day.
+    """
+    serializer_class = BookingBlockSerializer
+    permission_classes = [permissions.AllowAny]
+    
+    def get_queryset(self):
+        today = timezone.now().date()
+        alert_types = ['CLOSED_TODAY', 'OPEN_TODAY']
+        # Filter blocks that are active, match alert types, and cover today
+        return BookingBlock.objects.filter(
+            active=True,
+            type__in=alert_types,
+            start_date__lte=today,
+            end_date__gte=today
+        ).order_by('-priority')
+
 # Custom function-based view for party booking creation (bypasses serializer bug)
 @api_view(['POST', 'GET'])
 @permission_classes([permissions.AllowAny])

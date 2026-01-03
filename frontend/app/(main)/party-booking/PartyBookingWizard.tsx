@@ -7,21 +7,16 @@ import { motion } from "framer-motion";
 import { Calendar, Clock, Users, Mail, Phone, User, Cake, MessageSquare, PartyPopper, CheckCircle } from "lucide-react";
 import { createPartyBooking } from "../../actions/createPartyBooking";
 import ParticipantCollection from "../../../components/ParticipantCollection";
-import EInvitationStep from "./steps/EInvitationStep"; // Import the new step
+import { fetchBookingBlocks, isDateBlocked, BookingBlock } from "@/lib/api/booking-blocks";
 
-import { PageSection } from "@/lib/cms/types";
-
-// Dynamic minimum requirement as requested
-const MIN_PARTICIPANTS = 10;
-
-interface PartyBookingWizardProps {
-    cmsContent?: PageSection[];
-}
+// ...
 
 export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWizardProps) {
     const router = useRouter();
     // 1: Basic Info, 2: Participants, 3: E-Invitation, 4: Confirmation
     const [step, setStep] = useState(1);
+    const [bookingBlocks, setBookingBlocks] = useState<BookingBlock[]>([]); // Blocks
+
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -36,15 +31,14 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submitted, setSubmitted] = useState(false);
-    const [bookingDetails, setBookingDetails] = useState<any>(null);
-    const [participantError, setParticipantError] = useState("");
-    const [tempBookingId, setTempBookingId] = useState<string | null>(null);
-    const [config, setConfig] = useState<any>(null);
+    // ...
 
-    // Load party booking config from CMS
+    // Load party booking config from CMS AND Booking Blocks
     useEffect(() => {
-        const loadConfig = async () => {
+        const loadConfigAndBlocks = async () => {
+            // Load blocks
+            fetchBookingBlocks().then(setBookingBlocks);
+
             try {
                 const res = await fetch('/api/party-config', {
                     cache: 'no-store',
@@ -55,28 +49,42 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
                 console.error('Failed to load party booking config:', error);
             }
         };
-        loadConfig();
+        loadConfigAndBlocks();
     }, []);
 
-    // Dynamic minimum participants from config
-    const MIN_PARTICIPANTS = config?.min_participants || 10;
+    // ...
 
-    const getContent = (key: string, defaultTitle: string, defaultSubtitle: string) => {
-        const section = cmsContent?.find(s => s.section_key === key);
-        return {
-            title: section?.title || defaultTitle,
-            subtitle: section?.subtitle || defaultSubtitle
-        };
+    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newDate = e.target.value;
+        const blockReason = isDateBlocked(newDate, bookingBlocks);
+
+        if (blockReason) {
+            alert(`This date is not available due to ${blockReason}`);
+            // Don't update state, effectively clearing or keeping previous (or clear it)
+            setFormData({ ...formData, date: "" });
+            return;
+        }
+
+        setFormData({ ...formData, date: newDate });
     };
 
     const handleBasicInfoSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Blocking Check on Submit (Double check)
+        const blockReason = isDateBlocked(formData.date, bookingBlocks);
+        if (blockReason) {
+            alert(`This date is not available due to ${blockReason}`);
+            setFormData({ ...formData, date: "" });
+            return;
+        }
 
         // Validate minimum participants on submit
         if (formData.participants < MIN_PARTICIPANTS) {
             setParticipantError(`Minimum ${MIN_PARTICIPANTS} participants required.`);
             return;
         }
+        // ...
 
         setParticipantError("");
         setIsSubmitting(true);

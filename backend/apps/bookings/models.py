@@ -230,6 +230,10 @@ class Transaction(models.Model):
 
 class BookingBlock(models.Model):
     TYPE_CHOICES = [
+        ('BLOCKED_DATE', 'Blocked Date'),
+        ('CLOSED_TODAY', 'Closed Today (Popup)'),
+        ('OPEN_TODAY', 'Open Today (Holiday)'),
+        # Legacy choices kept for backward compatibility
         ('CLOSED', 'Closed'),
         ('MAINTENANCE', 'Maintenance'),
         ('PRIVATE_EVENT', 'Private Event'),
@@ -239,13 +243,18 @@ class BookingBlock(models.Model):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     reason = models.CharField(max_length=255)
-    type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='CLOSED')
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='BLOCKED_DATE')
     recurring = models.BooleanField(default=False)
+    
+    # New fields for enhanced control
+    active = models.BooleanField(default=True, help_text="Toggle this block on/off")
+    priority = models.IntegerField(default=0, help_text="Higher number = higher priority for alerts")
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Block: {self.reason} ({self.start_date} - {self.end_date})"
+        return f"[{self.type}] {self.reason} ({self.start_date.date()} - {self.end_date.date()})"
 
 class SessionBookingHistory(models.Model):
     """

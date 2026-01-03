@@ -70,9 +70,18 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
         };
     };
 
-    // Load session booking configuration from CMS
+    import { fetchBookingBlocks, isDateBlocked, BookingBlock } from "../lib/api/booking-blocks";
+
+    // ... inside component ...
+    const [config, setConfig] = useState<any>(null); // Session booking configuration from CMS
+    const [bookingBlocks, setBookingBlocks] = useState<BookingBlock[]>([]); // Blocks
+
+    // Load session booking configuration from CMS AND Booking Blocks
     useEffect(() => {
-        const loadConfig = async () => {
+        const loadConfigAndBlocks = async () => {
+            // Load blocks in parallel
+            fetchBookingBlocks().then(setBookingBlocks);
+
             try {
                 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
                 const res = await fetch(`${API_URL}/cms/session-booking-config/1/`);
@@ -97,12 +106,20 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                 });
             }
         };
-        loadConfig();
+        loadConfigAndBlocks();
     }, []);
 
     // Update available time slots when date changes
     useEffect(() => {
         if (formData.date) {
+            // Check if date is blocked
+            const blockReason = isDateBlocked(formData.date, bookingBlocks);
+            if (blockReason) {
+                setValue("date", "", { shouldValidate: true });
+                showToast("error", `This date is not available due to ${blockReason}`);
+                return;
+            }
+
             const slots = getAvailableTimeSlots(formData.date);
             setAvailableSlots(slots);
 
@@ -112,7 +129,7 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                 showToast("warning", "Selected time is no longer available. Please choose another slot.");
             }
         }
-    }, [formData.date, formData.time, setValue, showToast]);
+    }, [formData.date, formData.time, setValue, showToast, bookingBlocks]);
 
     const nextStep = async () => {
         let fieldsToValidate: (keyof BookingFormData)[] = [];

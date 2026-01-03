@@ -5,7 +5,8 @@ from .views import (
     BookingBlockViewSet, PartyBookingViewSet, SessionBookingHistoryViewSet, 
     PartyBookingHistoryViewSet, create_party_booking_view, waiver_list_view, 
     waiver_detail_view, add_party_participants_view, party_booking_detail_view,
-    mark_party_arrived_view, mark_party_not_arrived_view
+    mark_party_arrived_view, mark_party_not_arrived_view,
+    PublicBookingBlockViewSet, PublicSiteAlertViewSet
 )
 from .calendar_views import calendar_bookings
 
@@ -20,6 +21,8 @@ router.register(r'party-bookings-old', PartyBookingViewSet)
 # History endpoints for booking restoration
 router.register(r'session-booking-history', SessionBookingHistoryViewSet)
 router.register(r'party-booking-history', PartyBookingHistoryViewSet)
+router.register(r'public/booking-blocks', views.PublicBookingBlockViewSet, basename='public-booking-blocks')
+router.register(r'site-alerts', views.PublicSiteAlertViewSet, basename='site-alerts')
 
 urlpatterns = [
     # Calendar endpoint
