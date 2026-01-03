@@ -17,7 +17,7 @@ export interface BookingBlock {
 export const fetchBookingBlocks = async (): Promise<BookingBlock[]> => {
     try {
         // Use the public endpoint
-        const response = await fetch(`${API_URL}/public/booking-blocks/`);
+        const response = await fetch(`${API_URL}/bookings/public/booking-blocks/`);
         if (!response.ok) throw new Error('Failed to fetch blocks');
         return await response.json();
     } catch (error) {
@@ -31,7 +31,7 @@ export const fetchBookingBlocks = async (): Promise<BookingBlock[]> => {
  */
 export const fetchSiteAlerts = async (): Promise<BookingBlock[]> => {
     try {
-        const response = await fetch(`${API_URL}/site-alerts/`);
+        const response = await fetch(`${API_URL}/bookings/site-alerts/`);
         if (!response.ok) throw new Error('Failed to fetch alerts');
         return await response.json();
     } catch (error) {
