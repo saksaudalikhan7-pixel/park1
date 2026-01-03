@@ -258,6 +258,7 @@ class UploadView(APIView):
     # Configuration
     # Configuration
     MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB (as requested)
+    # Trigger deployment for consistency check
     ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp', 'mp4', 'mov', 'webm'}
     ALLOWED_MIME_TYPES = {
         'image/jpeg', 'image/jpg', 'image/png', 'image/webp',
