@@ -48,9 +48,18 @@ export async function createInvitationTemplate(data: FormData) {
         return { success: true };
     }
 
-    const error = await res.json();
-    console.error("API Error:", error);
-    throw new Error(error.detail || "Failed to create template");
+    if (!res.ok) {
+        let errorMessage;
+        try {
+            const error = await res.json();
+            errorMessage = error.detail || "Failed to create template";
+        } catch (e) {
+            const text = await res.text();
+            errorMessage = `Request failed (${res.status}): ${text.slice(0, 200)}...`;
+            console.error('[createInvitationTemplate] Non-JSON error:', text);
+        }
+        throw new Error(errorMessage);
+    }
 }
 
 export async function updateInvitationTemplate(id: number, data: FormData) {
@@ -67,8 +76,18 @@ export async function updateInvitationTemplate(id: number, data: FormData) {
         return { success: true };
     }
 
-    const error = await res.json();
-    throw new Error(error.detail || "Failed to update template");
+    if (!res.ok) {
+        let errorMessage;
+        try {
+            const error = await res.json();
+            errorMessage = error.detail || "Failed to update template";
+        } catch (e) {
+            const text = await res.text();
+            errorMessage = `Request failed (${res.status}): ${text.slice(0, 200)}...`;
+            console.error('[updateInvitationTemplate] Non-JSON error:', text);
+        }
+        throw new Error(errorMessage);
+    }
 }
 
 export async function deleteInvitationTemplate(id: number) {

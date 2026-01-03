@@ -7,7 +7,7 @@ import { z } from "zod";
 import { Loader2, Save, Trash, ArrowLeft, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { deleteInvitationTemplate } from "@/app/actions/invitation-templates";
+import { deleteInvitationTemplate, createInvitationTemplate, updateInvitationTemplate } from "@/app/actions/invitation-templates";
 import ImageUploadField from "./ImageUploadField";
 import { getInvitationTemplate } from "@/app/actions/invitation-templates";
 import { compressImage } from "../../../lib/compress-image";
@@ -27,12 +27,8 @@ interface InvitationTemplateFormProps {
     initialId?: number;
 }
 
-// Helper function to get CSRF token from cookies
-function getCookie(name: string): string {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop()?.split(';').shift() || '';
-    return '';
+interface InvitationTemplateFormProps {
+    initialId?: number;
 }
 
 export function InvitationTemplateForm({ initialId }: InvitationTemplateFormProps) {
@@ -105,30 +101,15 @@ export function InvitationTemplateForm({ initialId }: InvitationTemplateFormProp
                 }
             }
 
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-            const endpoint = initialId
-                ? `${apiUrl}/invitations/templates/${initialId}/`
-                : `${apiUrl}/invitations/templates/`;
-
-            const method = initialId ? 'PATCH' : 'POST';
-            const csrfToken = getCookie('csrftoken');
-
-            const response = await fetch(endpoint, {
-                method,
-                body: formData,
-                credentials: 'include',
-                headers: {
-                    'X-CSRFToken': csrfToken,
-                },
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ detail: 'Request failed' }));
-                throw new Error(errorData.detail || `Failed to ${initialId ? 'update' : 'create'} template`);
+            if (initialId) {
+                await updateInvitationTemplate(initialId, formData);
+                showToast("success", "Template updated successfully!");
+                setSuccess(true);
+            } else {
+                await createInvitationTemplate(formData);
+                showToast("success", "Template created successfully!");
+                setSuccess(true);
             }
-
-            showToast("success", `Template ${initialId ? 'updated' : 'created'} successfully!`);
-            setSuccess(true);
 
             setTimeout(() => {
                 router.push("/admin/invitations");
