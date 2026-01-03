@@ -74,7 +74,7 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
 
 
 
-    const [config, setConfig] = useState<any>(null); // Session booking configuration from CMS
+
     const [bookingBlocks, setBookingBlocks] = useState<BookingBlock[]>([]); // Blocks
 
     // Load session booking configuration from CMS AND Booking Blocks
