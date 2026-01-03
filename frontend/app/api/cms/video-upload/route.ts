@@ -10,27 +10,39 @@ export async function POST(req: NextRequest) {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
     try {
-        const contentType = req.headers.get('content-type');
-        if (!contentType?.includes('multipart/form-data')) {
-            return NextResponse.json({ error: 'Content-Type must be multipart/form-data' }, { status: 400 });
+        // Parse the incoming form data
+        const formData = await req.formData();
+        const file = formData.get('file');
+
+        if (!file) {
+            return NextResponse.json({ error: 'No file found in request' }, { status: 400 });
         }
 
-        // Forward raw stream to Django
+        // Create a new FormData instance for the backend request
+        const backendFormData = new FormData();
+        backendFormData.append('file', file);
+
+        // Forward to Django
         const response = await fetch(`${API_URL}/cms/upload/`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
-                'Content-Type': contentType, // Pass boundary intact
+                // CAUTION: Do NOT set Content-Type header manually when using FormData
+                // fetch will automatically set it to multipart/form-data with the correct boundary
             },
-            body: req.body, // Stream
-            // @ts-ignore - duplex is needed for streaming bodies in Node fetch
-            duplex: 'half',
+            body: backendFormData,
         });
 
         if (!response.ok) {
             const text = await response.text();
             console.error('Backend upload failed:', text);
-            return NextResponse.json({ error: 'Backend upload failed: ' + text.substring(0, 100) }, { status: response.status });
+            // Try to parse JSON error if possible
+            try {
+                const jsonError = JSON.parse(text);
+                return NextResponse.json({ error: jsonError.detail || jsonError.error || text }, { status: response.status });
+            } catch (e) {
+                return NextResponse.json({ error: 'Backend upload failed: ' + text.substring(0, 100) }, { status: response.status });
+            }
         }
 
         const data = await response.json();
