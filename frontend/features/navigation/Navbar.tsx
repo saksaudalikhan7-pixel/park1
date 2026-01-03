@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Ticket, Phone } from "lucide-react";
+import { Menu, X, Ticket } from "lucide-react";
 import { useUI } from "../../state/ui/uiContext";
 import { BouncyButton } from "../../components/BouncyButton";
 import { useEffect } from "react";
@@ -67,10 +67,6 @@ export function Navbar({ settings }: { settings?: any }) {
                             {link.label}
                         </Link>
                     ))}
-                    <a href={`tel:${phone.replace(/\s/g, '')}`} className="hidden xl:flex items-center gap-2 bg-[#2D1B4E] hover:bg-[#3D2B5E] px-4 py-2 rounded-lg transition-colors">
-                        <Phone className="w-4 h-4 text-white" />
-                        <span className="text-white font-semibold">{phone}</span>
-                    </a>
                     <Link href="/book">
                         <BouncyButton size="sm" variant="accent" as="div">
                             Book Now <Ticket className="w-4 h-4 ml-2" />
@@ -84,9 +80,6 @@ export function Navbar({ settings }: { settings?: any }) {
                 </nav>
 
                 <div className="md:hidden flex items-center gap-2 relative z-50">
-                    <a href={`tel:${phone.replace(/\s/g, '')}`} className="w-9 h-9 flex items-center justify-center bg-[#2D1B4E] hover:bg-[#3D2B5E] rounded-lg transition-colors">
-                        <Phone className="w-4 h-4 text-white" />
-                    </a>
                     <Link href="/book">
                         <BouncyButton size="sm" variant="accent" className="text-xs px-3 py-1.5" as="div">
                             Book
