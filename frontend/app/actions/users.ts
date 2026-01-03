@@ -113,14 +113,21 @@ export async function createAdminUser(data: any) {
     });
 
     if (!res || !res.ok) {
-        const error = await res.json();
-        const errorMessage = error.detail ||
-            (error.email ? `Email: ${error.email[0]}` : null) ||
-            (error.username ? `Username: ${error.username[0]}` : null) ||
-            (error.password ? `Password: ${error.password[0]}` : null) ||
-            (error.role ? `Role: ${error.role[0]}` : null) ||
-            Object.values(error).flat().join(', ') ||
-            "Failed to create user";
+        let errorMessage;
+        try {
+            const error = await res.json();
+            errorMessage = error.detail ||
+                (error.email ? `Email: ${error.email[0]}` : null) ||
+                (error.username ? `Username: ${error.username[0]}` : null) ||
+                (error.password ? `Password: ${error.password[0]}` : null) ||
+                (error.role ? `Role: ${error.role[0]}` : null) ||
+                Object.values(error).flat().join(', ') ||
+                "Failed to create user";
+        } catch (e) {
+            const text = await res.text();
+            errorMessage = `Request failed (${res.status}): ${text.slice(0, 200)}...`;
+            console.error('[createAdminUser] Non-JSON error:', text);
+        }
         throw new Error(errorMessage);
     }
 
