@@ -324,7 +324,7 @@ export const WaiverForm = () => {
                         </div>
                         <span className="ml-4 text-white/80 font-medium leading-relaxed text-sm md:text-base">
                             I confirm and accept the terms of this website.{" "}
-                            <a href="/terms" target="_blank" className="text-primary hover:underline font-bold">You can read the Terms and Conditions here.</a>
+                            <a href="/guidelines" target="_blank" className="text-primary hover:underline font-bold">You can read the Terms and Conditions here.</a>
                             <span className="text-red-400">*</span>
                         </span>
                     </label>
