@@ -53,14 +53,16 @@ export function GalleryManager({ items: initialItems }: GalleryManagerProps) {
                         successCount++;
                     }
                 } else {
-                    console.error('Upload failed:', result.error || 'Unknown error');
+                    const errorMessage = result.error || 'Unknown error';
+                    console.error('Upload failed:', errorMessage);
+                    toast.error(`Upload failed: ${errorMessage}`);
                 }
             }
 
             if (successCount > 0) {
                 toast.success(`Successfully added ${successCount} images`);
-            } else if (files.length > 0) {
-                toast.error('Failed to upload images. Check size or connection.');
+            } else if (files.length > 0 && successCount === 0) {
+                // If all failed, the individual toasts above will show why
             }
         } catch (error) {
             console.error('Upload error:', error);
