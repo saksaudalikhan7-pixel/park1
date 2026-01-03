@@ -1,13 +1,11 @@
 "use server";
 
 import { fetchAPI } from "../lib/server-api";
-import { requirePermission } from "../lib/admin-auth";
 import { logActivity } from "../lib/audit-log";
 import { revalidatePath } from "next/cache";
 import { transformCmsItem } from "../lib/transformers";
 
 export async function getInstagramReels() {
-    await requirePermission('cms', 'read');
     const res = await fetchAPI("/cms/instagram-reels/", { cache: 'no-store' });
     if (!res || !res.ok) return [];
     const data = await res.json();
@@ -15,7 +13,6 @@ export async function getInstagramReels() {
 }
 
 export async function getInstagramReel(id: string) {
-    await requirePermission('cms', 'read');
     const res = await fetchAPI(`/cms/instagram-reels/${id}/`);
     if (!res || !res.ok) return null;
     const data = await res.json();
