@@ -4,6 +4,7 @@ export function transformCmsItem(item: any) {
     if (!item) return null;
     return {
         ...item,
+        title: item.title || item.category,
         imageUrl: item.image_url,
         videoUrl: item.video_url,
         thumbnailUrl: item.thumbnail_url,

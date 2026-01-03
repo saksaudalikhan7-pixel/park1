@@ -3,14 +3,17 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Save, X, Plus, Trash2, GripVertical, Eye } from "lucide-react";
+import { Save, X, Plus, Trash2, GripVertical, Eye, FileText, Palette } from "lucide-react";
 
 interface MenuSectionEditorProps {
     initialData?: {
         id?: string;
-        title: string;
+        category?: string;
+        description?: string;
         items: string[];
+        color?: string;
         order?: number;
+        active?: boolean;
     };
     onSave: (data: any) => Promise<{ success: boolean; error?: string }>;
     onCancel: () => void;
@@ -18,8 +21,10 @@ interface MenuSectionEditorProps {
 
 export function MenuSectionEditor({ initialData, onSave, onCancel }: MenuSectionEditorProps) {
     const router = useRouter();
-    const [title, setTitle] = useState(initialData?.title || "");
+    const [category, setCategory] = useState(initialData?.category || "");
+    const [description, setDescription] = useState(initialData?.description || "");
     const [items, setItems] = useState<string[]>(initialData?.items || [""]);
+    const [color, setColor] = useState(initialData?.color || "secondary");
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState("");
 
@@ -39,8 +44,8 @@ export function MenuSectionEditor({ initialData, onSave, onCancel }: MenuSection
 
     const handleSave = async () => {
         // Validation
-        if (!title.trim()) {
-            setError("Section title is required");
+        if (!category.trim()) {
+            setError("Category name is required");
             return;
         }
 
@@ -54,8 +59,11 @@ export function MenuSectionEditor({ initialData, onSave, onCancel }: MenuSection
         setError("");
 
         const result = await onSave({
-            title: title.trim(),
-            items: validItems
+            category: category.trim(),
+            description: description.trim(),
+            items: validItems,
+            color,
+            active: true
         });
 
         setIsSaving(false);
@@ -66,6 +74,12 @@ export function MenuSectionEditor({ initialData, onSave, onCancel }: MenuSection
             setError(result.error || "Failed to save menu section");
         }
     };
+
+    const colorOptions = [
+        { value: "primary", label: "Primary (Pink)", class: "bg-primary" },
+        { value: "secondary", label: "Secondary (Yellow)", class: "bg-secondary" },
+        { value: "accent", label: "Accent (Cyan)", class: "bg-accent" },
+    ];
 
     return (
         <div className="max-w-4xl mx-auto p-6 space-y-6">
@@ -95,20 +109,64 @@ export function MenuSectionEditor({ initialData, onSave, onCancel }: MenuSection
 
             {/* Form */}
             <div className="space-y-6">
-                {/* Section Title */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Category Title */}
+                    <div>
+                        <label className="block text-sm font-bold text-white/70 mb-2 uppercase tracking-wide">
+                            Category Name <span className="text-red-400">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                            placeholder="e.g., Pre Plated, Buffet"
+                            className="w-full px-4 py-3 rounded-lg border-2 border-white/10 bg-surface-900 text-white outline-none focus:border-primary transition-all"
+                        />
+                        <p className="text-xs text-white/50 mt-1">
+                            Main heading for this section
+                        </p>
+                    </div>
+
+                    {/* Color Scheme */}
+                    <div>
+                        <label className="block text-sm font-bold text-white/70 mb-2 uppercase tracking-wide">
+                            Color Scheme
+                        </label>
+                        <div className="grid grid-cols-3 gap-2">
+                            {colorOptions.map((opt) => (
+                                <button
+                                    key={opt.value}
+                                    onClick={() => setColor(opt.value)}
+                                    className={`px-3 py-3 rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${color === opt.value
+                                            ? "border-white bg-white/10"
+                                            : "border-white/10 hover:bg-white/5"
+                                        }`}
+                                >
+                                    <div className={`w-4 h-4 rounded-full ${opt.class}`} />
+                                    <span className="text-sm font-medium text-white">{opt.value}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Description */}
                 <div>
                     <label className="block text-sm font-bold text-white/70 mb-2 uppercase tracking-wide">
-                        Section Title <span className="text-red-400">*</span>
+                        Description / Subtitle
                     </label>
-                    <input
-                        type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="e.g., Pre Plated, Buffet, Snacks"
-                        className="w-full px-4 py-3 rounded-lg border-2 border-white/10 bg-surface-900 text-white outline-none focus:border-primary transition-all"
-                    />
+                    <div className="relative">
+                        <FileText className="absolute left-4 top-3.5 w-5 h-5 text-white/30" />
+                        <input
+                            type="text"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="e.g., For each participant"
+                            className="w-full pl-12 pr-4 py-3 rounded-lg border border-white/10 bg-surface-900 text-white outline-none focus:border-primary transition-all"
+                        />
+                    </div>
                     <p className="text-xs text-white/50 mt-1">
-                        This will be the heading for this menu section
+                        Optional subtitle text displayed below the category name
                     </p>
                 </div>
 
@@ -168,20 +226,35 @@ export function MenuSectionEditor({ initialData, onSave, onCancel }: MenuSection
                         <h3 className="text-lg font-bold text-white">Preview</h3>
                     </div>
                     <div className="bg-surface-800/50 backdrop-blur-md p-6 rounded-2xl border border-white/10">
-                        <h3 className="text-xl font-display font-bold mb-4 text-primary">
-                            {title || "Section Title"}
-                        </h3>
-                        <ul className="space-y-2 text-sm text-white/80">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className={`w-10 h-10 rounded-lg bg-${color}/20 flex items-center justify-center`}>
+                                <Palette className={`w-5 h-5 text-${color}`} />
+                            </div>
+                            <div>
+                                <h3 className={`text-xl font-display font-bold text-${color}`}>
+                                    {category || "Category Name"}
+                                </h3>
+                                {description && (
+                                    <p className="text-sm text-white/60">{description}</p>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {items.filter(item => item.trim()).map((item, idx) => (
-                                <li key={idx} className="flex items-start gap-2">
-                                    <span className="text-primary">•</span>
-                                    {item}
-                                </li>
+                                <div
+                                    key={idx}
+                                    className="flex items-center gap-3 bg-surface-800/50 p-4 rounded-xl border border-white/10"
+                                >
+                                    <div className={`w-2 h-2 rounded-full bg-${color}`} />
+                                    <span className="text-white/90 font-medium">{item}</span>
+                                </div>
                             ))}
-                            {items.filter(item => item.trim()).length === 0 && (
-                                <li className="text-white/40 italic">No items added yet</li>
-                            )}
-                        </ul>
+                        </div>
+
+                        {items.filter(item => item.trim()).length === 0 && (
+                            <div className="text-white/40 italic">No items added yet</div>
+                        )}
                     </div>
                 </div>
             </div>

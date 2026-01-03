@@ -135,6 +135,7 @@ class InstagramReel(models.Model):
 class MenuSection(models.Model):
     """Menu sections for party feast"""
     category = models.CharField(max_length=100, help_text="e.g., 'Pre-Plated', 'Buffet'")
+    description = models.TextField(null=True, blank=True, help_text="Subtitle or description (e.g. 'For each participant')")
     items = models.JSONField(default=list, help_text="List of menu items")
     icon = models.CharField(max_length=50, null=True, blank=True, help_text="Icon name")
     color = models.CharField(max_length=20, default="secondary", help_text="Color variant")
