@@ -245,7 +245,6 @@ export default function PartyBookingsPage() {
                                 <th className="px-6 py-4 text-xs font-bold text-slate-600 uppercase tracking-wider">Time</th>
                                 <th className="px-6 py-4 text-xs font-bold text-slate-600 uppercase tracking-wider">Package</th>
                                 <th className="px-6 py-4 text-xs font-bold text-slate-600 uppercase tracking-wider">Amount</th>
-                                <th className="px-6 py-4 text-xs font-bold text-slate-600 uppercase tracking-wider">Status</th>
                                 <th className="px-6 py-4 text-xs font-bold text-slate-600 uppercase tracking-wider">Arrival</th>
                                 <th className="px-6 py-4 text-xs font-bold text-slate-600 uppercase tracking-wider">Waiver</th>
                                 <th className="px-6 py-4 text-xs font-bold text-slate-600 uppercase tracking-wider">Actions</th>
@@ -304,9 +303,6 @@ export default function PartyBookingsPage() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className="text-sm font-bold text-slate-900">{formatCurrency(booking.amount || 0)}</span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <StatusBadge status={booking.bookingStatus || booking.status} />
                                         </td>
                                         <td className="px-6 py-4">
                                             <ArrivedToggle
