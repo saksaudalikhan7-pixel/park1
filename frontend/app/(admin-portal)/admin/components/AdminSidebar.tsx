@@ -86,13 +86,6 @@ const navigation: NavGroup[] = [
         ]
     },
     {
-        name: "Calendar & Availability",
-        items: [
-            { name: "Holiday Open Dates", href: "/admin/holidays/open", icon: CalendarDays, permission: { entity: 'holidays', action: 'read' } },
-            { name: "Holiday Closed Dates", href: "/admin/holidays/closed", icon: CalendarX, permission: { entity: 'holidays', action: 'read' } },
-        ]
-    },
-    {
         name: "Promotions",
         items: [
             { name: "Vouchers", href: "/admin/vouchers", icon: Ticket, permission: { entity: 'vouchers', action: 'read' } },
