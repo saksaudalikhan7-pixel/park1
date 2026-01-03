@@ -4,7 +4,7 @@ import { useFieldArray, useFormContext } from "react-hook-form";
 import { Plus, Trash2, Calendar, User, Mail, Phone, AlertCircle, Check, FileText } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookingFormData } from "../lib/api/types";
-import { DateInput } from "./DateInput";
+import { HybridDateInput } from "./HybridDateInput";
 
 export const WaiverForm = () => {
     const { register, control, formState: { errors, touchedFields }, watch, setValue } = useFormContext<BookingFormData>();
@@ -30,6 +30,9 @@ export const WaiverForm = () => {
     const maxAdultDOB = new Date();
     maxAdultDOB.setFullYear(maxAdultDOB.getFullYear() - 18);
     const maxAdultDate = maxAdultDOB.toISOString().split('T')[0];
+
+    // Calculate max date for minors (today's date)
+    const maxMinorDate = new Date().toISOString().split('T')[0];
 
     // Success indicator for valid fields
     const SuccessIndicator = ({ show }: { show: boolean }) => {
@@ -132,7 +135,7 @@ export const WaiverForm = () => {
                             Date Of Birth <span className="text-red-400">*</span>
                         </label>
                         <div className="relative">
-                            <DateInput
+                            <HybridDateInput
                                 value={watch("dateOfBirth") || ""}
                                 onChange={(value) => setValue("dateOfBirth", value, { shouldValidate: true })}
                                 max={maxAdultDate}
@@ -150,7 +153,7 @@ export const WaiverForm = () => {
                             Date of Arrival <span className="text-red-400">*</span>
                         </label>
                         <div className="relative">
-                            <DateInput
+                            <HybridDateInput
                                 value={watch("dateOfArrival") || ""}
                                 onChange={(value) => setValue("dateOfArrival", value, { shouldValidate: true })}
                                 placeholder="DD-MM-YYYY"
@@ -190,9 +193,10 @@ export const WaiverForm = () => {
                                         <label className="block text-xs font-bold text-white/70 mb-2 uppercase tracking-wide">
                                             Date of Birth of minor <span className="text-red-400">*</span>
                                         </label>
-                                        <DateInput
+                                        <HybridDateInput
                                             value={watch(`minors.${index}.dob`) || ""}
                                             onChange={(value) => setValue(`minors.${index}.dob`, value, { shouldValidate: true })}
+                                            max={maxMinorDate}
                                             placeholder="DD-MM-YYYY"
                                             className="w-full px-4 py-3 rounded-lg border border-white/10 bg-surface-900 text-white focus:border-primary outline-none"
                                             error={!!errors.minors?.[index]?.dob}
@@ -275,9 +279,10 @@ export const WaiverForm = () => {
                                     <label className="block text-xs font-bold text-white/70 mb-2 uppercase tracking-wide">
                                         DOB <span className="text-red-400">*</span>
                                     </label>
-                                    <DateInput
+                                    <HybridDateInput
                                         value={watch(`adultGuests.${index}.dob`) || ""}
                                         onChange={(value) => setValue(`adultGuests.${index}.dob`, value, { shouldValidate: true })}
+                                        max={maxAdultDate}
                                         placeholder="DD-MM-YYYY"
                                         className="w-full px-4 py-3 rounded-lg border border-white/10 bg-surface-900 text-white focus:border-cyan-500 outline-none"
                                         error={!!errors.adultGuests?.[index]?.dob}
