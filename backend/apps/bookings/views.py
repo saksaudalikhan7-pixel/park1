@@ -602,14 +602,26 @@ class PublicSiteAlertViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.AllowAny]
     
     def get_queryset(self):
-        today = timezone.now().date()
+        from datetime import datetime, time
+        
+        # Calculate today's range in the server's timezone
+        now = timezone.now()
+        today_start = datetime.combine(now.date(), time.min)
+        today_end = datetime.combine(now.date(), time.max)
+        
+        if timezone.is_aware(now):
+            today_start = timezone.make_aware(today_start)
+            today_end = timezone.make_aware(today_end)
+
         alert_types = ['CLOSED_TODAY', 'OPEN_TODAY']
-        # Filter blocks that are active, match alert types, and cover today
+        
+        # Filter blocks that are active, match alert types, and overlap with today
+        # Overlap logic: (BlockStart <= TodayEnd) AND (BlockEnd >= TodayStart)
         return BookingBlock.objects.filter(
             active=True,
             type__in=alert_types,
-            start_date__lte=today,
-            end_date__gte=today
+            start_date__lte=today_end,
+            end_date__gte=today_start
         ).order_by('-priority')
 
 # Custom function-based view for party booking creation (bypasses serializer bug)
