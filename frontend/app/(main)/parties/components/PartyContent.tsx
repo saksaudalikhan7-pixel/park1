@@ -168,43 +168,7 @@ export default function PartyContent({ packages, menus, hero, settings, terms, c
                 </div>
             </section>
 
-            {/* Dynamic Menu Sections */}
-            <section className="relative px-4 py-12 bg-background-light">
-                <div className="max-w-6xl mx-auto">
-                    <ScrollReveal animation="fade">
-                        <h2 className="text-3xl md:text-4xl font-display font-black mb-6 text-center">
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent via-primary to-secondary">
-                                Party Feast Menu
-                            </span>
-                        </h2>
-                    </ScrollReveal>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {menus.length > 0 ? menus.map((menu, index) => (
-                            <ScrollReveal key={menu.id} animation={index % 2 === 0 ? "slideRight" : "slideLeft"}>
-                                <div className="bg-surface-800/50 backdrop-blur-md p-6 rounded-2xl border border-white/10 h-full">
-                                    <h3 className="text-xl font-display font-bold mb-4 flex items-center gap-2" style={{ color: index % 2 === 0 ? 'var(--secondary)' : 'var(--accent)' }}>
-                                        <Utensils className="w-5 h-5" />
-                                        {menu.title}
-                                    </h3>
-                                    <ul className="space-y-2 text-sm text-white/80">
-                                        {Array.isArray(menu.items) && menu.items.map((item: string, idx: number) => (
-                                            <li key={idx} className="flex items-start gap-2">
-                                                <span style={{ color: index % 2 === 0 ? 'var(--secondary)' : 'var(--accent)' }}>•</span>
-                                                {item}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </ScrollReveal>
-                        )) : (
-                            <div className="col-span-full text-center text-white/60">
-                                Menu details upcoming.
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </section>
 
             {/* Features - Compact */}
             <section className="relative px-4 py-12 bg-background">
