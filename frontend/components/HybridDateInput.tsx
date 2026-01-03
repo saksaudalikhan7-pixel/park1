@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Calendar } from "lucide-react";
 
 interface HybridDateInputProps {
@@ -24,10 +24,15 @@ export const HybridDateInput = ({
 }: HybridDateInputProps) => {
     const nativeDateRef = useRef<HTMLInputElement>(null);
 
+    // Internal state for text input to allow typing
+    const [inputValue, setInputValue] = useState("");
+
     // Convert ISO date (YYYY-MM-DD) to display format (DD-MM-YYYY)
     const isoToDisplay = (isoDate: string): string => {
         if (!isoDate) return "";
         const [year, month, day] = isoDate.split("-");
+        // Ensure we have all parts before formatting
+        if (!year || !month || !day) return "";
         return `${day}-${month}-${year}`;
     };
 
@@ -38,6 +43,27 @@ export const HybridDateInput = ({
         if (!day || !month || !year) return "";
         return `${year}-${month}-${day}`;
     };
+
+    // Synchronize local state when prop value changes (e.g. from native picker)
+    useEffect(() => {
+        if (value) {
+            const display = isoToDisplay(value);
+            // Only update if it's different to avoid cursor jumps or infinite loops
+            // checks if the current input value resolves to the same date
+            const currentIso = displayToIso(inputValue);
+            if (currentIso !== value) {
+                setInputValue(display);
+            }
+        } else if (inputValue && !value) {
+            // If value was cleared externally but we have input, decide whether to clear input
+            // Usually if value is "", input should be ""
+            // But if user is typing "12", value is "", we don't want to clear "12"
+            // So we only clear if we are NOT editing currently? 
+            // Simplified: If value is blank, we assume reset unless likely typing
+            const possibleIso = displayToIso(inputValue);
+            if (possibleIso) setInputValue(""); // Clear if it WAS a valid date but now cleared
+        }
+    }, [value]);
 
     // Handle manual text input
     const handleTextInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,23 +80,25 @@ export const HybridDateInput = ({
             input = input.slice(0, 10);
         }
 
+        setInputValue(input);
+
         // If complete date, validate and convert to ISO
         if (input.length === 10) {
             const isoDate = displayToIso(input);
             const date = new Date(isoDate);
 
-            // Validate date
+            // Validate date object validity
             if (!isNaN(date.getTime())) {
                 // Check min/max constraints
-                if (max && isoDate > max) return;
+                if (max && isoDate > max) return; // Could optionally show error state
                 if (min && isoDate < min) return;
 
                 onChange(isoDate);
             }
-        } else {
-            // Clear the value if incomplete
+        } else if (input === "") {
             onChange("");
         }
+        // Intermediate states do not trigger onChange to prevent invalid ISO strings
     };
 
     // Handle native date picker selection
@@ -78,24 +106,29 @@ export const HybridDateInput = ({
         const isoDate = e.target.value;
         if (isoDate) {
             onChange(isoDate);
+            // State update handled by useEffect
         }
     };
 
     // Open native date picker
     const openNativePicker = () => {
         if (nativeDateRef.current) {
-            nativeDateRef.current.showPicker?.();
+            if (nativeDateRef.current.showPicker) {
+                nativeDateRef.current.showPicker();
+            } else {
+                // Fallback for older browsers (focus usually triggers picker on mobile)
+                nativeDateRef.current.focus();
+                nativeDateRef.current.click();
+            }
         }
     };
-
-    const displayValue = value ? isoToDisplay(value) : "";
 
     return (
         <div className="relative">
             {/* Text input for manual typing */}
             <input
                 type="text"
-                value={displayValue}
+                value={inputValue}
                 onChange={handleTextInput}
                 placeholder={placeholder}
                 className={className}
@@ -112,15 +145,17 @@ export const HybridDateInput = ({
                 onChange={handleNativeDateChange}
                 max={max}
                 min={min}
-                className="absolute opacity-0 pointer-events-none"
+                className="absolute inset-0 opacity-0 pointer-events-none w-full h-full"
                 tabIndex={-1}
+                style={{ height: '1px', width: '1px', bottom: 0, left: 0 }} // Minimal footprint
             />
 
             {/* Calendar button to trigger native picker */}
             <button
                 type="button"
                 onClick={openNativePicker}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors p-2"
+                aria-label="Open calendar"
             >
                 <Calendar className="w-5 h-5" />
             </button>
