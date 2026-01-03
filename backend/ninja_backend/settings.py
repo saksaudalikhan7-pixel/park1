@@ -103,6 +103,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ninja_backend.wsgi.application'
 
 
+# Upload Constraints
+# Increase limit to 200MB to match UploadView limits
+DATA_UPLOAD_MAX_MEMORY_SIZE = 209715200  # 200 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 209715200  # 200 MB
+
+
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
