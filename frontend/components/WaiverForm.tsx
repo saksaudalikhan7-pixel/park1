@@ -323,7 +323,7 @@ export const WaiverForm = () => {
                             <Check className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-black opacity-0 peer-checked:opacity-100" size={16} />
                         </div>
                         <span className="ml-4 text-white/80 font-medium leading-relaxed text-sm md:text-base">
-                            I confirm and accept the terms of this website.{" "}
+                            I confirm and accept the Terms and conditions of this waiver.{" "}
                             <a href="/guidelines" target="_blank" className="text-primary hover:underline font-bold">You can read the Terms and Conditions here.</a>
                             <span className="text-red-400">*</span>
                         </span>

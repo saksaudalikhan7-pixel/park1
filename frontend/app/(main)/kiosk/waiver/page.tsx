@@ -412,8 +412,8 @@ export default function KioskWaiverPage() {
                                         className="mt-1 h-6 w-6 cursor-pointer rounded border-2 border-white/30 transition-all checked:border-primary checked:bg-primary"
                                     />
                                     <span className="ml-4 text-white/80 font-medium leading-relaxed text-sm md:text-base">
-                                        I confirm and accept the terms of this website.{" "}
-                                        <a href="/terms" target="_blank" className="text-primary hover:underline font-bold">You can read the Terms and Conditions here.</a>
+                                        I confirm and accept the Terms and conditions of this waiver.{" "}
+                                        <a href="/guidelines" target="_blank" className="text-primary hover:underline font-bold">You can read the Terms and Conditions here.</a>
                                         <span className="text-red-400">*</span>
                                     </span>
                                 </label>
