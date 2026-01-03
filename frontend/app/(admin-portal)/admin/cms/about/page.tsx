@@ -69,6 +69,7 @@ export default function AboutAdminPage() {
                     sectionKey="hero"
                     sectionTitle="Hero Section"
                     initialData={heroSection}
+                    hideImage={true}
                 />
             </section>
 

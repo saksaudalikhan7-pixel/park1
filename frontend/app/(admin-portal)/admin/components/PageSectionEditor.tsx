@@ -11,9 +11,10 @@ interface PageSectionEditorProps {
     sectionKey: string;
     sectionTitle: string;
     initialData?: any;
+    hideImage?: boolean; // New prop
 }
 
-export function PageSectionEditor({ page, sectionKey, sectionTitle, initialData }: PageSectionEditorProps) {
+export function PageSectionEditor({ page, sectionKey, sectionTitle, initialData, hideImage = false }: PageSectionEditorProps) {
     const [loading, setLoading] = useState(false);
     // If no initial data, we prep state for creation
     const [formData, setFormData] = useState({
@@ -136,18 +137,20 @@ export function PageSectionEditor({ page, sectionKey, sectionTitle, initialData 
                     </div>
                 </div>
 
-                <div>
-                    <ImageUploadField
-                        field={{
-                            label: "Background Image",
-                            name: "image_url",
-                            type: "image",
-                            required: false
-                        }}
-                        value={formData.image_url}
-                        onChange={handleImageChange}
-                    />
-                </div>
+                {!hideImage && (
+                    <div>
+                        <ImageUploadField
+                            field={{
+                                label: "Background Image",
+                                name: "image_url",
+                                type: "image",
+                                required: false
+                            }}
+                            value={formData.image_url}
+                            onChange={handleImageChange}
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );
