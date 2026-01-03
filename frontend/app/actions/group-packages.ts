@@ -7,15 +7,13 @@ import { revalidatePath } from "next/cache";
 import { transformCmsItem } from "../lib/transformers";
 
 export async function getGroupPackages() {
-    await requirePermission('cms', 'read');
-    const res = await fetchAPI("/cms/group-packages/");
+    const res = await fetchAPI("/cms/group-packages/", { cache: 'no-store' });
     if (!res || !res.ok) return [];
     const data = await res.json();
     return data.map(transformCmsItem);
 }
 
 export async function getGroupPackage(id: string) {
-    await requirePermission('cms', 'read');
     const res = await fetchAPI(`/cms/group-packages/${id}/`);
     if (!res || !res.ok) return null;
     const data = await res.json();

@@ -7,15 +7,13 @@ import { revalidatePath } from "next/cache";
 import { transformCmsItem } from "../lib/transformers";
 
 export async function getSocialLinks() {
-    await requirePermission('cms', 'read');
-    const res = await fetchAPI("/cms/social-links/");
+    const res = await fetchAPI("/cms/social-links/", { cache: 'no-store' });
     if (!res || !res.ok) return [];
     const data = await res.json();
     return data.map(transformCmsItem);
 }
 
 export async function getSocialLink(id: string) {
-    await requirePermission('cms', 'read');
     const res = await fetchAPI(`/cms/social-links/${id}/`);
     if (!res || !res.ok) return null;
     const data = await res.json();
