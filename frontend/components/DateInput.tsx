@@ -175,6 +175,8 @@ export const DateInput = ({
                     placeholder={placeholder}
                     className={className}
                     inputMode="numeric"
+                    pattern="[0-9-]*"
+                    autoComplete="off"
                 />
                 <button
                     type="button"
