@@ -85,7 +85,6 @@ export async function deleteFreeEntry(id: string) {
 // ========== STATIC PAGES ==========
 
 export async function getStaticPages(): Promise<any[]> {
-    await requirePermission('cms', 'read');
     const res = await fetchAPI("/cms/pages/");
     if (!res || !res.ok) return [];
     const data = await res.json();
@@ -93,7 +92,6 @@ export async function getStaticPages(): Promise<any[]> {
 }
 
 export async function getStaticPage(id: string) {
-    await requirePermission('cms', 'read');
     const res = await fetchAPI(`/cms/pages/${id}/`);
     if (!res || !res.ok) return null;
     const data = await res.json();
@@ -283,7 +281,6 @@ export async function deleteSocialLink(id: string) {
 // ========== PRODUCTS ==========
 
 export async function getProducts(): Promise<any[]> {
-    await requirePermission('shop', 'read');
     const res = await fetchAPI("/shop/products/");
     if (!res || !res.ok) return [];
     const data = await res.json();
@@ -291,7 +288,6 @@ export async function getProducts(): Promise<any[]> {
 }
 
 export async function getProduct(id: string) {
-    await requirePermission('shop', 'read');
     const res = await fetchAPI(`/shop/products/${id}/`);
     if (!res || !res.ok) return null;
     const data = await res.json();
