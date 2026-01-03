@@ -1,15 +1,28 @@
 "use client";
 
-import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Utensils, ChefHat } from "lucide-react";
+
+interface MenuSection {
+    id: string;
+    title: string;
+    items: string[];
+    description?: string;
+}
 
 interface MenuPopupProps {
     isOpen: boolean;
     onClose: () => void;
+    menuSections: MenuSection[];
 }
 
-export function MenuPopup({ isOpen, onClose }: MenuPopupProps) {
+export function MenuPopup({ isOpen, onClose, menuSections }: MenuPopupProps) {
+    // Color mapping for sections
+    const getColorClass = (index: number) => {
+        const colors = ['primary', 'secondary', 'accent'];
+        return colors[index % colors.length];
+    };
+
     return (
         <AnimatePresence>
             {isOpen && (
@@ -61,95 +74,43 @@ export function MenuPopup({ isOpen, onClose }: MenuPopupProps) {
 
                             {/* Content */}
                             <div className="p-6 md:p-8 space-y-8">
-                                {/* Pre Plated Section */}
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                                            <Utensils className="w-5 h-5 text-primary" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-xl md:text-2xl font-display font-bold text-primary">
-                                                Pre Plated
-                                            </h3>
-                                            <p className="text-sm text-white/60">For each participant</p>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        {[
-                                            "Chocolate & Jam Sandwiches",
-                                            "Chicken Nuggets",
-                                            "Chillie Garlic Potato Shots",
-                                            "Hot Potato Chips"
-                                        ].map((item, idx) => (
-                                            <div
-                                                key={idx}
-                                                className="flex items-center gap-3 bg-surface-800/50 p-4 rounded-xl border border-white/10"
-                                            >
-                                                <div className="w-2 h-2 rounded-full bg-primary" />
-                                                <span className="text-white/90 font-medium">{item}</span>
+                                {menuSections.length > 0 ? (
+                                    menuSections.map((section, index) => {
+                                        const colorClass = getColorClass(index);
+                                        return (
+                                            <div key={section.id} className="space-y-4">
+                                                <div className="flex items-center gap-3 mb-4">
+                                                    <div className={`w-10 h-10 rounded-lg bg-${colorClass}/20 flex items-center justify-center`}>
+                                                        <Utensils className={`w-5 h-5 text-${colorClass}`} />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className={`text-xl md:text-2xl font-display font-bold text-${colorClass}`}>
+                                                            {section.title}
+                                                        </h3>
+                                                        {section.description && (
+                                                            <p className="text-sm text-white/60">{section.description}</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                    {section.items.map((item, idx) => (
+                                                        <div
+                                                            key={idx}
+                                                            className="flex items-center gap-3 bg-surface-800/50 p-4 rounded-xl border border-white/10"
+                                                        >
+                                                            <div className={`w-2 h-2 rounded-full bg-${colorClass}`} />
+                                                            <span className="text-white/90 font-medium">{item}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        ))}
+                                        );
+                                    })
+                                ) : (
+                                    <div className="text-center text-white/60 py-8">
+                                        No menu items available. Please add menu sections in the admin panel.
                                     </div>
-                                </div>
-
-                                {/* Buffet Section */}
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className="w-10 h-10 rounded-lg bg-secondary/20 flex items-center justify-center">
-                                            <Utensils className="w-5 h-5 text-secondary" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-xl md:text-2xl font-display font-bold text-secondary">
-                                                Served as Buffet
-                                            </h3>
-                                            <p className="text-sm text-white/60">Unlimited servings</p>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        {[
-                                            "Chicken or Veg Noodles",
-                                            "Chicken or Veg Fried Rice"
-                                        ].map((item, idx) => (
-                                            <div
-                                                key={idx}
-                                                className="flex items-center gap-3 bg-surface-800/50 p-4 rounded-xl border border-white/10"
-                                            >
-                                                <div className="w-2 h-2 rounded-full bg-secondary" />
-                                                <span className="text-white/90 font-medium">{item}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Snacks Section */}
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
-                                            <Utensils className="w-5 h-5 text-accent" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-xl md:text-2xl font-display font-bold text-accent">
-                                                Snacks
-                                            </h3>
-                                            <p className="text-sm text-white/60">Treats and refreshments</p>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        {[
-                                            "Pop corn tubs X 2",
-                                            "Mini slush 1 per participant",
-                                            "Unlimited squash drink"
-                                        ].map((item, idx) => (
-                                            <div
-                                                key={idx}
-                                                className="flex items-center gap-3 bg-surface-800/50 p-4 rounded-xl border border-white/10"
-                                            >
-                                                <div className="w-2 h-2 rounded-full bg-accent" />
-                                                <span className="text-white/90 font-medium">{item}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
+                                )}
 
                                 {/* Footer Note */}
                                 <div className="mt-8 p-4 bg-primary/10 border border-primary/20 rounded-xl">

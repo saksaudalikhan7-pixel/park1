@@ -35,7 +35,7 @@ export default function PartyContent({ packages, menus, hero, settings, terms, c
 
     return (
         <main className="bg-background text-white min-h-screen pt-24">
-            <MenuPopup isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+            <MenuPopup isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} menuSections={menus} />
             {/* Header - Reduced padding */}
             <section className="relative py-16 px-4 overflow-hidden">
                 <div className="absolute inset-0">
