@@ -1,25 +1,17 @@
 "use client";
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { createMenuSection } from '@/app/actions/menu-sections';
-import { CMSForm } from '@/components/admin/cms/CMSForm';
-import { schemas } from '@/lib/cms/schema';
+import { MenuSectionEditor } from '@/components/admin/cms/MenuSectionEditor';
 
 export default function NewMenuSectionPage() {
-    return (
-        <div className="max-w-4xl mx-auto">
-            <div className="mb-8">
-                <h1 className="text-2xl font-bold text-slate-900">New Menu Section</h1>
-                <p className="text-slate-500">Add a new menu section</p>
-            </div>
+    const router = useRouter();
 
-            <CMSForm
-                schema={schemas.menu_section}
-                onSubmit={createMenuSection}
-                submitLabel="Create Menu Section"
-                backUrl="/admin/cms/menu-sections"
-            />
-        </div>
+    return (
+        <MenuSectionEditor
+            onSave={createMenuSection}
+            onCancel={() => router.push('/admin/cms/menu-sections')}
+        />
     );
 }
-

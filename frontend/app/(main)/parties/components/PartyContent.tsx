@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { ScrollReveal, BouncyButton, SectionDivider, ImageCarousel } from "@repo/ui";
 import { motion } from "framer-motion";
-import { Check, PartyPopper, Mail, Utensils, Cake, Gift, Music, AlertCircle, CheckCircle } from "lucide-react";
+import { Check, PartyPopper, Mail, Utensils, Cake, Gift, Music, AlertCircle, CheckCircle, Eye } from "lucide-react";
 import { getMediaUrl } from "@/lib/media-utils";
+import { MenuPopup } from "@/components/MenuPopup";
 
 interface PartyContentProps {
     packages: any[];
@@ -20,6 +22,8 @@ interface PartyContentProps {
 }
 
 export default function PartyContent({ packages, menus, hero, settings, terms, carouselImages }: PartyContentProps) {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
     // ... [Rest of code]
     // ...
 
@@ -31,6 +35,7 @@ export default function PartyContent({ packages, menus, hero, settings, terms, c
 
     return (
         <main className="bg-background text-white min-h-screen pt-24">
+            <MenuPopup isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
             {/* Header - Reduced padding */}
             <section className="relative py-16 px-4 overflow-hidden">
                 <div className="absolute inset-0">
@@ -127,6 +132,22 @@ export default function PartyContent({ packages, menus, hero, settings, terms, c
                                 No party packages available currently.
                             </div>
                         )}
+                    </div>
+
+                    {/* View Menu Button */}
+                    <div className="mt-8 flex justify-center">
+                        <ScrollReveal animation="scale">
+                            <button
+                                onClick={() => setIsMenuOpen(true)}
+                                className="group relative px-8 py-4 bg-gradient-to-r from-primary via-secondary to-accent rounded-xl font-bold text-black text-lg shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Eye className="w-5 h-5" />
+                                    <span>View Full Menu</span>
+                                    <Utensils className="w-5 h-5" />
+                                </div>
+                            </button>
+                        </ScrollReveal>
                     </div>
                 </div>
             </section>

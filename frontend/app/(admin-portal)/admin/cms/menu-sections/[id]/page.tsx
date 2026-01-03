@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { getMenuSection, updateMenuSection } from '@/app/actions/menu-sections';
-import { CMSForm } from '@/components/admin/cms/CMSForm';
-import { schemas } from '@/lib/cms/schema';
+import { MenuSectionEditor } from '@/components/admin/cms/MenuSectionEditor';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function EditMenuSectionPage({ params }: { params: { id: string } }) {
+    const router = useRouter();
     const [item, setItem] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
@@ -42,19 +43,10 @@ export default function EditMenuSectionPage({ params }: { params: { id: string }
     }
 
     return (
-        <div className="max-w-4xl mx-auto">
-            <div className="mb-8">
-                <h1 className="text-2xl font-bold text-slate-900">Edit Menu Section</h1>
-                <p className="text-slate-500">Update menu section details</p>
-            </div>
-
-            <CMSForm
-                schema={schemas.menu_section}
-                initialData={item}
-                onSubmit={(data) => updateMenuSection(params.id, data)}
-                submitLabel="Update Menu Section"
-                backUrl="/admin/cms/menu-sections"
-            />
-        </div>
+        <MenuSectionEditor
+            initialData={item}
+            onSave={(data) => updateMenuSection(params.id, data)}
+            onCancel={() => router.push('/admin/cms/menu-sections')}
+        />
     );
 }
