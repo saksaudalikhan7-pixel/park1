@@ -50,10 +50,16 @@ export async function createInvitationTemplate(data: FormData) {
 
     if (!res.ok) {
         let errorMessage;
-        try {
-            const error = await res.json();
-            errorMessage = error.detail || "Failed to create template";
-        } catch (e) {
+        const contentType = res.headers.get("content-type");
+
+        if (contentType && contentType.includes("application/json")) {
+            try {
+                const error = await res.json();
+                errorMessage = error.detail || "Failed to create template";
+            } catch (e) {
+                errorMessage = "Failed to parse error response";
+            }
+        } else {
             const text = await res.text();
             errorMessage = `Request failed (${res.status}): ${text.slice(0, 200)}...`;
             console.error('[createInvitationTemplate] Non-JSON error:', text);
@@ -78,10 +84,16 @@ export async function updateInvitationTemplate(id: number, data: FormData) {
 
     if (!res.ok) {
         let errorMessage;
-        try {
-            const error = await res.json();
-            errorMessage = error.detail || "Failed to update template";
-        } catch (e) {
+        const contentType = res.headers.get("content-type");
+
+        if (contentType && contentType.includes("application/json")) {
+            try {
+                const error = await res.json();
+                errorMessage = error.detail || "Failed to update template";
+            } catch (e) {
+                errorMessage = "Failed to parse error response";
+            }
+        } else {
             const text = await res.text();
             errorMessage = `Request failed (${res.status}): ${text.slice(0, 200)}...`;
             console.error('[updateInvitationTemplate] Non-JSON error:', text);
