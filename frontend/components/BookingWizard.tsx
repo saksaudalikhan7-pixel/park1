@@ -10,6 +10,7 @@ import { useToast } from "./ToastProvider";
 import { WaiverForm } from "./WaiverForm";
 import { validateVoucher } from "../app/actions/validateVoucher";
 import { PageSection } from "../lib/cms/types";
+import { fetchBookingBlocks, isDateBlocked, BookingBlock } from "../lib/api/booking-blocks";
 
 interface BookingWizardProps {
     onSubmit: (data: any) => Promise<{ success: boolean; bookingId?: string; bookingNumber?: string; error?: string }>;
@@ -70,9 +71,9 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
         };
     };
 
-    import { fetchBookingBlocks, isDateBlocked, BookingBlock } from "../lib/api/booking-blocks";
 
-    // ... inside component ...
+
+
     const [config, setConfig] = useState<any>(null); // Session booking configuration from CMS
     const [bookingBlocks, setBookingBlocks] = useState<BookingBlock[]>([]); // Blocks
 

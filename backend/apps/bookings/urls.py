@@ -21,8 +21,8 @@ router.register(r'party-bookings-old', PartyBookingViewSet)
 # History endpoints for booking restoration
 router.register(r'session-booking-history', SessionBookingHistoryViewSet)
 router.register(r'party-booking-history', PartyBookingHistoryViewSet)
-router.register(r'public/booking-blocks', views.PublicBookingBlockViewSet, basename='public-booking-blocks')
-router.register(r'site-alerts', views.PublicSiteAlertViewSet, basename='site-alerts')
+router.register(r'public/booking-blocks', PublicBookingBlockViewSet, basename='public-booking-blocks')
+router.register(r'site-alerts', PublicSiteAlertViewSet, basename='site-alerts')
 
 urlpatterns = [
     # Calendar endpoint

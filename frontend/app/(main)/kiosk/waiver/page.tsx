@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ScrollReveal } from "@repo/ui";
 import { FileSignature, CheckCircle, User, Mail, Phone, AlertCircle, Plus, Trash2, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { HybridDateInput } from "../../../../components/HybridDateInput";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
@@ -138,8 +139,16 @@ export default function KioskWaiverPage() {
         );
     }
 
+    // Calculate max dates
+    const maxAdultDOB = new Date();
+    maxAdultDOB.setFullYear(maxAdultDOB.getFullYear() - 18);
+    const maxAdultDate = maxAdultDOB.toISOString().split('T')[0];
+    const maxMinorDate = new Date().toISOString().split('T')[0];
+
     return (
         <main className="min-h-screen bg-background flex flex-col items-center justify-center p-4 py-12">
+            {/* ... scroll reveal ... */}
+
             <div className="max-w-5xl w-full">
                 <ScrollReveal animation="slideUp">
                     <div className="text-center mb-8">
@@ -221,13 +230,12 @@ export default function KioskWaiverPage() {
                                         <label className="block text-sm font-bold text-white/70 mb-3 uppercase tracking-wide">
                                             Date Of Birth <span className="text-red-400">*</span>
                                         </label>
-                                        <input
-                                            type="date"
-                                            required
+                                        <HybridDateInput
                                             value={formData.dateOfBirth}
-                                            onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                                            onChange={(value) => setFormData({ ...formData, dateOfBirth: value })}
+                                            max={maxAdultDate}
+                                            placeholder="DD-MM-YYYY"
                                             className="w-full px-6 py-4 rounded-xl border-2 border-white/10 focus:border-primary bg-surface-900 text-white outline-none transition-all text-lg"
-                                            style={{ colorScheme: 'dark' }}
                                         />
                                     </div>
 
@@ -235,13 +243,11 @@ export default function KioskWaiverPage() {
                                         <label className="block text-sm font-bold text-white/70 mb-3 uppercase tracking-wide">
                                             Date of Arrival <span className="text-red-400">*</span>
                                         </label>
-                                        <input
-                                            type="date"
-                                            required
+                                        <HybridDateInput
                                             value={formData.dateOfArrival}
-                                            onChange={(e) => setFormData({ ...formData, dateOfArrival: e.target.value })}
+                                            onChange={(value) => setFormData({ ...formData, dateOfArrival: value })}
+                                            placeholder="DD-MM-YYYY"
                                             className="w-full px-6 py-4 rounded-xl border-2 border-white/10 focus:border-primary bg-surface-900 text-white outline-none transition-all text-lg"
-                                            style={{ colorScheme: 'dark' }}
                                         />
                                     </div>
                                 </div>
@@ -278,13 +284,12 @@ export default function KioskWaiverPage() {
                                                 <label className="block text-xs font-bold text-white/70 mb-2 uppercase tracking-wide">
                                                     Date of Birth of minor <span className="text-red-400">*</span>
                                                 </label>
-                                                <input
-                                                    type="date"
+                                                <HybridDateInput
                                                     value={minor.dob}
-                                                    onChange={(e) => updateMinor(index, 'dob', e.target.value)}
+                                                    onChange={(value) => updateMinor(index, 'dob', value)}
+                                                    max={maxMinorDate}
+                                                    placeholder="DD-MM-YYYY"
                                                     className="w-full px-4 py-3 rounded-lg border border-white/10 bg-surface-900 text-white focus:border-primary outline-none"
-                                                    style={{ colorScheme: 'dark' }}
-                                                    required
                                                 />
                                             </div>
                                             <div className="md:col-span-2">
@@ -366,13 +371,12 @@ export default function KioskWaiverPage() {
                                                 <label className="block text-xs font-bold text-white/70 mb-2 uppercase tracking-wide">
                                                     DOB <span className="text-red-400">*</span>
                                                 </label>
-                                                <input
-                                                    type="date"
+                                                <HybridDateInput
                                                     value={adult.dob}
-                                                    onChange={(e) => updateAdult(index, 'dob', e.target.value)}
+                                                    onChange={(value) => updateAdult(index, 'dob', value)}
+                                                    max={maxAdultDate}
+                                                    placeholder="DD-MM-YYYY"
                                                     className="w-full px-4 py-3 rounded-lg border border-white/10 bg-surface-900 text-white focus:border-cyan-500 outline-none"
-                                                    style={{ colorScheme: 'dark' }}
-                                                    required
                                                 />
                                             </div>
                                             <div className="md:col-span-2">

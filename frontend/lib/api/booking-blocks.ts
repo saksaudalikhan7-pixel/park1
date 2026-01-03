@@ -1,4 +1,4 @@
-import { fetchAPI } from '../../lib/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 export interface BookingBlock {
     id: number;
@@ -17,8 +17,9 @@ export interface BookingBlock {
 export const fetchBookingBlocks = async (): Promise<BookingBlock[]> => {
     try {
         // Use the public endpoint
-        const data = await fetchAPI('/public/booking-blocks/');
-        return data || [];
+        const response = await fetch(`${API_URL}/public/booking-blocks/`);
+        if (!response.ok) throw new Error('Failed to fetch blocks');
+        return await response.json();
     } catch (error) {
         console.error("Failed to fetch booking blocks:", error);
         return [];
@@ -30,8 +31,9 @@ export const fetchBookingBlocks = async (): Promise<BookingBlock[]> => {
  */
 export const fetchSiteAlerts = async (): Promise<BookingBlock[]> => {
     try {
-        const data = await fetchAPI('/site-alerts/');
-        return data || [];
+        const response = await fetch(`${API_URL}/site-alerts/`);
+        if (!response.ok) throw new Error('Failed to fetch alerts');
+        return await response.json();
     } catch (error) {
         // Fail silently for alerts
         console.warn("Failed to fetch site alerts:", error);

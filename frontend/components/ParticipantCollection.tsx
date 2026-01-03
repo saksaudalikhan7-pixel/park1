@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { User, Mail, Phone, Calendar, X, Plus } from "lucide-react";
+import { HybridDateInput } from "./HybridDateInput";
 
 interface Adult {
     id: string;
@@ -207,12 +208,11 @@ export default function ParticipantCollection({ onSubmit, onBack, totalParticipa
                                             <label className="block text-sm font-medium text-white/70 mb-2">
                                                 Date of Birth *
                                             </label>
-                                            <input
-                                                type="date"
-                                                required
+                                            <HybridDateInput
                                                 value={adult.dob}
-                                                onChange={(e) => updateAdult(adult.id, 'dob', e.target.value)}
-                                                className="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-lg focus:border-primary focus:outline-none text-white"
+                                                onChange={(val) => updateAdult(adult.id, 'dob', val)}
+                                                max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+                                                placeholder="DD-MM-YYYY"
                                             />
                                         </div>
                                     </div>
@@ -287,12 +287,11 @@ export default function ParticipantCollection({ onSubmit, onBack, totalParticipa
                                                 <label className="block text-sm font-medium text-white/70 mb-2">
                                                     Date of Birth *
                                                 </label>
-                                                <input
-                                                    type="date"
-                                                    required
+                                                <HybridDateInput
                                                     value={minor.dob}
-                                                    onChange={(e) => updateMinor(minor.id, 'dob', e.target.value)}
-                                                    className="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-lg focus:border-primary focus:outline-none text-white"
+                                                    onChange={(val) => updateMinor(minor.id, 'dob', val)}
+                                                    max={new Date().toISOString().split('T')[0]}
+                                                    placeholder="DD-MM-YYYY"
                                                 />
                                             </div>
 
