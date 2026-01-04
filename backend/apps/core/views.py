@@ -20,8 +20,10 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        if self.request.user.is_superuser:
+        # Allow Superusers and Staff (Managers/Employees) to view all users
+        if self.request.user.is_superuser or self.request.user.is_staff:
             return User.objects.all()
+        # Regular users can only see themselves
         return User.objects.filter(id=self.request.user.id)
 
     @action(detail=False, methods=['get'])
