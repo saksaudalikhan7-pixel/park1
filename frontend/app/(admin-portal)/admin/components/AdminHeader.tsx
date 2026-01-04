@@ -7,6 +7,8 @@ import Link from "next/link";
 
 interface AdminHeaderProps {
     title?: string;
+    description?: string;
+    actions?: React.ReactNode;
     user?: {
         name: string;
         email: string;
@@ -14,7 +16,7 @@ interface AdminHeaderProps {
     };
 }
 
-export function AdminHeader({ title, user }: AdminHeaderProps) {
+export function AdminHeader({ title, description, actions, user }: AdminHeaderProps) {
     const [showNotifications, setShowNotifications] = useState(false);
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
@@ -60,10 +62,20 @@ export function AdminHeader({ title, user }: AdminHeaderProps) {
         <header className="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm">
             <div className="px-6 py-4">
                 <div className="flex items-center justify-between">
-                    {/* Page Title */}
-                    <div>
-                        {title && (
-                            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{title}</h1>
+                    {/* Page Title & Actions */}
+                    <div className="flex items-center gap-4">
+                        <div>
+                            {title && (
+                                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{title}</h1>
+                            )}
+                            {description && (
+                                <p className="text-sm text-slate-500 mt-1">{description}</p>
+                            )}
+                        </div>
+                        {actions && (
+                            <div className="ml-4">
+                                {actions}
+                            </div>
                         )}
                     </div>
 

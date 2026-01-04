@@ -59,6 +59,12 @@ export const API_ENDPOINTS = {
         products: `${API_BASE_URL}/shop/products/`,
     },
 
+    // Marketing Endpoints
+    marketing: {
+        campaigns: `${API_BASE_URL}/marketing/marketing-campaigns/`,
+        templates: `${API_BASE_URL}/marketing/email-templates/`,
+    },
+
     // Auth Endpoints
     auth: {
         token: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/token/`,

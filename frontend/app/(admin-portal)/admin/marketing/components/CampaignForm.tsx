@@ -1,0 +1,188 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Save, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { postAPI, putAPI, fetchAPI } from "@/lib/api";
+import API_ENDPOINTS from "@/lib/api";
+
+interface CampaignFormProps {
+    initialData?: any;
+    isEditing?: boolean;
+}
+
+interface EmailTemplate {
+    id: number;
+    name: string;
+}
+
+export default function CampaignForm({ initialData, isEditing = false }: CampaignFormProps) {
+    const router = useRouter();
+    const [submitting, setSubmitting] = useState(false);
+    const [templates, setTemplates] = useState<EmailTemplate[]>([]);
+
+    const [formData, setFormData] = useState({
+        title: initialData?.title || "",
+        subject: initialData?.subject || "",
+        template: initialData?.template || "",
+        content: initialData?.content || "",
+        recipient_type: initialData?.recipient_type || "ALL_ADULTS",
+        status: initialData?.status || "DRAFT",
+    });
+
+    useEffect(() => {
+        // Fetch templates for dropdown
+        const loadTemplates = async () => {
+            try {
+                const data = await fetchAPI<EmailTemplate[]>(API_ENDPOINTS.marketing.templates);
+                setTemplates(data);
+            } catch (error) {
+                console.error("Failed to load templates", error);
+            }
+        };
+        loadTemplates();
+    }, []);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSubmitting(true);
+
+        try {
+            if (isEditing && initialData?.id) {
+                await putAPI(`${API_ENDPOINTS.marketing.campaigns}${initialData.id}/`, formData);
+            } else {
+                await postAPI(API_ENDPOINTS.marketing.campaigns, formData);
+            }
+            router.push("/admin/marketing");
+            router.refresh();
+        } catch (error) {
+            console.error("Failed to save campaign", error);
+            alert("Failed to save campaign. Please try again.");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-slate-200 shadow-sm">
+            <div className="p-6 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Campaign Title
+                        </label>
+                        <input
+                            type="text"
+                            name="title"
+                            required
+                            value={formData.title}
+                            onChange={handleChange}
+                            placeholder="Internal ID e.g., 'Summer Promo 2026'"
+                            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Email Subject
+                        </label>
+                        <input
+                            type="text"
+                            name="subject"
+                            required
+                            value={formData.subject}
+                            onChange={handleChange}
+                            placeholder="Subject line seen by users"
+                            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Email Template
+                        </label>
+                        <select
+                            name="template"
+                            required
+                            value={formData.template}
+                            onChange={handleChange}
+                            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            <option value="">Select a template...</option>
+                            {templates.map(t => (
+                                <option key={t.id} value={t.id}>{t.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Recipient List
+                        </label>
+                        <select
+                            name="recipient_type"
+                            value={formData.recipient_type}
+                            onChange={handleChange}
+                            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            <option value="ALL_ADULTS">All Adult Participants</option>
+                            <option value="ALL_GUARDIANS">All Guardians</option>
+                            <option value="CUSTOM_LIST">Custom List (Not Implemented)</option>
+                        </select>
+                    </div>
+
+                    <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Injectable Content
+                        </label>
+                        <p className="text-xs text-slate-500 mb-2">
+                            This text will be injected into the <code>{"{{ content }}"}</code> placeholder of the selected template.
+                        </p>
+                        <textarea
+                            name="content"
+                            required
+                            rows={8}
+                            value={formData.content}
+                            onChange={handleChange}
+                            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-slate-50 px-6 py-4 border-t border-slate-200 flex items-center justify-between rounded-b-lg">
+                <Link
+                    href="/admin/marketing"
+                    className="text-sm font-medium text-slate-600 hover:text-slate-900"
+                >
+                    Cancel
+                </Link>
+                <div className="flex items-center gap-3">
+                    <button
+                        type="submit"
+                        disabled={submitting}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {submitting ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Saving...
+                            </>
+                        ) : (
+                            <>
+                                <Save className="w-4 h-4" />
+                                Save Draft
+                            </>
+                        )}
+                    </button>
+                </div>
+            </div>
+        </form>
+    );
+}

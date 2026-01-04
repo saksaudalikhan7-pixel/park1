@@ -91,6 +91,13 @@ const navigation: NavGroup[] = [
             { name: "Vouchers", href: "/admin/vouchers", icon: Ticket, permission: { entity: 'vouchers', action: 'read' } },
         ]
     },
+    {
+        name: "Marketing",
+        items: [
+            { name: "Campaigns", href: "/admin/marketing", icon: Mail, permission: { entity: 'marketing', action: 'read' } },
+            { name: "Templates", href: "/admin/marketing/templates", icon: FileText, permission: { entity: 'marketing', action: 'read' } },
+        ]
+    },
     // Content Management section removed - use CMS section instead to avoid duplicates
     {
         name: "System",
