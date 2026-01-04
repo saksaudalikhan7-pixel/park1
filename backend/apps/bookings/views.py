@@ -130,6 +130,34 @@ class BookingViewSet(viewsets.ModelViewSet):
         
         return response
 
+    @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
+    def check_duplicate(self, request):
+        """
+        Public endpoint to check for duplicate bookings.
+        Returns validation result without exposing full booking details.
+        """
+        email = request.query_params.get('email')
+        date = request.query_params.get('date')
+        time = request.query_params.get('time')
+        
+        if not all([email, date, time]):
+            return Response(
+                {'error': 'Missing required parameters'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        # Check for bookings with same details created in last 5 minutes
+        five_minutes_ago = timezone.now() - timezone.timedelta(minutes=5)
+        
+        exists = Booking.objects.filter(
+            email=email,
+            date=date,
+            time=time,
+            created_at__gte=five_minutes_ago
+        ).exists()
+        
+        return Response({'exists': exists})
+
     @action(detail=False, methods=['get'], url_path='ticket/(?P<uuid>[^/.]+)')
     def ticket(self, request, uuid=None):
         booking = get_object_or_404(Booking, uuid=uuid)

@@ -175,7 +175,7 @@ export const DateInput = ({
                     placeholder={placeholder}
                     className={className}
                     inputMode="numeric"
-                    pattern="[0-9-]*"
+                    pattern="[0-9\-]*"
                     autoComplete="off"
                 />
                 <button
@@ -249,7 +249,7 @@ export const DateInput = ({
                                         key={index}
                                         type="button"
                                         onClick={() => !isDisabled && handleDateSelect(date)}
-                                        disabled={isDisabled}
+                                        disabled={!!isDisabled}
                                         className={`
                                             aspect-square rounded-lg text-sm font-medium transition-all
                                             ${isDisabled ? "text-white/20 cursor-not-allowed" : "text-white hover:bg-primary/20"}

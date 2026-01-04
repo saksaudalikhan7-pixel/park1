@@ -133,7 +133,7 @@ export const HybridDateInput = ({
                 placeholder={placeholder}
                 className={className}
                 inputMode="numeric"
-                pattern="[0-9-]*"
+                pattern="[0-9\-]*"
                 autoComplete="off"
             />
 

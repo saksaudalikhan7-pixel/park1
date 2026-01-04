@@ -165,20 +165,15 @@ export async function createBooking(formData: any) {
         // Generate unique booking number
         const bookingNumber = generateBookingNumber();
 
-        // Check for duplicate bookings (same email, date, time within last 5 minutes)
-        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        // Check for duplicate bookings using the dedicated public endpoint
         const checkDuplicateRes = await fetch(
-            `${API_URL}/bookings/bookings/?email=${encodeURIComponent(sanitizedEmail)}&date=${data.date}&time=${data.time}`,
+            `${API_URL}/bookings/bookings/check_duplicate/?email=${encodeURIComponent(sanitizedEmail)}&date=${data.date}&time=${data.time}`,
             { cache: "no-store" }
         );
 
         if (checkDuplicateRes.ok) {
-            const existingBookings = await checkDuplicateRes.json();
-            const recentBooking = existingBookings.find((b: any) =>
-                new Date(b.created_at) >= fiveMinutesAgo
-            );
-
-            if (recentBooking) {
+            const result = await checkDuplicateRes.json();
+            if (result.exists) {
                 return {
                     success: false,
                     error: "A booking with these details was recently created. Please check your email or contact support."
