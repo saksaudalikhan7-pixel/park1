@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'apps.shop',
     'apps.invitations',
     'apps.emails.apps.EmailsConfig',  # Email system - use full path to ensure signals are registered
+    'apps.marketing',  # Azure Email Marketing System
 ]
 
 MIDDLEWARE = [

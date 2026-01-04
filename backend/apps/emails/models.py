@@ -18,6 +18,8 @@ class EmailLog(models.Model):
         ('ADMIN_NEW_BOOKING', 'Admin: New Booking'),
         ('ADMIN_CONTACT_MESSAGE', 'Admin: Contact Message'),
         ('WAIVER_CONFIRMATION', 'Waiver Confirmation'),
+        ('MARKETING_CAMPAIGN', 'Marketing Campaign'),
+        ('BIRTHDAY_MARKETING', 'Birthday Automation'),
     ]
     
     STATUS_CHOICES = [
