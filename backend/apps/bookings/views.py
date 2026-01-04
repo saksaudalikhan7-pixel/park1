@@ -109,7 +109,20 @@ class BookingViewSet(viewsets.ModelViewSet):
         logger.info("=== BookingViewSet.create() called ===")
         
         # Call parent create method
-        response = super().create(request, *args, **kwargs)
+        try:
+            response = super().create(request, *args, **kwargs)
+        except Exception as e:
+            import traceback
+            error_msg = str(e)
+            logger.error(f"CRITICAL: Booking creation failed: {error_msg}")
+            logger.error(traceback.format_exc())
+            return Response(
+                {
+                    "detail": f"Server Error: {error_msg}",
+                    "traceback": traceback.format_exc().split('\n')
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         # Get the created booking from response
         if response.status_code == 201:
