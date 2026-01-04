@@ -76,6 +76,7 @@ class GlobalSettingsViewSet(viewsets.ModelViewSet):
 class LogoViewSet(viewsets.ModelViewSet):
     queryset = Logo.objects.all()
     serializer_class = LogoSerializer
+    # Trigger deployment for missing endpoints
     
     def get_permissions(self):
         if self.action in ['list', 'retrieve', 'active']:
