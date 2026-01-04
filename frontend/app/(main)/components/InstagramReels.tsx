@@ -1,8 +1,7 @@
 'use client';
 
-import { Instagram, Play } from 'lucide-react';
+import { Instagram } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { getMediaUrl } from '@/lib/media-utils';
 
 interface InstagramReel {
@@ -13,49 +12,20 @@ interface InstagramReel {
     order: number;
 }
 
+import { InstagramEmbed } from 'react-social-media-embed';
+
 function ReelCard({ reel }: { reel: InstagramReel }) {
-    // Use the stored thumbnail_url directly. 
-    // If missing, show a placeholder or try to use the generic instagram image.
-    const hasThumbnail = !!reel.thumbnail_url;
-
     return (
-        <Link
-            href={reel.reel_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-shrink-0 w-[140px] sm:w-[180px] md:w-auto snap-center group relative aspect-[9/16] overflow-hidden rounded-xl bg-white/5 shadow-md transition-transform hover:-translate-y-1 hover:shadow-xl border border-white/10"
-        >
-            {/* Image Layer */}
-            {hasThumbnail ? (
-                <div className="absolute inset-0 w-full h-full relative">
-                    {/* Using next/image for optimization if possible, but standard img is safer for external URLs unless configured */}
-                    <img
-                        src={getMediaUrl(reel.thumbnail_url)}
-                        alt={reel.title || "Instagram Reel"}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        loading="lazy"
-                    />
-                </div>
-            ) : (
-                <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
-                    <Instagram className="w-8 h-8 text-white/20" />
-                </div>
-            )}
-
-            {/* Play Icon Overlay */}
-            <div className="absolute inset-0 bg-black/10 transition-colors group-hover:bg-black/40 flex items-center justify-center">
-                <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform border border-white/30">
-                    <Play className="w-5 h-5 text-white fill-current ml-0.5" />
-                </div>
+        <div className="flex-shrink-0 w-[328px] snap-center">
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <InstagramEmbed
+                    url={reel.reel_url}
+                    width={328}
+                    height={580} // Standard reel portrait aspect ratio
+                    captioned={false}
+                />
             </div>
-
-            {/* Instagram Icon */}
-            <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="bg-black/60 backdrop-blur-md p-1.5 rounded-full shadow-sm border border-white/10">
-                    <Instagram className="w-4 h-4 text-pink-500" />
-                </div>
-            </div>
-        </Link>
+        </div>
     );
 }
 
