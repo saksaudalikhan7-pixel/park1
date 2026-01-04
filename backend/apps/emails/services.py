@@ -322,6 +322,41 @@ class EmailService:
         
         return email_log
 
+    def send_waiver_confirmation(self, waiver):
+        """
+        Send waiver signing confirmation email.
+        
+        Args:
+            waiver: Waiver instance
+        """
+        logger.info(f"Preparing to send waiver confirmation for Waiver ID {waiver.id}")
+        
+        # Determine booking reference string
+        booking_ref = "Walk-in"
+        if waiver.booking:
+            booking_ref = f"Session #{waiver.booking.id}"
+        elif waiver.party_booking:
+            booking_ref = f"Party #{waiver.party_booking.id}"
+            
+        context = {
+            'waiver': waiver,
+            'name': waiver.name,
+            'signed_at': waiver.signed_at,
+            'waiver_id': waiver.id,
+            'booking_reference': booking_ref,
+        }
+        
+        email_log = self.send_email(
+            email_type='WAIVER_CONFIRMATION',
+            recipient_email=waiver.email,
+            recipient_name=waiver.name,
+            subject=f'Waiver Confirmation - Ninja Inflatable Park',
+            template_name='emails/waiver_confirmation.html',
+            context=context,
+        )
+        
+        return email_log
+
 
 # Singleton instance
 email_service = EmailService()

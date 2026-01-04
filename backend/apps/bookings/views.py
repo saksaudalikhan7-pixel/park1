@@ -509,6 +509,17 @@ def waiver_list_view(request):
                 customer_id=data.get('customer'),
             )
             
+            # Send confirmation email (Safe Mode: Try-Except to not block waiver creation)
+            if waiver.email:
+                try:
+                    from apps.emails.services import email_service
+                    email_service.send_waiver_confirmation(waiver)
+                except Exception as email_error:
+                    # Log error but proceed
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"Failed to send waiver confirmation email: {email_error}", exc_info=True)
+
             return Response({
                 'id': waiver.id,
                 'name': waiver.name,

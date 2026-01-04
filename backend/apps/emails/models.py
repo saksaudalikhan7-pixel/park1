@@ -17,6 +17,7 @@ class EmailLog(models.Model):
         ('BOOKING_CANCELLED', 'Booking Cancelled'),
         ('ADMIN_NEW_BOOKING', 'Admin: New Booking'),
         ('ADMIN_CONTACT_MESSAGE', 'Admin: Contact Message'),
+        ('WAIVER_CONFIRMATION', 'Waiver Confirmation'),
     ]
     
     STATUS_CHOICES = [
