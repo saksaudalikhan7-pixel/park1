@@ -148,7 +148,12 @@ export async function getPublicFacilities() {
     return facilities.filter((f: any) => f.active);
 }
 
-export async function getPublicGuidelines() {
-    const guidelines = await fetchFromAPI('/cms/guideline-categories/');
-    return guidelines.filter((g: any) => g.active);
+const guidelines = await fetchFromAPI('/cms/guideline-categories/');
+return guidelines.filter((g: any) => g.active);
 }
+
+export async function getPublicPricingCarouselImages() {
+    const images = await fetchFromAPI('/cms/pricing-carousel-images/');
+    return images.filter((i: any) => i.active);
+}
+

@@ -3,7 +3,7 @@ from .models import (
     Banner, Activity, Faq, SocialLink, GalleryItem,
     StatCard, InstagramReel, MenuSection, GroupPackage, GuidelineCategory, LegalDocument,
     PageSection, PricingPlan, ContactInfo, PartyPackage, TimelineItem, ValueItem, FacilityItem,
-    Page, ContactMessage, FreeEntry, SessionBookingConfig, PartyBookingConfig
+    Page, ContactMessage, FreeEntry, SessionBookingConfig, PartyBookingConfig, PricingCarouselImage
 )
 
 
@@ -127,4 +127,9 @@ class SessionBookingConfigSerializer(serializers.ModelSerializer):
 class PartyBookingConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = PartyBookingConfig
+        fields = '__all__'
+
+class PricingCarouselImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PricingCarouselImage
         fields = '__all__'

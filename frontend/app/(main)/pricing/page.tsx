@@ -4,18 +4,20 @@ import { getPricingPlans } from "../../actions/pricing-plans";
 import { getSettings } from "../../actions/settings";
 
 
-import { getPublicPageSections } from "@/lib/public-api";
+import { getPublicPageSections, getPublicPricingCarouselImages } from "@/lib/public-api";
 
 export default async function Pricing() {
     const [
         plans,
         settings,
-        sections
+        sections,
+        carouselImages
     ] = await Promise.all([
         getPricingPlans(),
         getSettings(),
-        getPublicPageSections('pricing')
-    ]) as [any[], any, any[]];
+        getPublicPageSections('pricing'),
+        getPublicPricingCarouselImages()
+    ]) as [any[], any, any[], any[]];
 
     const heroSection = sections.find((s: any) => s.section_key === 'hero');
 
@@ -30,6 +32,7 @@ export default async function Pricing() {
             plans={plans}
             settings={settings}
             hero={hero}
+            carouselImages={carouselImages}
         />
     );
 }

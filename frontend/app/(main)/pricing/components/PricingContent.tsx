@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Check, Clock, AlertCircle, Users, Mail } from "lucide-react";
 import { formatCurrency } from "@repo/utils";
 import { getMediaUrl } from "@/lib/media-utils";
+import PricingCarousel from "./PricingCarousel";
 
 interface PricingContentProps {
     plans: any[];
@@ -16,9 +17,10 @@ interface PricingContentProps {
         subtitle: string;
         image: string;
     };
+    carouselImages?: any[];
 }
 
-export default function PricingContent({ plans, settings, info, hero }: PricingContentProps) {
+export default function PricingContent({ plans, settings, info, hero, carouselImages = [] }: PricingContentProps) {
     // Sort plans by price or some order field if available, otherwise assume backend order
     // Ensure active plans only
     const activePlans = plans.filter(p => !p.hasOwnProperty('active') || p.active);
@@ -57,6 +59,14 @@ export default function PricingContent({ plans, settings, info, hero }: PricingC
                         </p>
                     </ScrollReveal>
                 </div>
+
+                {/* Carousel Section */}
+                {carouselImages && carouselImages.length > 0 && (
+                    <div className="mt-12">
+                        <PricingCarousel images={carouselImages} />
+                    </div>
+                )}
+
                 <SectionDivider position="bottom" variant="curve" color="fill-background" />
             </section>
 

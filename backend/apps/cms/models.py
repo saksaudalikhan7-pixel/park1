@@ -609,3 +609,22 @@ class AttractionVideoSection(models.Model):
         active_status = 'Active' if self.is_active else 'Inactive'
         title_display = self.title or 'Untitled'
         return f"Video: {title_display} - {active_status}"
+
+class PricingCarouselImage(models.Model):
+    """
+    Images for the carousel on the Pricing page.
+    """
+    title = models.CharField(max_length=200, blank=True, null=True, help_text="Optional title/alt text")
+    image_url = models.CharField(max_length=700, help_text="URL of the image (uploaded via gallery or external)")
+    order = models.IntegerField(default=0, help_text="Display order")
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', '-created_at']
+        verbose_name = "Pricing Carousel Image"
+        verbose_name_plural = "Pricing Carousel Images"
+
+    def __str__(self):
+        return self.title or f"Image {self.id}"

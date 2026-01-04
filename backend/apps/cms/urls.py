@@ -7,7 +7,7 @@ from .views import (
     PageSectionViewSet, PricingPlanViewSet, ContactInfoViewSet, PartyPackageViewSet,
     TimelineItemViewSet, ValueItemViewSet, FacilityItemViewSet,
     PageViewSet, UploadView, ReorderView, ContactMessageViewSet, FreeEntryViewSet, SessionBookingConfigViewSet, PartyBookingConfigViewSet,
-    attraction_video_view
+    attraction_video_view, PricingCarouselImageViewSet
 )
 
 router = DefaultRouter()
@@ -34,6 +34,7 @@ router.register(r'free-entries', FreeEntryViewSet)
 router.register(r'pages', PageViewSet)
 router.register(r'session-booking-config', SessionBookingConfigViewSet)
 router.register(r'party-booking-config', PartyBookingConfigViewSet)
+router.register(r'pricing-carousel-images', PricingCarouselImageViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

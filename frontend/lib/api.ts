@@ -35,6 +35,7 @@ export const API_ENDPOINTS = {
         group_packages: `${API_BASE_URL}/cms/group-packages/`,
         group_benefits: `${API_BASE_URL}/cms/group-benefits/`,
         contact_messages: `${API_BASE_URL}/cms/contact-messages/`,
+        pricing_carousel_images: `${API_BASE_URL}/cms/pricing-carousel-images/`,
     },
 
     // Core Endpoints

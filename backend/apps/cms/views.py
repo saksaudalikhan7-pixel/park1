@@ -9,7 +9,7 @@ from .models import (
     Banner, Activity, Faq, SocialLink, GalleryItem,
     StatCard, InstagramReel, MenuSection, GroupPackage, GuidelineCategory, LegalDocument,
     PageSection, PricingPlan, ContactInfo, PartyPackage, TimelineItem, ValueItem, FacilityItem,
-    Page, ContactMessage, FreeEntry, SessionBookingConfig, PartyBookingConfig
+    Page, ContactMessage, FreeEntry, SessionBookingConfig, PartyBookingConfig, PricingCarouselImage
 )
 from .serializers import (
     BannerSerializer, ActivitySerializer, FaqSerializer, 
@@ -18,7 +18,8 @@ from .serializers import (
     GuidelineCategorySerializer, LegalDocumentSerializer,
     PageSectionSerializer, PricingPlanSerializer, ContactInfoSerializer, PartyPackageSerializer,
     TimelineItemSerializer, ValueItemSerializer, FacilityItemSerializer,
-    PageSerializer, ContactMessageSerializer, FreeEntrySerializer, SessionBookingConfigSerializer, PartyBookingConfigSerializer
+    PageSerializer, ContactMessageSerializer, FreeEntrySerializer, SessionBookingConfigSerializer, PartyBookingConfigSerializer,
+    PricingCarouselImageSerializer
 )
 
 class BaseCmsViewSet(viewsets.ModelViewSet):
@@ -485,3 +486,10 @@ def attraction_video_view(request):
             'video': new_video_url,
             'is_active': video_section.is_active
         })
+
+class PricingCarouselImageViewSet(BaseCmsViewSet):
+    queryset = PricingCarouselImage.objects.all()
+    serializer_class = PricingCarouselImageSerializer
+    filterset_fields = ['active']
+    ordering_fields = ['order', 'created_at']
+    ordering = ['order']
