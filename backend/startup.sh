@@ -7,6 +7,9 @@ python manage.py migrate --noinput
 echo "Running emails app migration explicitly..."
 python manage.py migrate emails --noinput
 
+echo "Running marketing app migration explicitly..."
+python manage.py migrate marketing --noinput
+
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
