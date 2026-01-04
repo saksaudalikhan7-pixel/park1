@@ -514,6 +514,26 @@ export async function createBookingBlock(data: { startDate: Date; endDate: Date;
 
     if (res && res.ok) {
         revalidatePath("/admin/booking-blocks");
+        return { success: true };
+    }
+
+    if (!res || !res.ok) {
+        let errorMessage;
+        const contentType = res?.headers.get("content-type");
+
+        if (contentType && contentType.includes("application/json")) {
+            try {
+                const error = await res.json();
+                errorMessage = error.detail || "Failed to create booking block";
+            } catch (e) {
+                errorMessage = "Failed to parse error response";
+            }
+        } else {
+            const text = await res?.text();
+            errorMessage = `Request failed (${res?.status}): ${text ? text.slice(0, 200) : 'Unknown error'}...`;
+            console.error('[createBookingBlock] Non-JSON error:', text);
+        }
+        throw new Error(errorMessage);
     }
 }
 
@@ -533,6 +553,26 @@ export async function updateBookingBlock(id: string, data: { startDate: Date; en
 
     if (res && res.ok) {
         revalidatePath("/admin/booking-blocks");
+        return { success: true };
+    }
+
+    if (!res || !res.ok) {
+        let errorMessage;
+        const contentType = res?.headers.get("content-type");
+
+        if (contentType && contentType.includes("application/json")) {
+            try {
+                const error = await res.json();
+                errorMessage = error.detail || "Failed to update booking block";
+            } catch (e) {
+                errorMessage = "Failed to parse error response";
+            }
+        } else {
+            const text = await res?.text();
+            errorMessage = `Request failed (${res?.status}): ${text ? text.slice(0, 200) : 'Unknown error'}...`;
+            console.error('[updateBookingBlock] Non-JSON error:', text);
+        }
+        throw new Error(errorMessage);
     }
 }
 

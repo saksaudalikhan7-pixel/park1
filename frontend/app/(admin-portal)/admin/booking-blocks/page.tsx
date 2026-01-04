@@ -95,11 +95,15 @@ export default function BookingBlocksPage() {
                                     </td>
                                     <td className="px-6 py-4 text-slate-700">{block.reason}</td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${block.type === 'CLOSED' ? 'bg-red-100 text-red-700' :
-                                            block.type === 'MAINTENANCE' ? 'bg-yellow-100 text-yellow-700' :
-                                                'bg-blue-100 text-blue-700'
+                                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${block.type === 'CLOSED' ? 'bg-red-100 text-red-700' :
+                                                block.type === 'CLOSED_TODAY' ? 'bg-red-100 text-red-700 border border-red-200' :
+                                                    block.type === 'OPEN_TODAY' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
+                                                        block.type === 'MAINTENANCE' ? 'bg-yellow-100 text-yellow-700' :
+                                                            'bg-blue-100 text-blue-700'
                                             }`}>
-                                            {block.type}
+                                            {block.type === 'CLOSED_TODAY' ? 'HOLIDAY CLOSED' :
+                                                block.type === 'OPEN_TODAY' ? 'HOLIDAY OPEN' :
+                                                    block.type}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-slate-500">
