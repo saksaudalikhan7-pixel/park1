@@ -91,9 +91,9 @@ export default function AttractionVideoSection({ videoData }: AttractionVideoSec
                                 muted
                                 loop
                                 playsInline
+                                preload="metadata"
                                 className="absolute inset-0 w-full h-full object-cover bg-black"
                                 src={videoData.video}
-                                poster={videoData.video + '#t=0.5'}
                             >
                                 Your browser does not support the video tag.
                             </video>
