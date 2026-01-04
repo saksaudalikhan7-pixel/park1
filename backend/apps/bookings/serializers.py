@@ -124,7 +124,6 @@ class BookingSerializer(serializers.ModelSerializer):
             blocks = BookingBlock.objects.filter(
                 start_date__lte=date,
                 end_date__gte=date,
-                active=True,
                 type__in=blocking_types
             )
             
@@ -220,7 +219,6 @@ class PartyBookingSerializer(serializers.ModelSerializer):
             blocks = BookingBlock.objects.filter(
                 start_date__lte=date,
                 end_date__gte=date,
-                active=True,
                 type__in=blocking_types
             )
             
