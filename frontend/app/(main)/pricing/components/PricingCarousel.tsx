@@ -33,7 +33,27 @@ export default function PricingCarousel({ images }: PricingCarouselProps) {
     useEffect(() => {
         checkScroll();
         window.addEventListener('resize', checkScroll);
-        return () => window.removeEventListener('resize', checkScroll);
+
+        // Auto-scroll logic
+        const autoScrollInterval = setInterval(() => {
+            if (scrollContainerRef.current) {
+                const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+
+                // If we reached the end, scroll back to start
+                if (scrollLeft + clientWidth >= scrollWidth - 10) {
+                    scrollContainerRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    // Otherwise scroll right
+                    const scrollAmount = clientWidth * 0.33; // Scroll one item width approx
+                    scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+                }
+            }
+        }, 5000); // 5 seconds interval
+
+        return () => {
+            window.removeEventListener('resize', checkScroll);
+            clearInterval(autoScrollInterval);
+        };
     }, [images]);
 
     const scroll = (direction: 'left' | 'right') => {
