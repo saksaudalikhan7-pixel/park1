@@ -13,8 +13,8 @@ import {
     Edit,
     Trash
 } from "lucide-react";
-import { fetchAPI, deleteAPI, postAPI } from "@/lib/api";
-import API_ENDPOINTS from "@/lib/api";
+import { getCampaigns, deleteCampaign, sendCampaign } from "@/app/actions/marketing";
+import { API_ENDPOINTS } from "@/lib/api-endpoints";
 import { StatusBadge } from "@/app/(admin-portal)/admin/components/StatusBadge";
 
 interface Campaign {
@@ -37,7 +37,7 @@ export default function CampaignList() {
 
     const loadCampaigns = async () => {
         try {
-            const data = await fetchAPI<Campaign[]>(API_ENDPOINTS.marketing.campaigns);
+            const data = await getCampaigns();
             setCampaigns(data);
         } catch (error) {
             console.error("Failed to load campaigns", error);
@@ -53,7 +53,7 @@ export default function CampaignList() {
     const handleDelete = async (id: number) => {
         if (!confirm("Are you sure you want to delete this campaign?")) return;
         try {
-            await deleteAPI(`${API_ENDPOINTS.marketing.campaigns}${id}/`);
+            await deleteCampaign(id);
             loadCampaigns();
         } catch (error) {
             alert("Failed to delete campaign");
@@ -63,8 +63,7 @@ export default function CampaignList() {
     const handleSend = async (id: number, title: string) => {
         if (!confirm(`Are you sure you want to SEND campaign "${title}" to all recipients?\nThis cannot be undone.`)) return;
         try {
-            // Using postAPI for the specific action
-            await postAPI(`${API_ENDPOINTS.marketing.campaigns}${id}/send/`, {});
+            await sendCampaign(id);
             alert(`Campaign "${title}" queued for sending successfully.`);
             loadCampaigns();
         } catch (error: any) {

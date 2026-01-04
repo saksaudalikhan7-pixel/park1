@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { postAPI, putAPI } from "@/lib/api";
-import API_ENDPOINTS from "@/lib/api";
+import { createTemplate, updateTemplate } from "@/app/actions/marketing";
+import { API_ENDPOINTS } from "@/lib/api-endpoints";
 
 interface TemplateFormProps {
     initialData?: any;
@@ -38,9 +38,9 @@ export default function TemplateForm({ initialData, isEditing = false }: Templat
 
         try {
             if (isEditing && initialData?.id) {
-                await putAPI(`${API_ENDPOINTS.marketing.templates}${initialData.id}/`, formData);
+                await updateTemplate(initialData.id, formData);
             } else {
-                await postAPI(API_ENDPOINTS.marketing.templates, formData);
+                await createTemplate(formData);
             }
             router.push("/admin/marketing/templates");
             router.refresh();

@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Save, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { postAPI, putAPI, fetchAPI } from "@/lib/api";
-import API_ENDPOINTS from "@/lib/api";
+import { createCampaign, updateCampaign, getTemplates } from "@/app/actions/marketing";
+import { API_ENDPOINTS } from "@/lib/api-endpoints";
 
 interface CampaignFormProps {
     initialData?: any;
@@ -35,7 +35,7 @@ export default function CampaignForm({ initialData, isEditing = false }: Campaig
         // Fetch templates for dropdown
         const loadTemplates = async () => {
             try {
-                const data = await fetchAPI<EmailTemplate[]>(API_ENDPOINTS.marketing.templates);
+                const data = await getTemplates();
                 setTemplates(data);
             } catch (error) {
                 console.error("Failed to load templates", error);
@@ -55,9 +55,9 @@ export default function CampaignForm({ initialData, isEditing = false }: Campaig
 
         try {
             if (isEditing && initialData?.id) {
-                await putAPI(`${API_ENDPOINTS.marketing.campaigns}${initialData.id}/`, formData);
+                await updateCampaign(initialData.id, formData);
             } else {
-                await postAPI(API_ENDPOINTS.marketing.campaigns, formData);
+                await createCampaign(formData);
             }
             router.push("/admin/marketing");
             router.refresh();

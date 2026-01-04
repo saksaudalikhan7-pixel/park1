@@ -9,8 +9,8 @@ import {
     Check,
     X
 } from "lucide-react";
-import { fetchAPI, deleteAPI } from "@/lib/api";
-import API_ENDPOINTS from "@/lib/api";
+import { getTemplates, deleteTemplate } from "@/app/actions/marketing";
+import { API_ENDPOINTS } from "@/lib/api-endpoints";
 
 interface EmailTemplate {
     id: number;
@@ -28,7 +28,7 @@ export default function TemplateList() {
 
     const loadTemplates = async () => {
         try {
-            const data = await fetchAPI<EmailTemplate[]>(API_ENDPOINTS.marketing.templates);
+            const data = await getTemplates();
             setTemplates(data);
         } catch (error) {
             console.error("Failed to load templates", error);
@@ -44,7 +44,7 @@ export default function TemplateList() {
     const handleDelete = async (id: number) => {
         if (!confirm("Are you sure you want to delete this template?")) return;
         try {
-            await deleteAPI(`${API_ENDPOINTS.marketing.templates}${id}/`);
+            await deleteTemplate(id);
             loadTemplates();
         } catch (error) {
             alert("Failed to delete template");

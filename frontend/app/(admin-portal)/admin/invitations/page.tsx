@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Plus, Search, Edit, Trash2, Image as ImageIcon } from "lucide-react";
-import { fetchAPI } from "@/lib/api"; // Assuming a central API helper exists or we use fetch directly
+// import { fetchAPI } from "@/lib/api"; // Removed unused import causing build error in client component
 import { toast } from "sonner";
 
 interface Template {
@@ -47,23 +47,23 @@ export default function InvitationTemplatesPage() {
 
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-            
+
             // Get auth token from cookies
             const getCookie = (name: string) => {
                 const value = `; ${document.cookie}`;
                 const parts = value.split(`; ${name}=`);
                 if (parts.length === 2) return parts.pop()?.split(';').shift();
             };
-            
+
             const token = getCookie('admin_token');
             const headers: HeadersInit = {
                 'Content-Type': 'application/json',
             };
-            
+
             if (token) {
                 headers['Authorization'] = `Bearer ${token}`;
             }
-            
+
             const res = await fetch(`${API_URL}/invitations/templates/${id}/`, {
                 method: "DELETE",
                 headers,
