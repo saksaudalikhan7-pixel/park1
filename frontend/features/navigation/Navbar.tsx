@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Ticket } from "lucide-react";
 import { useUI } from "../../state/ui/uiContext";
 import { BouncyButton } from "../../components/BouncyButton";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const navLinks = [
     { href: "/", label: "Home" },
@@ -22,6 +22,25 @@ export function Navbar({ settings }: { settings?: any }) {
     const { state, dispatch } = useUI();
     const { isMobileMenuOpen } = state;
     const phone = settings?.contactPhone || "+91 98454 71611";
+    const [logoUrl, setLogoUrl] = useState("/logo_transparent.png");
+
+    useEffect(() => {
+        // Fetch dynamic logo on mount
+        const fetchLogo = async () => {
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/core/logos/active/`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.image_url) {
+                        setLogoUrl(data.image_url);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch logo:", error);
+            }
+        };
+        fetchLogo();
+    }, []);
 
     useEffect(() => {
         if (isMobileMenuOpen) {
@@ -49,7 +68,7 @@ export function Navbar({ settings }: { settings?: any }) {
             <div className="w-full max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                 <Link href="/" className="relative z-50 block flex-shrink-0">
                     <img
-                        src="/logo_transparent.png"
+                        src={logoUrl}
                         alt="Ninja Inflatable Park"
                         className="h-10 md:h-12 w-auto object-contain transition-transform duration-300 hover:scale-105"
                         style={{ background: 'transparent' }}

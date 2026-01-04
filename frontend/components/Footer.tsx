@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, Heart } from "lucide-react";
 import Link from "next/link";
 import { footerLinks, siteConfig } from "../lib/config";
+import { useEffect, useState } from "react";
 
 export const Footer = ({ settings, socialLinks }: { settings?: any; socialLinks?: any[] }) => {
     const defaultSocialLinks = [
@@ -11,6 +12,26 @@ export const Footer = ({ settings, socialLinks }: { settings?: any; socialLinks?
         { icon: <Instagram className="w-5 h-5" />, href: siteConfig.links.instagram, label: "Instagram" },
         { icon: <Twitter className="w-5 h-5" />, href: siteConfig.links.twitter, label: "Twitter" },
     ];
+
+    const [logoUrl, setLogoUrl] = useState("/ninja-logo.png");
+
+    useEffect(() => {
+        // Fetch dynamic logo on mount
+        const fetchLogo = async () => {
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/core/logos/active/`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.image_url) {
+                        setLogoUrl(data.image_url);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch logo:", error);
+            }
+        };
+        fetchLogo();
+    }, []);
 
     const linksToDisplay = socialLinks && socialLinks.length > 0 ? socialLinks.map((link: any) => {
         const platform = (link.platform || link.label || "").toLowerCase();
@@ -42,7 +63,7 @@ export const Footer = ({ settings, socialLinks }: { settings?: any; socialLinks?
                     <div className="lg:col-span-2">
                         <Link href="/" className="inline-block mb-4">
                             <img
-                                src="/ninja-logo.png"
+                                src={logoUrl}
                                 alt="Ninja Inflatable Park"
                                 className="h-16 w-auto drop-shadow-neon-blue"
                             />

@@ -76,10 +76,12 @@ class Logo(models.Model):
         verbose_name_plural = "Logos"
     
     def save(self, *args, **kwargs):
-        # Ensure only one logo is active at a time
-        if self.is_active:
-            Logo.objects.filter(is_active=True).exclude(pk=self.pk).update(is_active=False)
+        # Enforce single active logo
+        self.is_active = True
         super().save(*args, **kwargs)
+        
+        # Delete all other logos to keep DB clean and enforce single source of truth
+        Logo.objects.exclude(pk=self.pk).delete()
     
     def __str__(self):
         return f"{self.name} ({'Active' if self.is_active else 'Inactive'})"
