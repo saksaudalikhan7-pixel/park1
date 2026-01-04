@@ -199,6 +199,22 @@ class ContactMessageViewSet(viewsets.ModelViewSet):
         message.save()
         return Response({'status': 'marked as unread', 'is_read': False})
 
+    def perform_create(self, serializer):
+        """
+        Save the contact message and trigger email notification.
+        """
+        instance = serializer.save()
+        
+        # Trigger email notification
+        try:
+            from apps.emails.services import email_service
+            email_service.send_contact_message_confirmation(instance)
+        except Exception as e:
+            # IMPORTANT: Log error but DO NOT break the contact form flow
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to trigger contact message email: {str(e)}")
+
 class PageViewSet(BaseCmsViewSet):
     queryset = Page.objects.all()
     serializer_class = PageSerializer

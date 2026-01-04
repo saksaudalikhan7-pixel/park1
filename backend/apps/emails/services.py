@@ -292,5 +292,36 @@ class EmailService:
         return email_log
 
 
+    def send_contact_message_confirmation(self, contact_message):
+        """
+        Send admin notification for new contact message.
+        
+        Args:
+            contact_message: ContactMessage instance
+        """
+        logger.info(f"Preparing to send contact message notification for ID {contact_message.id}")
+        
+        context = {
+            'contact_message': contact_message,
+            'customer_name': contact_message.name,
+            'subject': contact_message.subject,
+        }
+        
+        # Hardcoded admin email as per requirements
+        admin_email = "info@ninjainflatablepark.com"
+        
+        email_log = self.send_email(
+            email_type='ADMIN_CONTACT_MESSAGE',
+            recipient_email=admin_email,
+            recipient_name="Ninja Park Admin",
+            subject=f'New Contact Message - {contact_message.subject}',
+            template_name='emails/admin/contact_message.html',
+            context=context,
+            contact_message=contact_message
+        )
+        
+        return email_log
+
+
 # Singleton instance
 email_service = EmailService()
