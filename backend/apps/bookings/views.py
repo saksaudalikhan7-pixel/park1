@@ -589,7 +589,6 @@ class PublicBookingBlockViewSet(viewsets.ReadOnlyModelViewSet):
         blocking_types = ['BLOCKED_DATE', 'CLOSED', 'MAINTENANCE', 'PRIVATE_EVENT', 'OTHER']
         # Filter for active blocks in the future (or including today)
         return BookingBlock.objects.filter(
-            active=True,
             type__in=blocking_types,
             end_date__gte=timezone.now().date()
         )
@@ -618,11 +617,10 @@ class PublicSiteAlertViewSet(viewsets.ReadOnlyModelViewSet):
         # Filter blocks that are active, match alert types, and overlap with today
         # Overlap logic: (BlockStart <= TodayEnd) AND (BlockEnd >= TodayStart)
         return BookingBlock.objects.filter(
-            active=True,
             type__in=alert_types,
             start_date__lte=today_end,
             end_date__gte=today_start
-        ).order_by('-priority')
+        ).order_by('-start_date')
 
 # Custom function-based view for party booking creation (bypasses serializer bug)
 @api_view(['POST', 'GET'])

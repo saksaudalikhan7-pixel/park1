@@ -246,10 +246,6 @@ class BookingBlock(models.Model):
     type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='BLOCKED_DATE')
     recurring = models.BooleanField(default=False)
     
-    # New fields for enhanced control
-    active = models.BooleanField(default=True, help_text="Toggle this block on/off")
-    priority = models.IntegerField(default=0, help_text="Higher number = higher priority for alerts")
-    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
