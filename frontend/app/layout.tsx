@@ -5,16 +5,12 @@ import { Inter, Outfit } from "next/font/google";
 import { UIProvider } from "../state/ui/uiContext";
 import { GlobalAlert } from "../components/GlobalAlert";
 
+import { getMetadata } from "@/seo/seo.config";
+
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
-export const metadata: Metadata = {
-    title: "Ninja Inflatable Park",
-    description: "India's Biggest Inflatable Park",
-    icons: {
-        icon: '/favicon.png',
-    },
-};
+export const metadata: Metadata = getMetadata();
 export default function RootLayout({
     children,
 }: {
