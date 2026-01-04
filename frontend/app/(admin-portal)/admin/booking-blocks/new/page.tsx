@@ -36,8 +36,8 @@ export default function NewBookingBlockPage() {
             await createBookingBlock(data);
             router.push("/admin/booking-blocks");
             router.refresh();
-        } catch (err) {
-            setError("Failed to create booking block");
+        } catch (err: any) {
+            setError(err.message || "Failed to create booking block");
         } finally {
             setLoading(false);
         }
