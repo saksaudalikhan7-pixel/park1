@@ -211,8 +211,21 @@ export async function createBooking(formData: any) {
         });
 
         if (!bookingRes.ok) {
-            const error = await bookingRes.json();
-            return { success: false, error: error.detail || "Failed to create booking" };
+            let errorMessage = "Failed to create booking";
+            try {
+                const errorText = await bookingRes.text();
+                try {
+                    const error = JSON.parse(errorText);
+                    errorMessage = error.detail || "Failed to create booking";
+                } catch {
+                    // If parsing fails, it's likely HTML or plain text (e.g. 500 error page)
+                    console.error("Non-JSON error response from booking API:", errorText.substring(0, 500));
+                    errorMessage = `Server Error (${bookingRes.status}). Please try again later.`;
+                }
+            } catch (e) {
+                console.error("Failed to read error response:", e);
+            }
+            return { success: false, error: errorMessage };
         }
 
         const booking = await bookingRes.json();
