@@ -6,7 +6,12 @@ import { revalidatePath } from "next/cache";
 // Pricing Carousel Actions
 
 export async function getPricingCarouselImages() {
-    return await fetchAPI<any[]>(API_ENDPOINTS.cms.pricing_carousel_images);
+    try {
+        return await fetchAPI<any[]>(API_ENDPOINTS.cms.pricing_carousel_images);
+    } catch (error) {
+        console.error("Failed to fetch pricing carousel images:", error);
+        return []; // Return empty array to prevent UI crash
+    }
 }
 
 export async function updatePricingCarouselOrder(items: { id: number; order: number }[]) {
