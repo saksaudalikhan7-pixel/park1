@@ -34,23 +34,37 @@ export async function deletePricingCarouselImage(id: number) {
 }
 
 export async function createPricingCarouselImage(data: FormData) {
-    // Image upload requires FormData. postAPI in lib/api.ts might expect JSON if data is not FormData.
-    // But our server-api.ts handles FormData?
-    // Let's check api.ts:
-    /*
-    export async function postAPI<T>(url: string, data: any, options?: RequestInit): Promise<T> {
-        const endpoint = url.replace(API_BASE_URL, '');
-        const result = await serverPostAPI(endpoint, data);
-        ...
+    // 1. Extract file and other data
+    const file = data.get('image') as File;
+    const title = data.get('title') as string;
+    const order = data.get('order') as string;
+    const active = data.get('active') as string;
+
+    if (!file) {
+        throw new Error("No image file provided");
     }
-    */
-    // server-api.ts handles it if we pass FormData. 
-    // Ideally we pass FormData directly.
 
-    // However, server actions receiving FormData is standard.
-    // But passing it to `postAPI` which calls `serverPostAPI`...
-    // Let's assume serverPostAPI handles FormData correctly (it does check `instanceof FormData`).
+    // 2. Upload image to /api/cms/upload/
+    const uploadFormData = new FormData();
+    uploadFormData.append('file', file);
 
-    await postAPI(API_ENDPOINTS.cms.pricing_carousel_images, data);
+    // Note: postAPI wrapper calls serverPostAPI.
+    // We trust serverPostAPI handles FormData correctly (passing it to fetch body, letting browser set boundary).
+    // The UploadView returns: { url: "...", ... }
+    const uploadResponse = await postAPI<{ url: string }>(API_ENDPOINTS.cms.upload, uploadFormData);
+
+    if (!uploadResponse || !uploadResponse.url) {
+        throw new Error("Failed to get image URL from upload response");
+    }
+
+    // 3. Create PricingCarouselImage record with the returned URL
+    const payload = {
+        title: title || 'Carousel Image',
+        image_url: uploadResponse.url,
+        order: parseInt(order) || 0,
+        active: active === 'true'
+    };
+
+    await postAPI(API_ENDPOINTS.cms.pricing_carousel_images, payload);
     revalidatePath('/admin/cms/pricing');
 }
