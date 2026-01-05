@@ -36,9 +36,7 @@ export async function deletePricingCarouselImage(id: number) {
     revalidatePath('/admin/cms/pricing');
 }
 
-import { cookies } from "next/headers";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 export async function createPricingCarouselImage(data: FormData) {
     const token = cookies().get('admin_token')?.value;
