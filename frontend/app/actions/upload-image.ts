@@ -2,7 +2,9 @@
 
 import { cookies } from 'next/headers';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+import { API_ENDPOINTS } from '@/lib/api-endpoints';
+
+// Removed local API_URL as we use API_ENDPOINTS now
 
 export async function uploadImage(formData: FormData) {
     try {
@@ -33,7 +35,7 @@ export async function uploadImage(formData: FormData) {
         console.log('[Upload] Sending to Django backend...');
 
         // Forward to Django backend
-        const response = await fetch(`${API_URL}/cms/upload/`, {
+        const response = await fetch(API_ENDPOINTS.cms.upload, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
