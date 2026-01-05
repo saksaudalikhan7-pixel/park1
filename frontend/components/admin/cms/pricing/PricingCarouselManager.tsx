@@ -1,4 +1,4 @@
-```javascript
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -11,7 +11,7 @@ import {
 } from "@/app/actions/cms";
 
 // Helper to get media URL if needed, or just use string
-const getMediaUrl = (url: string) => url; 
+const getMediaUrl = (url: string) => url;
 
 export default function PricingCarouselManager() {
     const [items, setItems] = useState<any[]>([]);
@@ -59,15 +59,15 @@ export default function PricingCarouselManager() {
                 // Direct call to my robust action (which handles upload -> create)
                 // This matches the "Auto Upload" behavior of Party Carousel
                 try {
-                   await createPricingCarouselImage(formData);
-                   successCount++;
+                    await createPricingCarouselImage(formData);
+                    successCount++;
                 } catch (err) {
                     console.error("Upload failed for file:", file.name, err);
                 }
             }
 
             if (successCount > 0) {
-                toast.success(`Successfully added ${ successCount } images`);
+                toast.success(`Successfully added ${successCount} images`);
                 await loadImages(); // Refresh list to get new IDs and clean state
             }
         } catch (error) {
@@ -147,4 +147,4 @@ export default function PricingCarouselManager() {
         </div>
     );
 }
-```
+
