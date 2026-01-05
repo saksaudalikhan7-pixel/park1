@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, ArrowUp, ArrowDown, Image as ImageIcon, Upload, Loader2, Save } from 'lucide-react';
+import { Plus, Trash2, ArrowUp, ArrowDown, Image as ImageIcon, Upload, Loader2, Save, X } from 'lucide-react';
 import {
     getPricingCarouselImages,
     updatePricingCarouselOrder,
@@ -23,6 +23,7 @@ export default function PricingCarouselManager() {
     const [images, setImages] = useState<CarouselImage[]>([]);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -35,18 +36,32 @@ export default function PricingCarouselManager() {
             setImages(data.sort((a: any, b: any) => a.order - b.order));
         } catch (error) {
             console.error('Failed to load carousel images:', error);
-            toast.error('Failed to load images');
+            // toast.error('Failed to load images'); // Suppress error on initial load to avoid spamming if DB is just starting
         } finally {
             setLoading(false);
         }
     };
 
-    const handleFilesSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files || files.length === 0) return;
 
+        // Add to selected files
+        setSelectedFiles(prev => [...prev, ...Array.from(files)]);
+
+        // Clear input so same files can be selected again if needed
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const removeSelectedFile = (index: number) => {
+        setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const handleSaveUpload = async () => {
+        if (selectedFiles.length === 0) return;
+
         setUploading(true);
-        const uploadPromises = Array.from(files).map(async (file, index) => {
+        const uploadPromises = selectedFiles.map(async (file, index) => {
             const formData = new FormData();
             formData.append('image', file);
             formData.append('title', file.name.split('.')[0] || 'Carousel Image');
@@ -59,14 +74,14 @@ export default function PricingCarouselManager() {
 
         try {
             await Promise.all(uploadPromises);
-            toast.success(`Successfully added ${files.length} images`);
+            toast.success(`Successfully saved ${selectedFiles.length} images`);
+            setSelectedFiles([]); // Clear selection
             await loadImages();
         } catch (error) {
             console.error('Failed to upload images:', error);
             toast.error('Failed to upload some images');
         } finally {
             setUploading(false);
-            if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
@@ -129,15 +144,11 @@ export default function PricingCarouselManager() {
 
                 <div className="flex flex-col items-center gap-3">
                     <div className="p-4 bg-white rounded-full shadow-sm">
-                        {uploading ? (
-                            <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-                        ) : (
-                            <Upload className="w-8 h-8 text-blue-600" />
-                        )}
+                        <Upload className="w-8 h-8 text-blue-600" />
                     </div>
                     <div>
                         <h3 className="text-lg font-medium text-slate-900">
-                            {uploading ? 'Uploading...' : 'Drop images here or click to upload'}
+                            Drop images here or click to select
                         </h3>
                         <p className="text-sm text-slate-500 mt-1">
                             Support for multiple images (JPG, PNG, WEBP)
@@ -147,11 +158,59 @@ export default function PricingCarouselManager() {
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploading}
                         className="mt-2"
+                        type="button"
                     >
-                        {uploading ? 'Uploading...' : 'Select Images'}
+                        Select Images
                     </Button>
                 </div>
             </div>
+
+            {/* Selected Files Preview Area */}
+            {selectedFiles.length > 0 && (
+                <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                    <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-medium text-blue-900">Selected files to upload ({selectedFiles.length})</h4>
+                        <Button
+                            onClick={handleSaveUpload}
+                            disabled={uploading}
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                            {uploading ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    Uploading...
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="w-4 h-4 mr-2" />
+                                    Save Images
+                                </>
+                            )}
+                        </Button>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        {selectedFiles.map((file, idx) => (
+                            <div key={idx} className="relative group bg-white p-2 rounded border border-blue-200">
+                                <div className="aspect-video bg-slate-100 rounded overflow-hidden mb-2">
+                                    <img
+                                        src={URL.createObjectURL(file)}
+                                        className="w-full h-full object-cover"
+                                        alt="preview"
+                                        onLoad={(e) => URL.revokeObjectURL((e.target as HTMLImageElement).src)}
+                                    />
+                                </div>
+                                <div className="text-xs truncate text-slate-600 px-1">{file.name}</div>
+                                <button
+                                    onClick={() => removeSelectedFile(idx)}
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-sm hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                    <X size={12} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 gap-4">
                 {images.map((image, index) => (
