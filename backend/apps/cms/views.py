@@ -345,9 +345,10 @@ class UploadView(APIView):
             }, status=status.HTTP_201_CREATED)
             
         except Exception as e:
+            # DEBUG: Return 400 with actual error for debugging
             return Response(
                 {'error': f'Upload failed: {str(e)}'}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 class ReorderView(APIView):
