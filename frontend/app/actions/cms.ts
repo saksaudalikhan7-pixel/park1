@@ -60,7 +60,8 @@ export async function createPricingCarouselImage(data: FormData) {
         const blob = new Blob([buffer], { type: file.type });
         backendFormData.append('file', blob, file.name);
 
-        const uploadResponse = await fetch(`${API_URL}/cms/upload/`, {
+        const targetUrl = `${API_URL}/cms/upload/`;
+        const uploadResponse = await fetch(targetUrl, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -68,18 +69,23 @@ export async function createPricingCarouselImage(data: FormData) {
             body: backendFormData,
         });
 
-        if (!uploadResponse.ok) {
-            const errorText = await uploadResponse.text();
-            console.error("Upload failed details:", errorText);
-            try {
-                const jsonError = JSON.parse(errorText);
-                return { success: false, error: jsonError.error || uploadResponse.statusText };
-            } catch {
-                return { success: false, error: `Upload failed: ${errorText || uploadResponse.statusText}` };
-            }
+        const responseText = await uploadResponse.text();
+        let uploadResult;
+
+        try {
+            uploadResult = JSON.parse(responseText);
+        } catch (e) {
+            console.error("JSON Parse Error:", e, "Response:", responseText.substring(0, 200));
+            return {
+                success: false,
+                error: `Invalid JSON from ${targetUrl} (Status: ${uploadResponse.status}): ${responseText.substring(0, 50)}...`
+            };
         }
 
-        const uploadResult = await uploadResponse.json();
+        if (!uploadResponse.ok) {
+            console.error("Upload failed details:", responseText);
+            return { success: false, error: uploadResult.error || `Upload failed: ${uploadResponse.statusText}` };
+        }
 
         if (!uploadResult || !uploadResult.url) {
             return { success: false, error: "Failed to get image URL from upload response" };
