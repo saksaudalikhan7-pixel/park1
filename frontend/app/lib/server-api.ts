@@ -44,15 +44,20 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
 }
 
 export async function postAPI(endpoint: string, data: any) {
+    const isFormData = data instanceof FormData;
+
     const headers: Record<string, string> = {
-        "Content-Type": "application/json",
         ...getAuthHeader(),
     };
+
+    if (!isFormData) {
+        headers["Content-Type"] = "application/json";
+    }
 
     const res = await fetch(`${API_URL}${endpoint}`, {
         method: "POST",
         headers,
-        body: JSON.stringify(data),
+        body: isFormData ? data : JSON.stringify(data),
         cache: "no-store",
     });
 
@@ -61,15 +66,20 @@ export async function postAPI(endpoint: string, data: any) {
 }
 
 export async function putAPI(endpoint: string, data: any) {
+    const isFormData = data instanceof FormData;
+
     const headers: Record<string, string> = {
-        "Content-Type": "application/json",
         ...getAuthHeader(),
     };
+
+    if (!isFormData) {
+        headers["Content-Type"] = "application/json";
+    }
 
     const res = await fetch(`${API_URL}${endpoint}`, {
         method: "PUT",
         headers,
-        body: JSON.stringify(data),
+        body: isFormData ? data : JSON.stringify(data),
         cache: "no-store",
     });
 
