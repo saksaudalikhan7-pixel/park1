@@ -5,10 +5,13 @@ echo "Running database migrations..."
 python manage.py migrate --noinput
 
 echo "Running emails app migration explicitly..."
-python manage.py migrate emails --noinput
+python manage.py migrate emails --noinput || echo "Email migration warning"
+
+echo "Checking marketing migrations status..."
+python manage.py showmigrations marketing || echo "Could not show marketing migrations"
 
 echo "Running marketing app migration explicitly..."
-python manage.py migrate marketing --noinput
+python manage.py migrate marketing --noinput || echo "Marketing migration FAILED but continuing..."
 
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
