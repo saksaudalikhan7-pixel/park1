@@ -59,10 +59,15 @@ export default function PricingCarouselManager() {
                 // Direct call to my robust action (which handles upload -> create)
                 // This matches the "Auto Upload" behavior of Party Carousel
                 try {
-                    await createPricingCarouselImage(formData);
-                    successCount++;
+                    const result = await createPricingCarouselImage(formData);
+                    if (result.success) {
+                        successCount++;
+                    } else {
+                        console.error("Upload failed for file:", file.name, result.error);
+                        toast.error(`Failed to upload ${file.name}: ${result.error}`);
+                    }
                 } catch (err) {
-                    console.error("Upload failed for file:", file.name, err);
+                    console.error("Critical upload error:", file.name, err);
                 }
             }
 

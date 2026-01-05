@@ -39,56 +39,65 @@ export async function deletePricingCarouselImage(id: number) {
 
 
 export async function createPricingCarouselImage(data: FormData) {
-    const token = cookies().get('admin_token')?.value;
-    if (!token) throw new Error("Authentication required");
+    try {
+        const token = cookies().get('admin_token')?.value;
+        if (!token) return { success: false, error: "Authentication required" };
 
-    // 1. Extract file and other data
-    const file = data.get('image') as File;
-    const title = data.get('title') as string;
-    const order = data.get('order') as string;
-    const active = data.get('active') as string;
+        // 1. Extract file and other data
+        const file = data.get('image') as File;
+        const title = data.get('title') as string;
+        const order = data.get('order') as string;
+        const active = data.get('active') as string;
 
-    if (!file) {
-        throw new Error("No image file provided");
+        if (!file) {
+            return { success: false, error: "No image file provided" };
+        }
+
+        // 2. Upload image to /api/cms/upload/ using manual fetch with Blob (Node.js compatible)
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        const backendFormData = new FormData();
+        const blob = new Blob([buffer], { type: file.type });
+        backendFormData.append('file', blob, file.name);
+
+        const uploadResponse = await fetch(`${API_URL}/cms/upload/`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+            body: backendFormData,
+        });
+
+        if (!uploadResponse.ok) {
+            const errorText = await uploadResponse.text();
+            console.error("Upload failed details:", errorText);
+            try {
+                const jsonError = JSON.parse(errorText);
+                return { success: false, error: jsonError.error || uploadResponse.statusText };
+            } catch {
+                return { success: false, error: `Upload failed: ${errorText || uploadResponse.statusText}` };
+            }
+        }
+
+        const uploadResult = await uploadResponse.json();
+
+        if (!uploadResult || !uploadResult.url) {
+            return { success: false, error: "Failed to get image URL from upload response" };
+        }
+
+        // 3. Create PricingCarouselImage record with the returned URL
+        const payload = {
+            title: title || 'Carousel Image',
+            image_url: uploadResult.url,
+            order: parseInt(order) || 0,
+            active: active === 'true'
+        };
+
+        await postAPI(API_ENDPOINTS.cms.pricing_carousel_images, payload);
+        revalidatePath('/admin/cms/pricing');
+        return { success: true };
+    } catch (error: any) {
+        console.error("Server Action Error:", error);
+        return { success: false, error: error.message || "Unknown server action error" };
     }
-
-    // 2. Upload image to /api/cms/upload/ using manual fetch with Blob (Node.js compatible)
-    // This matches the working implementation in upload-image.ts
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const backendFormData = new FormData();
-    const blob = new Blob([buffer], { type: file.type });
-    backendFormData.append('file', blob, file.name);
-
-    const uploadResponse = await fetch(`${API_URL}/cms/upload/`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            // Do NOT set Content-Type here, let fetch set boundary
-        },
-        body: backendFormData,
-    });
-
-    if (!uploadResponse.ok) {
-        const errorText = await uploadResponse.text();
-        console.error("Upload failed:", errorText);
-        throw new Error(`Upload failed: ${uploadResponse.statusText}`);
-    }
-
-    const uploadResult = await uploadResponse.json();
-
-    if (!uploadResult || !uploadResult.url) {
-        throw new Error("Failed to get image URL from upload response");
-    }
-
-    // 3. Create PricingCarouselImage record with the returned URL
-    const payload = {
-        title: title || 'Carousel Image',
-        image_url: uploadResult.url,
-        order: parseInt(order) || 0,
-        active: active === 'true'
-    };
-
-    await postAPI(API_ENDPOINTS.cms.pricing_carousel_images, payload);
-    revalidatePath('/admin/cms/pricing');
 }
