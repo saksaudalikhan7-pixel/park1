@@ -32,7 +32,7 @@ def unsubscribe_view(request):
 class EmailTemplateViewSet(viewsets.ModelViewSet):
     queryset = EmailTemplate.objects.all().order_by('-created_at')
     serializer_class = EmailTemplateSerializer
-    filterset_fields = ['active', 'type']
+    filterset_fields = ['is_active', 'type']
 
     def get_queryset(self):
         return EmailTemplate.objects.all().order_by('-created_at')
