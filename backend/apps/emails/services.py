@@ -185,6 +185,8 @@ class EmailService:
             result = poller.result()
             
             # Return message ID
+            if isinstance(result, dict):
+                return result.get("messageId") or result.get("id")
             return result.message_id
             
         except ImportError:
