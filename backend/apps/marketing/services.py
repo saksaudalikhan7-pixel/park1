@@ -129,6 +129,77 @@ class MarketingService:
             except Exception as e:
                 logger.error(f"Failed to send birthday email to {email}: {e}")
 
+        # ---------------------------------------------------------
+        # ADDITIONAL CHECKS: Legacy Minors stored in JSON `minors` list
+        # ---------------------------------------------------------
+        # Fetch Waivers that HAVE a minors list
+        json_waivers = Waiver.objects.exclude(minors__isnull=True).exclude(minors__exact=[])
+        
+        for waiver in json_waivers:
+            if not waiver.email: continue
+            
+            # Helper to check if we already processed this guardian in this batch
+            # (Though the Tracker check below handles persistence)
+            
+            try:
+                minors_list = waiver.minors
+                if not isinstance(minors_list, list):
+                    continue
+                    
+                target_found = False
+                minor_name = ""
+                
+                for minor in minors_list:
+                    if not isinstance(minor, dict) or 'dob' not in minor:
+                        continue
+                        
+                    # Parse DOB string "YYYY-MM-DD"
+                    try:
+                        m_dob_str = minor.get('dob')
+                        # Simple string slice for Month/Day comparison to avoid full date parsing issues
+                        # Format is typically YYYY-MM-DD
+                        parts = m_dob_str.split('-')
+                        if len(parts) == 3:
+                            m_month = int(parts[1])
+                            m_day = int(parts[2])
+                            
+                            if m_month == target_date.month and m_day == target_date.day:
+                                target_found = True
+                                minor_name = minor.get('name', 'Your Child')
+                                break
+                    except (ValueError, IndexError):
+                        continue
+                        
+                if target_found:
+                    email = waiver.email
+                    name = waiver.name # Guardian Name
+                    
+                    # 1. Check Unsubscribe
+                    if self.is_unsubscribed(email):
+                        continue
+                        
+                    # 2. Check Duplicates 
+                    # Note: Unique limit is Email + Year. 
+                    # This means we only send ONE birthday email per family/guardian per year.
+                    # This is a known database constraint.
+                    if BirthdayEmailTracker.objects.filter(email=email, year=current_year).exists():
+                        continue
+                        
+                    # 3. Send Email
+                    self._send_birthday_email(waiver, email, name, current_year)
+                    
+                    # 4. Track
+                    BirthdayEmailTracker.objects.create(
+                        email=email,
+                        year=current_year,
+                        waiver=waiver
+                    )
+                    sent_count += 1
+                    logger.info(f"Sent Legacy Minor Birthday Email to {email} for {minor_name}")
+
+            except Exception as e:
+                logger.error(f"Error processing legacy minor waiver {waiver.id}: {e}")
+
         logger.info(f"Birthday Batch Completed. Sent: {sent_count}")
 
     def _send_birthday_email(self, waiver, email, name, year):
