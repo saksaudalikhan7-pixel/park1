@@ -33,7 +33,14 @@ export async function deletePricingCarouselImage(id: number) {
     revalidatePath('/admin/cms/pricing');
 }
 
+import { cookies } from "next/headers";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+
 export async function createPricingCarouselImage(data: FormData) {
+    const token = cookies().get('admin_token')?.value;
+    if (!token) throw new Error("Authentication required");
+
     // 1. Extract file and other data
     const file = data.get('image') as File;
     const title = data.get('title') as string;
@@ -44,23 +51,39 @@ export async function createPricingCarouselImage(data: FormData) {
         throw new Error("No image file provided");
     }
 
-    // 2. Upload image to /api/cms/upload/
-    const uploadFormData = new FormData();
-    uploadFormData.append('file', file);
+    // 2. Upload image to /api/cms/upload/ using manual fetch with Blob (Node.js compatible)
+    // This matches the working implementation in upload-image.ts
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const backendFormData = new FormData();
+    const blob = new Blob([buffer], { type: file.type });
+    backendFormData.append('file', blob, file.name);
 
-    // Note: postAPI wrapper calls serverPostAPI.
-    // We trust serverPostAPI handles FormData correctly (passing it to fetch body, letting browser set boundary).
-    // The UploadView returns: { url: "...", ... }
-    const uploadResponse = await postAPI<{ url: string }>(API_ENDPOINTS.cms.upload, uploadFormData);
+    const uploadResponse = await fetch(`${API_URL}/cms/upload/`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            // Do NOT set Content-Type here, let fetch set boundary
+        },
+        body: backendFormData,
+    });
 
-    if (!uploadResponse || !uploadResponse.url) {
+    if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        console.error("Upload failed:", errorText);
+        throw new Error(`Upload failed: ${uploadResponse.statusText}`);
+    }
+
+    const uploadResult = await uploadResponse.json();
+
+    if (!uploadResult || !uploadResult.url) {
         throw new Error("Failed to get image URL from upload response");
     }
 
     // 3. Create PricingCarouselImage record with the returned URL
     const payload = {
         title: title || 'Carousel Image',
-        image_url: uploadResponse.url,
+        image_url: uploadResult.url,
         order: parseInt(order) || 0,
         active: active === 'true'
     };
