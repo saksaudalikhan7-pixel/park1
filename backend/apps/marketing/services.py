@@ -93,10 +93,11 @@ class MarketingService:
         
         Waiver = apps.get_model('bookings', 'Waiver')
         
-        # Find matching waivers
+        # Find matching waivers for MINORS
         waivers = Waiver.objects.filter(
             dob__month=target_date.month,
-            dob__day=target_date.day
+            dob__day=target_date.day,
+            participant_type='MINOR'
         ).exclude(email__isnull=True).exclude(email='')
         
         sent_count = 0
