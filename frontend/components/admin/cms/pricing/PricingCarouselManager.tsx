@@ -1,7 +1,8 @@
+```javascript
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, ArrowUp, ArrowDown, Image as ImageIcon, Upload, Loader2, Save, X } from 'lucide-react';
+import { Loader2, Trash2, Upload, Save, X, ArrowLeft, ArrowRight } from 'lucide-react';
 import {
     getPricingCarouselImages,
     updatePricingCarouselOrder,
@@ -17,6 +18,7 @@ interface CarouselImage {
     image: string;
     order: number;
     active: boolean;
+    image_url: string; // Handle both key variations if needed, API returns snake_case usually
 }
 
 export default function PricingCarouselManager() {
@@ -33,10 +35,14 @@ export default function PricingCarouselManager() {
     const loadImages = async () => {
         try {
             const data = await getPricingCarouselImages();
-            setImages(data.sort((a: any, b: any) => a.order - b.order));
+            // Map API response to consistent shape if needed, or just cast
+            const formatted = data.map((img: any) => ({
+                ...img,
+                image: img.image_url || img.image // Ensure we have a displayable URL source
+            }));
+            setImages(formatted.sort((a: any, b: any) => a.order - b.order));
         } catch (error) {
             console.error('Failed to load carousel images:', error);
-            // toast.error('Failed to load images'); // Suppress error on initial load to avoid spamming if DB is just starting
         } finally {
             setLoading(false);
         }
@@ -45,11 +51,7 @@ export default function PricingCarouselManager() {
     const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files || files.length === 0) return;
-
-        // Add to selected files
         setSelectedFiles(prev => [...prev, ...Array.from(files)]);
-
-        // Clear input so same files can be selected again if needed
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
@@ -64,234 +66,184 @@ export default function PricingCarouselManager() {
         const uploadPromises = selectedFiles.map(async (file, index) => {
             const formData = new FormData();
             formData.append('image', file);
-            formData.append('title', file.name.split('.')[0] || 'Carousel Image');
+            formData.append('title', file.name.split('.')[0]);
             formData.append('active', 'true');
-            // Append order: current length + index
-            formData.append('order', (images.length + index).toString());
-
+            formData.append('order', (images.length + index + 1).toString());
+            
             return createPricingCarouselImage(formData);
         });
 
         try {
             await Promise.all(uploadPromises);
-            toast.success(`Successfully saved ${selectedFiles.length} images`);
-            setSelectedFiles([]); // Clear selection
+            toast.success(`Saved ${ selectedFiles.length } new images`);
+            setSelectedFiles([]);
             await loadImages();
         } catch (error) {
             console.error('Failed to upload images:', error);
-            toast.error('Failed to upload some images');
+            toast.error('Failed to save some images');
         } finally {
             setUploading(false);
         }
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm('Are you sure you want to delete this image?')) return;
-
+        if (!confirm('Remove this image?')) return;
         try {
             await deletePricingCarouselImage(id);
             setImages(prev => prev.filter(img => img.id !== id));
-            toast.success('Image deleted');
+            toast.success('Image removed');
         } catch (error) {
-            console.error('Failed to delete image:', error);
+            console.error('Failed to delete:', error);
             toast.error('Failed to delete image');
         }
     };
 
-    const moveImage = async (index: number, direction: 'up' | 'down') => {
+    const moveImage = async (index: number, direction: 'left' | 'right') => {
         if (
-            (direction === 'up' && index === 0) ||
-            (direction === 'down' && index === images.length - 1)
+            (direction === 'left' && index === 0) ||
+            (direction === 'right' && index === images.length - 1)
         ) {
             return;
         }
 
         const newImages = [...images];
-        const targetIndex = direction === 'up' ? index - 1 : index + 1;
-
-        // Swap directly in the array
+        const targetIndex = direction === 'left' ? index - 1 : index + 1;
         [newImages[index], newImages[targetIndex]] = [newImages[targetIndex], newImages[index]];
 
-        // Update local state immediately for responsiveness
-        // Re-assign orders based on new index
         const updatedImages = newImages.map((img, i) => ({ ...img, order: i }));
         setImages(updatedImages);
 
-        // Sync with backend
         try {
             const updates = updatedImages.map(img => ({ id: img.id, order: img.order }));
             await updatePricingCarouselOrder(updates);
         } catch (error) {
             console.error('Failed to save order:', error);
-            toast.error('Failed to save new order');
-            loadImages(); // Revert on error
+            toast.error('Failed to save order');
+            loadImages();
         }
     };
 
-    if (loading) return <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>;
+    if (loading) return <div className="p-8 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>;
 
     return (
-        <div className="space-y-6">
-            <div className="bg-slate-50 p-6 rounded-xl border-2 border-dashed border-slate-300 hover:border-blue-500 hover:bg-blue-50/50 transition-all text-center">
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleFilesSelected}
-                    className="hidden"
-                />
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            {/* Header Section */}
+            <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 className="text-lg font-semibold text-slate-900">Pricing Carousel Images</h2>
+                    <p className="text-sm text-slate-500">Manage images displayed on the pricing page</p>
+                </div>
 
-                <div className="flex flex-col items-center gap-3">
-                    <div className="p-4 bg-white rounded-full shadow-sm">
-                        <Upload className="w-8 h-8 text-blue-600" />
-                    </div>
-                    <div>
-                        <h3 className="text-lg font-medium text-slate-900">
-                            Drop images here or click to select
-                        </h3>
-                        <p className="text-sm text-slate-500 mt-1">
-                            Support for multiple images (JPG, PNG, WEBP)
-                        </p>
-                    </div>
-                    <Button
+                <div className="flex items-center gap-3">
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleFilesSelected}
+                        className="hidden"
+                    />
+                    
+                    <Button 
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploading}
-                        className="mt-2"
-                        type="button"
+                        variant="secondary"
+                        className="flex items-center gap-2"
                     >
-                        Select Images
+                        <Upload className="w-4 h-4" />
+                        Add Images
                     </Button>
+
+                    {selectedFiles.length > 0 && (
+                        <Button 
+                            onClick={handleSaveUpload}
+                            disabled={uploading}
+                            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+                        >
+                            {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                            Save ({selectedFiles.length})
+                        </Button>
+                    )}
                 </div>
             </div>
 
-            {/* Selected Files Preview Area */}
-            {selectedFiles.length > 0 && (
-                <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
-                    <div className="flex items-center justify-between mb-4">
-                        <h4 className="font-medium text-blue-900">Selected files to upload ({selectedFiles.length})</h4>
-                        <Button
-                            onClick={handleSaveUpload}
-                            disabled={uploading}
-                            className="bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                            {uploading ? (
-                                <>
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Uploading...
-                                </>
-                            ) : (
-                                <>
-                                    <Save className="w-4 h-4 mr-2" />
-                                    Save Images
-                                </>
-                            )}
-                        </Button>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        {selectedFiles.map((file, idx) => (
-                            <div key={idx} className="relative group bg-white p-2 rounded border border-blue-200">
-                                <div className="aspect-video bg-slate-100 rounded overflow-hidden mb-2">
-                                    <img
-                                        src={URL.createObjectURL(file)}
-                                        className="w-full h-full object-cover"
-                                        alt="preview"
-                                        onLoad={(e) => URL.revokeObjectURL((e.target as HTMLImageElement).src)}
-                                    />
-                                </div>
-                                <div className="text-xs truncate text-slate-600 px-1">{file.name}</div>
-                                <button
-                                    onClick={() => removeSelectedFile(idx)}
-                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-sm hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                    <X size={12} />
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            <div className="grid grid-cols-1 gap-4">
-                {images.map((image, index) => (
-                    <div
-                        key={image.id}
-                        className="flex items-center gap-4 p-3 bg-white border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition-shadow group"
-                    >
-                        <div className="flex flex-col gap-1 text-slate-400">
-                            <button
-                                onClick={() => moveImage(index, 'up')}
-                                disabled={index === 0}
-                                className="p-1 hover:text-blue-600 disabled:opacity-30 transition-colors"
-                                title="Move Up"
-                            >
-                                <ArrowUp size={18} />
-                            </button>
-                            <button
-                                onClick={() => moveImage(index, 'down')}
-                                disabled={index === images.length - 1}
-                                className="p-1 hover:text-blue-600 disabled:opacity-30 transition-colors"
-                                title="Move Down"
-                            >
-                                <ArrowDown size={18} />
-                            </button>
-                        </div>
-
-                        <div className="h-20 w-32 relative rounded-md overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-100">
-                            {image.image ? (
-                                <img
-                                    src={image.image}
-                                    alt={image.title}
-                                    className="h-full w-full object-cover"
-                                />
-                            ) : (
-                                <div className="flex items-center justify-center h-full">
-                                    <ImageIcon className="h-8 w-8 text-slate-300" />
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-slate-900 truncate" title={image.title}>
-                                {image.title || 'Untitled'}
-                            </h4>
-                            <div className="flex items-center gap-2 mt-1">
-                                {image.active ? (
-                                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
-                                        Active
-                                    </span>
-                                ) : (
-                                    <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium">
-                                        Inactive
-                                    </span>
-                                )}
-                                <span className="text-xs text-slate-400">
-                                    Order: {image.order}
+            {/* Content Section */}
+            <div className="p-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {/* Previews of Pending Uploads */}
+                    {selectedFiles.map((file, idx) => (
+                        <div key={`preview - ${ idx } `} className="group relative aspect-video bg-blue-50 rounded-lg overflow-hidden border-2 border-blue-200">
+                             <img 
+                                src={URL.createObjectURL(file)} 
+                                className="w-full h-full object-cover opacity-70" 
+                                alt="preview"
+                                onLoad={(e) => URL.revokeObjectURL((e.target as HTMLImageElement).src)}
+                             />
+                             <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full shadow-sm">
+                                    Pending Save
                                 </span>
+                             </div>
+                             <button 
+                                onClick={() => removeSelectedFile(idx)}
+                                className="absolute top-2 right-2 p-1.5 bg-white text-slate-500 rounded-full hover:bg-red-50 hover:text-red-600 shadow-sm transition-colors"
+                            >
+                                <X className="w-3 h-3" />
+                            </button>
+                        </div>
+                    ))}
+
+                    {/* Existing Images */}
+                    {images.map((item, index) => (
+                        <div key={item.id} className="group relative aspect-video bg-slate-100 rounded-lg overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                            <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                            
+                            {/* Overlay Controls */}
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => moveImage(index, 'left')}
+                                        disabled={index === 0}
+                                        className="p-1.5 bg-white/90 text-slate-700 rounded-full hover:bg-white hover:text-blue-600 disabled:opacity-50 transition-colors"
+                                        title="Move Left"
+                                    >
+                                        <ArrowLeft className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => moveImage(index, 'right')}
+                                        disabled={index === images.length - 1}
+                                        className="p-1.5 bg-white/90 text-slate-700 rounded-full hover:bg-white hover:text-blue-600 disabled:opacity-50 transition-colors"
+                                        title="Move Right"
+                                    >
+                                        <ArrowRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                                <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    className="h-8 w-8 rounded-full p-0"
+                                    onClick={() => handleDelete(item.id)}
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            </div>
+                            
+                            {/* Order Badge */}
+                            <div className="absolute top-2 left-2 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded backdrop-blur-sm">
+                                #{index + 1}
                             </div>
                         </div>
+                    ))}
 
-                        <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                            <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => handleDelete(image.id)}
-                                title="Delete Image"
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
+                    {images.length === 0 && selectedFiles.length === 0 && (
+                        <div className="col-span-full py-12 text-center text-slate-500 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                            <Upload className="w-8 h-8 mx-auto mb-3 text-slate-300" />
+                            <p>No images in carousel. Add pending images to start.</p>
                         </div>
-                    </div>
-                ))}
-
-                {images.length === 0 && !loading && (
-                    <div className="text-center py-12 bg-slate-50/50 rounded-lg border border-dashed border-slate-200">
-                        <ImageIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                        <h3 className="text-slate-900 font-medium">No images yet</h3>
-                        <p className="text-slate-500 text-sm">Upload images to create your carousel</p>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
         </div>
     );
 }
+```
