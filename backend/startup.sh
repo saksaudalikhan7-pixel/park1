@@ -11,7 +11,7 @@ echo "Checking marketing migrations status..."
 python manage.py showmigrations marketing || echo "Could not show marketing migrations"
 
 echo "Running marketing app migration explicitly..."
-python manage.py migrate marketing --noinput || echo "Marketing migration FAILED but continuing..."
+python manage.py migrate marketing --noinput
 
 echo "checking cms migrations..."
 python manage.py showmigrations cms || echo "Could not show cms migrations"
