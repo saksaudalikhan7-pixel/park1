@@ -28,6 +28,7 @@ export default function CampaignForm({ initialData, isEditing = false }: Campaig
         template: initialData?.template || "",
         content: initialData?.content || "",
         recipient_type: initialData?.recipient_type || "ALL_ADULTS",
+        custom_email_list: initialData?.custom_email_list || "",
         status: initialData?.status || "DRAFT",
     });
 
@@ -133,9 +134,28 @@ export default function CampaignForm({ initialData, isEditing = false }: Campaig
                         >
                             <option value="ALL_ADULTS">All Adult Participants</option>
                             <option value="ALL_GUARDIANS">All Guardians</option>
-                            <option value="CUSTOM_LIST">Custom List (Not Implemented)</option>
+                            <option value="CUSTOM_LIST">Custom List (Manual Entry)</option>
                         </select>
                     </div>
+
+                    {formData.recipient_type === 'CUSTOM_LIST' && (
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-slate-700 mb-1">
+                                Custom Email List
+                            </label>
+                            <p className="text-xs text-slate-500 mb-2">
+                                Enter email addresses separated by commas or new lines.
+                            </p>
+                            <textarea
+                                name="custom_email_list"
+                                rows={4}
+                                value={formData.custom_email_list}
+                                onChange={handleChange}
+                                placeholder="alice@example.com, bob@example.com"
+                                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                            />
+                        </div>
+                    )}
 
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-slate-700 mb-1">

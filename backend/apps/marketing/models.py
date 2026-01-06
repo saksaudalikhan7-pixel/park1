@@ -59,6 +59,7 @@ class MarketingCampaign(models.Model):
     template = models.ForeignKey(EmailTemplate, on_delete=models.SET_NULL, null=True, blank=True)
     content = models.TextField(help_text="Campaign specific content to inject into template")
     recipient_type = models.CharField(max_length=20, choices=RECIPIENT_CHOICES, default='ALL_ADULTS')
+    custom_email_list = models.TextField(blank=True, null=True, help_text="Comma-separated list of emails for CUSTOM_LIST recipient type")
     
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='DRAFT')
     sent_at = models.DateTimeField(null=True, blank=True)

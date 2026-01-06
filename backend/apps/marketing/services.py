@@ -291,7 +291,15 @@ class MarketingService:
             for email, name in waivers:
                 if email: recipients.add((email, name))
                 
-        # Custom List implementation would go here (e.g. from a CSV or text field)
+        elif campaign.recipient_type == 'CUSTOM_LIST':
+            if campaign.custom_email_list:
+                # Split by comma or newline
+                raw_emails = campaign.custom_email_list.replace('\n', ',').split(',')
+                for raw in raw_emails:
+                    e = raw.strip()
+                    if e:
+                        # Use email as name if unknown
+                        recipients.add((e, "Valued Customer"))
         
         return list(recipients)
 

@@ -21,7 +21,7 @@ class MarketingCampaignSerializer(serializers.ModelSerializer):
         model = MarketingCampaign
         fields = [
             'id', 'title', 'subject', 'template', 'template_name', 
-            'content', 'recipient_type', 'recipient_type_display',
+            'content', 'recipient_type', 'recipient_type_display', 'custom_email_list',
             'status', 'status_display', 'sent_at', 'scheduled_at',
             'recipient_count', 'sent_count', 'failed_count',
             'created_at', 'updated_at'
