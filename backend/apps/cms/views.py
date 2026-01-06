@@ -442,7 +442,7 @@ def attraction_video_view(request):
             'is_active': video_section.is_active
         })
 
-    elif request.method == 'POST':
+    if request.method == 'POST':
         # Check permissions manually since we used AllowAny for GET
         if not (request.user.is_authenticated and (
             getattr(request.user, 'role', '') in ['admin', 'manager', 'content_manager'] or 
@@ -451,55 +451,60 @@ def attraction_video_view(request):
         )):
              return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
 
-        data = request.data
-        
-        # Get latest or create
-        video_section = AttractionVideoSection.objects.first()
-        if not video_section:
-            video_section = AttractionVideoSection()
-        
-        # Update fields
-        if 'title' in data:
-            video_section.title = data['title']
-        if 'is_active' in data:
-            video_section.is_active = data['is_active']
+        try:
+            data = request.data
             
-        # Handle video URL update
-        if 'video_url' in data and data['video_url']:
-            video_url = data['video_url']
-            if settings.MEDIA_URL in video_url:
-                try:
-                    relative_path = video_url.split(settings.MEDIA_URL)[-1]
-                    video_section.video = relative_path
-                except:
-                    pass
-            else:
-                video_section.video = video_url
-
-        # Handle thumbnail URL update
-        if 'thumbnail_url' in data and data['thumbnail_url']:
-            thumb_url = data['thumbnail_url']
-            if settings.MEDIA_URL in thumb_url:
-                try:
-                    relative_path = thumb_url.split(settings.MEDIA_URL)[-1]
-                    video_section.thumbnail = relative_path
-                except:
-                    pass
-            else:
-                video_section.thumbnail = thumb_url
+            # Get latest or create
+            video_section = AttractionVideoSection.objects.first()
+            if not video_section:
+                video_section = AttractionVideoSection()
+            
+            # Update fields
+            if 'title' in data:
+                video_section.title = data['title']
+            if 'is_active' in data:
+                video_section.is_active = data['is_active']
                 
-        video_section.save()
-        
-        # Return updated data
-        new_video_url = request.build_absolute_uri(video_section.video.url) if video_section.video else None
-        new_thumb_url = request.build_absolute_uri(video_section.thumbnail.url) if video_section.thumbnail else None
-        
-        return Response({
-            'title': video_section.title,
-            'video': new_video_url,
-            'thumbnail': new_thumb_url,
-            'is_active': video_section.is_active
-        })
+            # Helper to extract relative path safely
+            def get_relative_path(url):
+                if not url: return None
+                # If it's a full URL containing MEDIA_URL, strip it
+                if settings.MEDIA_URL and settings.MEDIA_URL in url:
+                    return url.split(settings.MEDIA_URL)[-1]
+                # If it's already a relative path (no http/https), keep it
+                if not url.startswith('http'):
+                    return url
+                # Fallback: return as is (Django might handle it or error, but we try)
+                return url
+
+            # Handle video URL update
+            if 'video_url' in data:
+                video_path = get_relative_path(data['video_url'])
+                if video_path:
+                    video_section.video.name = video_path # Set name directly for FileField
+
+            # Handle thumbnail URL update
+            if 'thumbnail_url' in data:
+                thumb_path = get_relative_path(data['thumbnail_url'])
+                if thumb_path:
+                    video_section.thumbnail.name = thumb_path # Set name directly for ImageField
+                    
+            video_section.save()
+            
+            # Return updated data
+            new_video_url = request.build_absolute_uri(video_section.video.url) if video_section.video else None
+            new_thumb_url = request.build_absolute_uri(video_section.thumbnail.url) if video_section.thumbnail else None
+            
+            return Response({
+                'title': video_section.title,
+                'video': new_video_url,
+                'thumbnail': new_thumb_url,
+                'is_active': video_section.is_active
+            })
+        except Exception as e:
+            import traceback
+            print(traceback.format_exc()) # Log properly
+            return Response({'error': f'Failed to save: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class PricingCarouselImageViewSet(BaseCmsViewSet):
     queryset = PricingCarouselImage.objects.all()
