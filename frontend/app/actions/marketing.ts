@@ -35,6 +35,10 @@ export async function getTemplates() {
     return await fetchAPI<any[]>(API_ENDPOINTS.marketing.templates);
 }
 
+export async function getTemplate(id: number) {
+    return await fetchAPI<any>(`${API_ENDPOINTS.marketing.templates}${id}/`);
+}
+
 export async function createTemplate(data: any) {
     await postAPI(API_ENDPOINTS.marketing.templates, data);
     revalidatePath('/admin/marketing/templates');

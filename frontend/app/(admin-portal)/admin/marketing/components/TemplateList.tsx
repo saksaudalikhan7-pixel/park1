@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
+import Link from "next/link";
 import {
     FileText,
     Edit,
@@ -104,13 +105,13 @@ export default function TemplateList() {
                             </td>
                             <td className="px-6 py-4 text-right">
                                 <div className="flex items-center justify-end gap-2">
-                                    <button
+                                    <Link
+                                        href={`/admin/marketing/templates/${template.id}`}
                                         className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"
                                         title="Edit"
-                                    // OnClick to navigate to edit page
                                     >
                                         <Edit className="w-4 h-4" />
-                                    </button>
+                                    </Link>
                                     <button
                                         onClick={() => handleDelete(template.id)}
                                         className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded"
