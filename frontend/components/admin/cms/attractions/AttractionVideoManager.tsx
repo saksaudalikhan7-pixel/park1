@@ -14,11 +14,13 @@ export function AttractionVideoManager({ initialData }: AttractionVideoManagerPr
     const [data, setData] = useState({
         title: '',
         video: '', // This will hold the URL/Path
+        thumbnail: '', // Thumbnail URL/Path
         is_active: true,
         ...initialData
     });
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [thumbnailUploading, setThumbnailUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
 
     // Update state if initialData changes (e.g. after revalidation)
@@ -93,6 +95,49 @@ export function AttractionVideoManager({ initialData }: AttractionVideoManagerPr
         }
     };
 
+    const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validation
+        const MAX_SIZE = 10 * 1024 * 1024; // 10MB for images
+        if (file.size > MAX_SIZE) {
+            toast.error(`Image too large. Max size: 10MB.`);
+            return;
+        }
+
+        if (!file.type.startsWith('image/')) {
+            toast.error('Invalid file type. Please upload an image.');
+            return;
+        }
+
+        setThumbnailUploading(true);
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const res = await fetch('/api/cms/video-upload', { // We can reuse the same endpoint if it handles images broadly or specific logic
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await res.json();
+
+            if (res.ok && result.success && result.url) {
+                handleChange('thumbnail', result.url);
+                toast.success('Thumbnail uploaded successfully!');
+            } else {
+                toast.error(result.error || 'Upload failed');
+            }
+        } catch (error: any) {
+            toast.error('Upload failed: ' + error.message);
+        } finally {
+            setThumbnailUploading(false);
+            e.target.value = '';
+        }
+    };
+
     const handleSave = async () => {
         setLoading(true);
         try {
@@ -100,7 +145,8 @@ export function AttractionVideoManager({ initialData }: AttractionVideoManagerPr
             const payload = {
                 title: data.title,
                 is_active: data.is_active,
-                video_url: data.video // Send as video_url for backend to process
+                video_url: data.video, // Send as video_url for backend to process
+                thumbnail_url: data.thumbnail
             };
 
             const result = await updateAttractionVideo(payload);
@@ -122,6 +168,7 @@ export function AttractionVideoManager({ initialData }: AttractionVideoManagerPr
     };
 
     const videoUrl = getMediaUrl(data.video);
+    const thumbnailUrl = getMediaUrl(data.thumbnail);
 
     return (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -138,7 +185,7 @@ export function AttractionVideoManager({ initialData }: AttractionVideoManagerPr
                 </div>
                 <button
                     onClick={handleSave}
-                    disabled={loading || uploading}
+                    disabled={loading || uploading || thumbnailUploading}
                     className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium disabled:opacity-50"
                 >
                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -182,6 +229,7 @@ export function AttractionVideoManager({ initialData }: AttractionVideoManagerPr
                             <video
                                 src={videoUrl}
                                 controls
+                                poster={thumbnailUrl || undefined}
                                 className="w-full h-full object-contain"
                             />
                             <button
@@ -231,6 +279,57 @@ export function AttractionVideoManager({ initialData }: AttractionVideoManagerPr
                             Max 500MB • MP4/WebM
                         </p>
                     </div>
+                </div>
+
+                {/* Thumbnail Upload Section */}
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-slate-700">Thumbnail Image (Poster)</label>
+
+                    {thumbnailUrl ? (
+                        <div className="relative rounded-lg overflow-hidden bg-slate-100 aspect-video border border-slate-200 w-64">
+                            <img
+                                src={thumbnailUrl}
+                                alt="Thumbnail"
+                                className="w-full h-full object-cover"
+                            />
+                            <button
+                                onClick={() => handleChange('thumbnail', '')}
+                                className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors"
+                                title="Remove thumbnail"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="w-64 aspect-video bg-slate-50 rounded-lg border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400">
+                            <Upload className="w-8 h-8 mb-2 opacity-50" />
+                            <p className="text-xs">No thumbnail</p>
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-4 mt-2">
+                        <div className="relative w-64">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleThumbnailUpload}
+                                disabled={thumbnailUploading}
+                                id="thumbnail-upload-input"
+                                className="hidden"
+                            />
+                            <label
+                                htmlFor="thumbnail-upload-input"
+                                className={`flex items-center justify-center gap-2 w-full px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-all cursor-pointer ${thumbnailUploading ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
+                            >
+                                <Upload className="w-4 h-4" />
+                                {thumbnailUploading ? 'Uploading...' : (thumbnailUrl ? 'Replace Image' : 'Upload Image')}
+                            </label>
+                        </div>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                        Recommended: 1080x1920 (Vertical) or 1920x1080 (Horizontal) • Max 10MB
+                    </p>
                 </div>
             </div>
         </div>

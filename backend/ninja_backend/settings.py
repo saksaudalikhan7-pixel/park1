@@ -106,9 +106,9 @@ WSGI_APPLICATION = 'ninja_backend.wsgi.application'
 
 
 # Upload Constraints
-# Limit to 50MB as requested
-DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
-FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
+# Limit to 500MB as requested
+DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB
 
 
 # Database

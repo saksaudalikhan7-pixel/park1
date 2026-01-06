@@ -273,8 +273,7 @@ class UploadView(APIView):
     parser_classes = (MultiPartParser, FormParser)
     
     # Configuration
-    # Configuration
-    MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB (as requested)
+    MAX_FILE_SIZE = 500 * 1024 * 1024  # 500MB
     # Trigger deployment for consistency check
     ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp', 'mp4', 'mov', 'webm'}
     ALLOWED_MIME_TYPES = {
@@ -294,8 +293,9 @@ class UploadView(APIView):
         # Validate file size
         if file_obj.size > self.MAX_FILE_SIZE:
             size_mb = file_obj.size / 1024 / 1024
+            max_mb = self.MAX_FILE_SIZE / 1024 / 1024
             return Response(
-                {'error': f'File too large. Maximum size is 5MB. Uploaded file is {size_mb:.2f}MB'},
+                {'error': f'File too large. Maximum size is {max_mb:.0f}MB. Uploaded file is {size_mb:.2f}MB'},
                 status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
             )
         
