@@ -258,7 +258,7 @@ class AttractionVideoSectionAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Video Content', {
-            'fields': ('title', 'video', 'is_active')
+            'fields': ('title', 'video', 'thumbnail', 'is_active')
         }),
         ('Metadata', {
             'fields': ('created_at',),

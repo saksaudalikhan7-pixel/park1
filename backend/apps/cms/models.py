@@ -597,6 +597,7 @@ class AttractionVideoSection(models.Model):
     """
     title = models.CharField(max_length=200, blank=True, null=True)
     video = models.FileField(upload_to='attraction_videos/', max_length=500)
+    thumbnail = models.ImageField(upload_to='attraction_thumbnails/', blank=True, null=True, help_text="Poster image to show while video loads")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     

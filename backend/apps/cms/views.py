@@ -433,10 +433,12 @@ def attraction_video_view(request):
             return Response(None, status=200)
         
         video_url = request.build_absolute_uri(video_section.video.url) if video_section.video else None
+        thumb_url = request.build_absolute_uri(video_section.thumbnail.url) if video_section.thumbnail else None
         
         return Response({
             'title': video_section.title,
             'video': video_url,
+            'thumbnail': thumb_url,
             'is_active': video_section.is_active
         })
 
@@ -465,26 +467,37 @@ def attraction_video_view(request):
         # Handle video URL update
         if 'video_url' in data and data['video_url']:
             video_url = data['video_url']
-            # If it's an absolute URL from our own server, strip domain and /media/
-            # Example: http://localhost:8000/media/uploads/foo.mp4 -> uploads/foo.mp4
             if settings.MEDIA_URL in video_url:
-                # Find relative path start
                 try:
                     relative_path = video_url.split(settings.MEDIA_URL)[-1]
                     video_section.video = relative_path
                 except:
                     pass
             else:
-                # If it's just a filename or relative path
                 video_section.video = video_url
+
+        # Handle thumbnail URL update
+        if 'thumbnail_url' in data and data['thumbnail_url']:
+            thumb_url = data['thumbnail_url']
+            if settings.MEDIA_URL in thumb_url:
+                try:
+                    relative_path = thumb_url.split(settings.MEDIA_URL)[-1]
+                    video_section.thumbnail = relative_path
+                except:
+                    pass
+            else:
+                video_section.thumbnail = thumb_url
                 
         video_section.save()
         
         # Return updated data
         new_video_url = request.build_absolute_uri(video_section.video.url) if video_section.video else None
+        new_thumb_url = request.build_absolute_uri(video_section.thumbnail.url) if video_section.thumbnail else None
+        
         return Response({
             'title': video_section.title,
             'video': new_video_url,
+            'thumbnail': new_thumb_url,
             'is_active': video_section.is_active
         })
 

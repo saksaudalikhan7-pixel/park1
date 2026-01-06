@@ -7,6 +7,7 @@ import { ScrollReveal } from "@repo/ui";
 interface VideoData {
     title: string | null;
     video: string;
+    thumbnail?: string | null;
 }
 
 interface AttractionVideoSectionProps {
@@ -92,6 +93,7 @@ export default function AttractionVideoSection({ videoData }: AttractionVideoSec
                                 loop
                                 playsInline
                                 preload="metadata"
+                                poster={videoData.thumbnail || undefined}
                                 className="absolute inset-0 w-full h-full object-cover bg-black"
                                 src={videoData.video}
                             >
