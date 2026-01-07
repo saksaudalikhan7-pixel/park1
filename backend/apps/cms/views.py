@@ -472,17 +472,24 @@ def attraction_video_view(request):
                     
                 # If it's a full URL, extract the path after the domain
                 if url.startswith('http'):
-                    # Split by '/media/' or '/uploads/' to get the relative path
-                    if '/media/' in url:
+                    # Handle Azure Blob Storage URLs (e.g., https://ninjapark.blob.core.windows.net/media/uploads/...)
+                    if 'blob.core.windows.net' in url:
                         # Extract everything after /media/
+                        if '/media/' in url:
+                            parts = url.split('/media/')
+                            if len(parts) > 1:
+                                return parts[-1]
+                    # Handle regular URLs with /media/
+                    elif '/media/' in url:
                         parts = url.split('/media/')
                         if len(parts) > 1:
                             return parts[-1]
+                    # Handle /uploads/ pattern
                     elif '/uploads/' in url:
-                        # Extract uploads/filename
                         parts = url.split('/uploads/')
                         if len(parts) > 1:
                             return 'uploads/' + parts[-1]
+                    
                     # Fallback: try to extract path from URL
                     from urllib.parse import urlparse
                     parsed = urlparse(url)
