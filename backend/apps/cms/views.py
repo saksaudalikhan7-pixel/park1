@@ -510,30 +510,43 @@ def attraction_video_view(request):
                     url = url[6:]
                 return url
 
-            # Handle video URL update
+            # Handle video URL update - ONLY update if it's a new upload (starts with uploads/)
+            # If it's a full Azure URL, that means the user didn't upload a new file, so skip updating
             if 'video_url' in data:
                 video_url = data['video_url']
-                if video_url:  # Only update if there's a value
-                    video_path = get_relative_path(video_url)
-                    if video_path:
-                        print(f"Setting video path to: {video_path}")  # Debug log
-                        video_section.video.name = video_path
+                if video_url:
+                    # Check if this is a new upload (relative path starting with uploads/)
+                    if video_url.startswith('uploads/') or (video_url.startswith('http') and '/uploads/' in video_url):
+                        video_path = get_relative_path(video_url)
+                        if video_path:
+                            print(f"Updating video to new upload: {video_path}")
+                            video_section.video.name = video_path
+                        else:
+                            print(f"Warning: Could not extract path from video URL: {video_url}")
                     else:
-                        print(f"Warning: Could not extract path from video URL: {video_url}")
+                        # It's an existing Azure URL - don't update, keep current value
+                        print(f"Skipping video update - existing file: {video_url[:100]}")
                 elif video_url == '':  # Explicitly empty - clear the field
+                    print("Clearing video field")
                     video_section.video = None
 
-            # Handle thumbnail URL update
+            # Handle thumbnail URL update - same logic
             if 'thumbnail_url' in data:
                 thumb_url = data['thumbnail_url']
-                if thumb_url:  # Only update if there's a value
-                    thumb_path = get_relative_path(thumb_url)
-                    if thumb_path:
-                        print(f"Setting thumbnail path to: {thumb_path}")  # Debug log
-                        video_section.thumbnail.name = thumb_path
+                if thumb_url:
+                    # Check if this is a new upload
+                    if thumb_url.startswith('uploads/') or (thumb_url.startswith('http') and '/uploads/' in thumb_url):
+                        thumb_path = get_relative_path(thumb_url)
+                        if thumb_path:
+                            print(f"Updating thumbnail to new upload: {thumb_path}")
+                            video_section.thumbnail.name = thumb_path
+                        else:
+                            print(f"Warning: Could not extract path from thumbnail URL: {thumb_url}")
                     else:
-                        print(f"Warning: Could not extract path from thumbnail URL: {thumb_url}")
+                        # It's an existing Azure URL - don't update, keep current value
+                        print(f"Skipping thumbnail update - existing file: {thumb_url[:100]}")
                 elif thumb_url == '':  # Explicitly empty - clear the field
+                    print("Clearing thumbnail field")
                     video_section.thumbnail = None
                     
             video_section.save()
