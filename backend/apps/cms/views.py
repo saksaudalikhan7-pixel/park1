@@ -467,29 +467,70 @@ def attraction_video_view(request):
                 
             # Helper to extract relative path safely
             def get_relative_path(url):
-                if not url: return None
-                # If it's a full URL containing MEDIA_URL, strip it
-                if settings.MEDIA_URL and settings.MEDIA_URL in url:
-                    return url.split(settings.MEDIA_URL)[-1]
-                # If it's already a relative path (no http/https), keep it
-                if not url.startswith('http'):
-                    return url
-                # Fallback: return as is (Django might handle it or error, but we try)
+                if not url: 
+                    return None
+                    
+                # If it's a full URL, extract the path after the domain
+                if url.startswith('http'):
+                    # Split by '/media/' or '/uploads/' to get the relative path
+                    if '/media/' in url:
+                        # Extract everything after /media/
+                        parts = url.split('/media/')
+                        if len(parts) > 1:
+                            return parts[-1]
+                    elif '/uploads/' in url:
+                        # Extract uploads/filename
+                        parts = url.split('/uploads/')
+                        if len(parts) > 1:
+                            return 'uploads/' + parts[-1]
+                    # Fallback: try to extract path from URL
+                    from urllib.parse import urlparse
+                    parsed = urlparse(url)
+                    path = parsed.path
+                    # Remove leading slash if present
+                    if path.startswith('/'):
+                        path = path[1:]
+                    # Remove 'media/' prefix if present
+                    if path.startswith('media/'):
+                        path = path[6:]
+                    return path if path else None
+                
+                # If it's already a relative path, ensure it doesn't start with /
+                if url.startswith('/'):
+                    url = url[1:]
+                # Remove 'media/' prefix if present
+                if url.startswith('media/'):
+                    url = url[6:]
                 return url
 
             # Handle video URL update
             if 'video_url' in data:
-                video_path = get_relative_path(data['video_url'])
-                if video_path:
-                    video_section.video.name = video_path # Set name directly for FileField
+                video_url = data['video_url']
+                if video_url:  # Only update if there's a value
+                    video_path = get_relative_path(video_url)
+                    if video_path:
+                        print(f"Setting video path to: {video_path}")  # Debug log
+                        video_section.video.name = video_path
+                    else:
+                        print(f"Warning: Could not extract path from video URL: {video_url}")
+                elif video_url == '':  # Explicitly empty - clear the field
+                    video_section.video = None
 
             # Handle thumbnail URL update
             if 'thumbnail_url' in data:
-                thumb_path = get_relative_path(data['thumbnail_url'])
-                if thumb_path:
-                    video_section.thumbnail.name = thumb_path # Set name directly for ImageField
+                thumb_url = data['thumbnail_url']
+                if thumb_url:  # Only update if there's a value
+                    thumb_path = get_relative_path(thumb_url)
+                    if thumb_path:
+                        print(f"Setting thumbnail path to: {thumb_path}")  # Debug log
+                        video_section.thumbnail.name = thumb_path
+                    else:
+                        print(f"Warning: Could not extract path from thumbnail URL: {thumb_url}")
+                elif thumb_url == '':  # Explicitly empty - clear the field
+                    video_section.thumbnail = None
                     
             video_section.save()
+            print(f"Saved video section - Video: {video_section.video.name if video_section.video else 'None'}, Thumbnail: {video_section.thumbnail.name if video_section.thumbnail else 'None'}")  # Debug log
             
             # Return updated data
             new_video_url = request.build_absolute_uri(video_section.video.url) if video_section.video else None
