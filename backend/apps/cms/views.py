@@ -437,7 +437,7 @@ def attraction_video_view(request):
          - If authenticated (Admin): Returns latest created (active or inactive).
          - If anonymous (Public): Returns latest active only.
     POST: Updates or creates the attraction video section (Admin only).
-    Now supports YouTube URLs stored in the video field.
+    Supports YouTube URLs via youtube_url field.
     """
     if request.method == 'GET':
         # Determine if user is admin/manager
@@ -457,16 +457,11 @@ def attraction_video_view(request):
         if not video_section:
             return Response(None, status=200)
         
-        # Check if video field contains a URL or file path
-        video_value = str(video_section.video) if video_section.video else None
-        if video_value and (video_value.startswith('http://') or video_value.startswith('https://')):
-            # It's a YouTube URL, return as-is
-            video_url = video_value
-        elif video_value:
-            # It's a file path, build absolute URL
-            video_url = request.build_absolute_uri(video_section.video.url)
-        else:
-            video_url = None
+        # Use the model's helper method to get video URL
+        video_url = video_section.get_video_url()
+        if video_url and not video_url.startswith('http'):
+            # It's a relative path, make it absolute
+            video_url = request.build_absolute_uri(video_url)
             
         thumb_url = request.build_absolute_uri(video_section.thumbnail.url) if video_section.thumbnail else None
         
@@ -500,19 +495,13 @@ def attraction_video_view(request):
             if 'is_active' in data:
                 video_section.is_active = data['is_active']
                 
-            # Handle video URL - store YouTube URLs directly in the video field
+            # Handle video URL - store in youtube_url field
             if 'video_url' in data:
                 video_url = data['video_url']
-                print(f"[DEBUG] Received video_url: {video_url}")
-                if video_url and (video_url.startswith('http://') or video_url.startswith('https://')):
-                    # It's a YouTube URL - store it directly as text
-                    print(f"[DEBUG] Storing YouTube URL: {video_url}")
-                    video_section.video.name = video_url
-                    print(f"[DEBUG] After setting, video.name = {video_section.video.name}")
-                elif video_url == '':
-                    # Clear the field
-                    print("[DEBUG] Clearing video field")
-                    video_section.video = None
+                if video_url:
+                    video_section.youtube_url = video_url
+                else:
+                    video_section.youtube_url = None
 
             # Handle thumbnail URL update - for uploaded images
             if 'thumbnail_url' in data:
@@ -533,24 +522,17 @@ def attraction_video_view(request):
                     video_section.thumbnail = None
                     
             video_section.save()
-            print(f"[DEBUG] After save, video field value: {video_section.video}")
-            print(f"[DEBUG] After save, video.name: {video_section.video.name if video_section.video else 'None'}")
             
             # Return updated data
-            video_value = str(video_section.video) if video_section.video else None
-            print(f"[DEBUG] Returning video_value: {video_value}")
-            if video_value and (video_value.startswith('http://') or video_value.startswith('https://')):
-                new_video_url = video_value
-            elif video_value:
-                new_video_url = request.build_absolute_uri(video_section.video.url)
-            else:
-                new_video_url = None
+            video_url = video_section.get_video_url()
+            if video_url and not video_url.startswith('http'):
+                video_url = request.build_absolute_uri(video_url)
                 
             new_thumb_url = request.build_absolute_uri(video_section.thumbnail.url) if video_section.thumbnail else None
             
             return Response({
                 'title': video_section.title,
-                'video': new_video_url,
+                'video': video_url,
                 'thumbnail': new_thumb_url,
                 'is_active': video_section.is_active
             })

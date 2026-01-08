@@ -594,10 +594,11 @@ class AttractionVideoSection(models.Model):
     """
     Independent video section for attraction page.
     Managed via admin, displayed below hero section.
-    Now supports YouTube/Vimeo embeds (stored as text in video field).
+    Supports both YouTube embeds and uploaded video files.
     """
     title = models.CharField(max_length=200, blank=True, null=True)
-    video = models.FileField(upload_to='attraction_videos/', max_length=500, blank=True)  # Can store URLs as text
+    video = models.FileField(upload_to='attraction_videos/', max_length=500, blank=True)  # For uploaded videos
+    youtube_url = models.CharField(max_length=500, blank=True, null=True, help_text="YouTube URL (e.g., https://youtube.com/shorts/TKflY2nTraQ)")  # For YouTube embeds
     thumbnail = models.ImageField(upload_to='attraction_thumbnails/', blank=True, null=True, help_text="Poster image to show while video loads")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -611,6 +612,14 @@ class AttractionVideoSection(models.Model):
         active_status = 'Active' if self.is_active else 'Inactive'
         title_display = self.title or 'Untitled'
         return f"Video: {title_display} - {active_status}"
+    
+    def get_video_url(self):
+        """Returns YouTube URL if set, otherwise returns uploaded video URL"""
+        if self.youtube_url:
+            return self.youtube_url
+        elif self.video:
+            return self.video.url
+        return None
 
 class PricingCarouselImage(models.Model):
     """
