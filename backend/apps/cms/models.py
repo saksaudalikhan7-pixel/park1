@@ -594,10 +594,10 @@ class AttractionVideoSection(models.Model):
     """
     Independent video section for attraction page.
     Managed via admin, displayed below hero section.
-    Now supports YouTube/Vimeo embeds instead of file uploads.
+    Now supports YouTube/Vimeo embeds (stored as text in video field).
     """
     title = models.CharField(max_length=200, blank=True, null=True)
-    video_url = models.URLField(max_length=500, help_text="YouTube, Vimeo, or other video URL (e.g., https://youtube.com/shorts/TKflY2nTraQ)")
+    video = models.FileField(upload_to='attraction_videos/', max_length=500, blank=True)  # Can store URLs as text
     thumbnail = models.ImageField(upload_to='attraction_thumbnails/', blank=True, null=True, help_text="Poster image to show while video loads")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
