@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { updateAttractionVideo } from '@/app/actions/attraction-video';
 import { getMediaUrl } from '@/lib/media-utils';
 import { toast } from 'sonner';
-import { Loader2, Save, Upload, Video, X } from 'lucide-react';
+import { Loader2, Save, Upload, Video, X, Link as LinkIcon } from 'lucide-react';
 
 interface AttractionVideoManagerProps {
     initialData: any;
@@ -13,15 +13,13 @@ interface AttractionVideoManagerProps {
 export function AttractionVideoManager({ initialData }: AttractionVideoManagerProps) {
     const [data, setData] = useState({
         title: '',
-        video: '', // This will hold the URL/Path
+        video: '', // This will hold the YouTube/Vimeo URL
         thumbnail: '', // Thumbnail URL/Path
         is_active: true,
         ...initialData
     });
     const [loading, setLoading] = useState(false);
-    const [uploading, setUploading] = useState(false);
     const [thumbnailUploading, setThumbnailUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
 
     // Update state if initialData changes (e.g. after revalidation)
     useEffect(() => {
@@ -35,64 +33,6 @@ export function AttractionVideoManager({ initialData }: AttractionVideoManagerPr
 
     const handleChange = (name: string, value: any) => {
         setData((prev: any) => ({ ...prev, [name]: value }));
-    };
-
-    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        // Validation
-        const MAX_SIZE = 500 * 1024 * 1024; // 500MB (matching server limit)
-        if (file.size > MAX_SIZE) {
-            toast.error(`File too large. Max size: 500MB. Your file: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
-            return;
-        }
-
-        if (!file.type.startsWith('video/')) {
-            toast.error('Invalid file type. Please upload a video file (MP4, WebM).');
-            return;
-        }
-
-        setUploading(true);
-        setUploadProgress(0);
-
-        // Simulated progress
-        const interval = setInterval(() => {
-            setUploadProgress(p => (p < 90 ? p + 5 : p));
-        }, 300);
-
-        try {
-            const formData = new FormData();
-            formData.append('file', file);
-
-            // Use streaming route handler
-            const res = await fetch('/api/cms/video-upload', {
-                method: 'POST',
-                body: formData,
-            });
-
-            const result = await res.json();
-
-            clearInterval(interval);
-            setUploadProgress(100);
-
-            if (res.ok && result.success && result.url) {
-                // Update state with the new URL
-                handleChange('video', result.url);
-                toast.success('Video uploaded successfully! Click Save to apply.');
-            } else {
-                const errorMsg = result.error || 'Upload failed';
-                toast.error(errorMsg);
-                console.error('Upload Error:', errorMsg);
-            }
-        } catch (error: any) {
-            clearInterval(interval);
-            toast.error('Upload failed: ' + error.message);
-        } finally {
-            setUploading(false);
-            // Reset input
-            e.target.value = '';
-        }
     };
 
     const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -185,7 +125,7 @@ export function AttractionVideoManager({ initialData }: AttractionVideoManagerPr
                 </div>
                 <button
                     onClick={handleSave}
-                    disabled={loading || uploading || thumbnailUploading}
+                    disabled={loading || thumbnailUploading}
                     className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium disabled:opacity-50"
                 >
                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -220,18 +160,43 @@ export function AttractionVideoManager({ initialData }: AttractionVideoManagerPr
                     />
                 </div>
 
-                {/* Video Upload Section */}
+                {/* YouTube URL Input */}
                 <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-700">Video File</label>
-
-                    {videoUrl ? (
-                        <div className="relative rounded-lg overflow-hidden bg-slate-900 aspect-video">
-                            <video
-                                src={videoUrl}
-                                controls
-                                poster={thumbnailUrl || undefined}
-                                className="w-full h-full object-contain"
+                    <label className="block text-sm font-medium text-slate-700">Video URL</label>
+                    <div className="flex gap-2">
+                        <div className="relative flex-1">
+                            <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                            <input
+                                type="url"
+                                value={data.video || ''}
+                                onChange={(e) => handleChange('video', e.target.value)}
+                                placeholder="https://youtube.com/shorts/TKflY2nTraQ"
+                                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-slate-900"
                             />
+                        </div>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                        Paste a YouTube, Vimeo, or other video URL
+                    </p>
+
+                    {videoUrl && (
+                        <div className="relative rounded-lg overflow-hidden bg-slate-900 aspect-video mt-4">
+                            {/* YouTube embed preview */}
+                            {videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be') ? (
+                                <iframe
+                                    src={getYouTubeEmbedUrl(videoUrl)}
+                                    className="w-full h-full"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                />
+                            ) : (
+                                <video
+                                    src={videoUrl}
+                                    controls
+                                    poster={thumbnailUrl || undefined}
+                                    className="w-full h-full object-contain"
+                                />
+                            )}
                             <button
                                 onClick={() => handleChange('video', '')}
                                 className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors"
@@ -240,45 +205,7 @@ export function AttractionVideoManager({ initialData }: AttractionVideoManagerPr
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
-                    ) : (
-                        <div className="w-full aspect-video bg-slate-50 rounded-lg border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400">
-                            <Video className="w-12 h-12 mb-3 opacity-50" />
-                            <p className="text-sm">No video selected</p>
-                        </div>
                     )}
-
-                    <div className="flex items-center gap-4 mt-2">
-                        <div className="relative flex-1">
-                            <input
-                                type="file"
-                                accept="video/mp4,video/webm"
-                                onChange={handleUpload}
-                                disabled={uploading}
-                                id="video-upload-input"
-                                className="hidden"
-                            />
-                            <label
-                                htmlFor="video-upload-input"
-                                className={`flex items-center justify-center gap-2 w-full px-4 py-3 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-all cursor-pointer ${uploading ? 'opacity-50 cursor-not-allowed' : ''
-                                    }`}
-                            >
-                                <Upload className="w-4 h-4" />
-                                {uploading ? `Uploading... ${uploadProgress}%` : (videoUrl ? 'Replace Video' : 'Upload Video')}
-                            </label>
-
-                            {uploading && (
-                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-100 rounded-b-lg overflow-hidden">
-                                    <div
-                                        className="h-full bg-primary transition-all duration-300"
-                                        style={{ width: `${uploadProgress}%` }}
-                                    />
-                                </div>
-                            )}
-                        </div>
-                        <p className="text-xs text-slate-500">
-                            Max 500MB • MP4/WebM
-                        </p>
-                    </div>
                 </div>
 
                 {/* Thumbnail Upload Section */}
@@ -334,4 +261,25 @@ export function AttractionVideoManager({ initialData }: AttractionVideoManagerPr
             </div>
         </div>
     );
+}
+
+// Helper function to convert YouTube URLs to embed URLs
+function getYouTubeEmbedUrl(url: string): string {
+    // Handle youtube.com/watch?v=VIDEO_ID
+    if (url.includes('youtube.com/watch')) {
+        const videoId = new URL(url).searchParams.get('v');
+        return `https://www.youtube.com/embed/${videoId}`;
+    }
+    // Handle youtu.be/VIDEO_ID
+    if (url.includes('youtu.be/')) {
+        const videoId = url.split('youtu.be/')[1].split('?')[0];
+        return `https://www.youtube.com/embed/${videoId}`;
+    }
+    // Handle youtube.com/shorts/VIDEO_ID
+    if (url.includes('youtube.com/shorts/')) {
+        const videoId = url.split('/shorts/')[1].split('?')[0];
+        return `https://www.youtube.com/embed/${videoId}`;
+    }
+    // Return original URL if not recognized
+    return url;
 }

@@ -321,6 +321,10 @@ class UploadView(APIView):
             from django.core.files.base import ContentFile
             import uuid
             from datetime import datetime
+            import logging
+            
+            logger = logging.getLogger(__name__)
+            logger.info(f"Starting upload for file: {file_obj.name}, size: {file_obj.size} bytes")
             
             # Generate unique filename to prevent overwrites
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -328,14 +332,29 @@ class UploadView(APIView):
             safe_filename = f"{timestamp}_{unique_id}_{file_obj.name}"
             
             # Save to uploads directory
-            path = default_storage.save(
-                f"uploads/{safe_filename}", 
-                ContentFile(file_obj.read())
-            )
+            try:
+                path = default_storage.save(
+                    f"uploads/{safe_filename}", 
+                    ContentFile(file_obj.read())
+                )
+                logger.info(f"File saved successfully to: {path}")
+            except Exception as storage_error:
+                logger.error(f"Azure storage error: {str(storage_error)}")
+                import traceback
+                logger.error(traceback.format_exc())
+                return Response(
+                    {'error': f'Storage error: {str(storage_error)}'}, 
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
             
             # Generate absolute URL
-            relative_url = default_storage.url(path)
-            full_url = request.build_absolute_uri(relative_url)
+            try:
+                relative_url = default_storage.url(path)
+                full_url = request.build_absolute_uri(relative_url)
+            except Exception as url_error:
+                logger.error(f"URL generation error: {str(url_error)}")
+                # Even if URL generation fails, we can still return the path
+                full_url = f"/media/{path}"
             
             return Response({
                 'url': full_url,
@@ -345,10 +364,15 @@ class UploadView(APIView):
             }, status=status.HTTP_201_CREATED)
             
         except Exception as e:
-            # DEBUG: Return 400 with actual error for debugging
+            # DEBUG: Return 500 with actual error for debugging
+            import traceback
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Upload failed with exception: {str(e)}")
+            logger.error(traceback.format_exc())
             return Response(
                 {'error': f'Upload failed: {str(e)}'}, 
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 class ReorderView(APIView):
@@ -413,6 +437,7 @@ def attraction_video_view(request):
          - If authenticated (Admin): Returns latest created (active or inactive).
          - If anonymous (Public): Returns latest active only.
     POST: Updates or creates the attraction video section (Admin only).
+    Now supports YouTube/Vimeo URLs instead of file uploads.
     """
     if request.method == 'GET':
         # Determine if user is admin/manager
@@ -432,12 +457,13 @@ def attraction_video_view(request):
         if not video_section:
             return Response(None, status=200)
         
-        video_url = request.build_absolute_uri(video_section.video.url) if video_section.video else None
+        # For YouTube URLs, return them directly
+        video_url = video_section.video_url if video_section.video_url else None
         thumb_url = request.build_absolute_uri(video_section.thumbnail.url) if video_section.thumbnail else None
         
         return Response({
             'title': video_section.title,
-            'video': video_url,
+            'video': video_url,  # Now returns YouTube URL directly
             'thumbnail': thumb_url,
             'is_active': video_section.is_active
         })
@@ -465,95 +491,33 @@ def attraction_video_view(request):
             if 'is_active' in data:
                 video_section.is_active = data['is_active']
                 
-            # Helper to extract relative path safely
-            def get_relative_path(url):
-                if not url: 
-                    return None
-                    
-                # If it's a full URL, extract the path after the domain
-                if url.startswith('http'):
-                    # Handle Azure Blob Storage URLs (e.g., https://ninjapark.blob.core.windows.net/media/uploads/...)
-                    if 'blob.core.windows.net' in url:
-                        # Extract everything after /media/
-                        if '/media/' in url:
-                            parts = url.split('/media/')
-                            if len(parts) > 1:
-                                return parts[-1]
-                    # Handle regular URLs with /media/
-                    elif '/media/' in url:
-                        parts = url.split('/media/')
-                        if len(parts) > 1:
-                            return parts[-1]
-                    # Handle /uploads/ pattern
-                    elif '/uploads/' in url:
-                        parts = url.split('/uploads/')
-                        if len(parts) > 1:
-                            return 'uploads/' + parts[-1]
-                    
-                    # Fallback: try to extract path from URL
-                    from urllib.parse import urlparse
-                    parsed = urlparse(url)
-                    path = parsed.path
-                    # Remove leading slash if present
-                    if path.startswith('/'):
-                        path = path[1:]
-                    # Remove 'media/' prefix if present
-                    if path.startswith('media/'):
-                        path = path[6:]
-                    return path if path else None
-                
-                # If it's already a relative path, ensure it doesn't start with /
-                if url.startswith('/'):
-                    url = url[1:]
-                # Remove 'media/' prefix if present
-                if url.startswith('media/'):
-                    url = url[6:]
-                return url
-
-            # Handle video URL update - ONLY update if it's a new upload (starts with uploads/)
-            # If it's a full Azure URL, that means the user didn't upload a new file, so skip updating
+            # Handle video URL update - now it's just a simple URL field
             if 'video_url' in data:
-                video_url = data['video_url']
-                if video_url:
-                    # Check if this is a new upload (relative path starting with uploads/)
-                    if video_url.startswith('uploads/') or (video_url.startswith('http') and '/uploads/' in video_url):
-                        video_path = get_relative_path(video_url)
-                        if video_path:
-                            print(f"Updating video to new upload: {video_path}")
-                            video_section.video.name = video_path
-                        else:
-                            print(f"Warning: Could not extract path from video URL: {video_url}")
-                    else:
-                        # It's an existing Azure URL - don't update, keep current value
-                        print(f"Skipping video update - existing file: {video_url[:100]}")
-                elif video_url == '':  # Explicitly empty - clear the field
-                    print("Clearing video field")
-                    video_section.video = None
+                video_section.video_url = data['video_url'] if data['video_url'] else ''
 
-            # Handle thumbnail URL update - same logic
+            # Handle thumbnail URL update - for uploaded images
             if 'thumbnail_url' in data:
                 thumb_url = data['thumbnail_url']
                 if thumb_url:
-                    # Check if this is a new upload
-                    if thumb_url.startswith('uploads/') or (thumb_url.startswith('http') and '/uploads/' in thumb_url):
-                        thumb_path = get_relative_path(thumb_url)
-                        if thumb_path:
-                            print(f"Updating thumbnail to new upload: {thumb_path}")
-                            video_section.thumbnail.name = thumb_path
+                    # Check if this is a new upload (contains /uploads/)
+                    if '/uploads/' in thumb_url:
+                        # Extract relative path from Azure URL
+                        if 'blob.core.windows.net/media/' in thumb_url:
+                            thumb_path = thumb_url.split('blob.core.windows.net/media/')[-1]
+                        elif '/media/' in thumb_url:
+                            thumb_path = thumb_url.split('/media/')[-1]
                         else:
-                            print(f"Warning: Could not extract path from thumbnail URL: {thumb_url}")
-                    else:
-                        # It's an existing Azure URL - don't update, keep current value
-                        print(f"Skipping thumbnail update - existing file: {thumb_url[:100]}")
+                            thumb_path = thumb_url
+                        
+                        video_section.thumbnail.name = thumb_path
+                    # else: it's an existing URL, don't update
                 elif thumb_url == '':  # Explicitly empty - clear the field
-                    print("Clearing thumbnail field")
                     video_section.thumbnail = None
                     
             video_section.save()
-            print(f"Saved video section - Video: {video_section.video.name if video_section.video else 'None'}, Thumbnail: {video_section.thumbnail.name if video_section.thumbnail else 'None'}")  # Debug log
             
             # Return updated data
-            new_video_url = request.build_absolute_uri(video_section.video.url) if video_section.video else None
+            new_video_url = video_section.video_url if video_section.video_url else None
             new_thumb_url = request.build_absolute_uri(video_section.thumbnail.url) if video_section.thumbnail else None
             
             return Response({
