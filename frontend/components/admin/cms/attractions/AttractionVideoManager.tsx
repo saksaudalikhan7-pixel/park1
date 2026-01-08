@@ -1,104 +1,94 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { updateAttractionVideo } from '@/app/actions/attraction-video';
-import { getMediaUrl } from '@/lib/media-utils';
+import { Video, Link as LinkIcon, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { Loader2, Save, Upload, Video, X, Link as LinkIcon } from 'lucide-react';
+import { getAttractionVideo, updateAttractionVideo } from '@/app/actions/attraction-video';
 
-interface AttractionVideoManagerProps {
-    initialData: any;
+interface VideoData {
+    title: string;
+    video: string;
+    is_active: boolean;
 }
 
-export function AttractionVideoManager({ initialData }: AttractionVideoManagerProps) {
-    const [data, setData] = useState({
+// Helper function to convert YouTube URLs to embed URLs
+function getYouTubeEmbedUrl(url: string): string | null {
+    if (!url) return null;
+
+    // Handle youtube.com/watch?v=VIDEO_ID
+    if (url.includes('youtube.com/watch')) {
+        try {
+            const videoId = new URL(url).searchParams.get('v');
+            return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+        } catch {
+            return null;
+        }
+    }
+    // Handle youtu.be/VIDEO_ID
+    if (url.includes('youtu.be/')) {
+        const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+        return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    }
+    // Handle youtube.com/shorts/VIDEO_ID
+    if (url.includes('youtube.com/shorts/')) {
+        const videoId = url.split('/shorts/')[1]?.split('?')[0];
+        return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    }
+    return null;
+}
+
+export default function AttractionVideoManager() {
+    const [data, setData] = useState<VideoData>({
         title: '',
-        video: '', // This will hold the YouTube/Vimeo URL
-        thumbnail: '', // Thumbnail URL/Path
-        is_active: true,
-        ...initialData
+        video: '',
+        is_active: true
     });
     const [loading, setLoading] = useState(false);
-    const [thumbnailUploading, setThumbnailUploading] = useState(false);
+    const [initialLoading, setInitialLoading] = useState(true);
 
-    // Update state if initialData changes (e.g. after revalidation)
+    // Load existing data
     useEffect(() => {
-        if (initialData) {
-            setData((prev: any) => ({
-                ...prev,
-                ...initialData
-            }));
-        }
-    }, [initialData]);
-
-    const handleChange = (name: string, value: any) => {
-        setData((prev: any) => ({ ...prev, [name]: value }));
-    };
-
-    const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        // Validation
-        const MAX_SIZE = 10 * 1024 * 1024; // 10MB for images
-        if (file.size > MAX_SIZE) {
-            toast.error(`Image too large. Max size: 10MB.`);
-            return;
-        }
-
-        if (!file.type.startsWith('image/')) {
-            toast.error('Invalid file type. Please upload an image.');
-            return;
-        }
-
-        setThumbnailUploading(true);
-
-        try {
-            const formData = new FormData();
-            formData.append('file', file);
-
-            const res = await fetch('/api/cms/video-upload', { // We can reuse the same endpoint if it handles images broadly or specific logic
-                method: 'POST',
-                body: formData,
-            });
-
-            const result = await res.json();
-
-            if (res.ok && result.success && result.url) {
-                handleChange('thumbnail', result.url);
-                toast.success('Thumbnail uploaded successfully!');
-            } else {
-                toast.error(result.error || 'Upload failed');
+        async function loadData() {
+            try {
+                const result = await getAttractionVideo();
+                if (result) {
+                    setData({
+                        title: result.title || '',
+                        video: result.video || '',
+                        is_active: result.is_active !== undefined ? result.is_active : true
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to load video data:', error);
+            } finally {
+                setInitialLoading(false);
             }
-        } catch (error: any) {
-            toast.error('Upload failed: ' + error.message);
-        } finally {
-            setThumbnailUploading(false);
-            e.target.value = '';
         }
-    };
+        loadData();
+    }, []);
 
     const handleSave = async () => {
         setLoading(true);
         try {
-            // Prepare payload
             const payload = {
                 title: data.title,
-                is_active: data.is_active,
-                video_url: data.video, // Send as video_url for backend to process
-                thumbnail_url: data.thumbnail
+                video_url: data.video,
+                is_active: data.is_active
             };
 
             const result = await updateAttractionVideo(payload);
 
             if (result.success) {
-                toast.success('Video section updated');
+                toast.success('Video section saved successfully!');
                 if (result.item) {
-                    // Update local state with returned normalized data
-                    setData(result.item);
+                    setData({
+                        title: result.item.title || '',
+                        video: result.item.video || '',
+                        is_active: result.item.is_active !== undefined ? result.item.is_active : true
+                    });
                 }
             } else {
-                toast.error(result.error || 'Failed to update');
+                toast.error(result.error || 'Failed to save');
             }
         } catch (error: any) {
             toast.error(error.message || 'An error occurred');
@@ -107,179 +97,137 @@ export function AttractionVideoManager({ initialData }: AttractionVideoManagerPr
         }
     };
 
-    const videoUrl = getMediaUrl(data.video);
-    const thumbnailUrl = getMediaUrl(data.thumbnail);
+    if (initialLoading) {
+        return (
+            <div className="flex items-center justify-center p-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    const youtubeEmbedUrl = getYouTubeEmbedUrl(data.video);
+    const isYouTubeUrl = data.video && (data.video.includes('youtube.com') || data.video.includes('youtu.be'));
 
     return (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex items-center justify-between">
                 <div>
-                    <div className="flex items-center gap-2 mb-1">
-                        <h2 className="text-lg font-semibold text-slate-900">Attraction Video</h2>
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wider ${data.is_active ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-500'
-                            }`}>
-                            {data.is_active ? 'Active' : 'Inactive'}
+                    <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                        <Video className="w-6 h-6 text-primary" />
+                        Attraction Video
+                        <span className="text-sm font-normal text-slate-500 ml-2">
+                            {data.is_active ? 'ACTIVE' : 'INACTIVE'}
                         </span>
-                    </div>
-                    <p className="text-sm text-slate-500">Manage the featured video on the Attractions page</p>
+                    </h2>
+                    <p className="text-sm text-slate-600 mt-1">
+                        Manage the featured video on the Attractions page
+                    </p>
                 </div>
                 <button
                     onClick={handleSave}
-                    disabled={loading || thumbnailUploading}
-                    className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium disabled:opacity-50"
+                    disabled={loading}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                    Save Changes
+                    {loading ? (
+                        <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            Saving...
+                        </>
+                    ) : (
+                        <>
+                            <Check className="w-4 h-4" />
+                            Save Changes
+                        </>
+                    )}
                 </button>
             </div>
 
-            <div className="p-6 space-y-6">
-                {/* Active Toggle */}
-                <div className="flex items-center space-x-2">
+            {/* Main Content */}
+            <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-6">
+                {/* Enable Toggle */}
+                <div className="flex items-center gap-3 pb-4 border-b border-slate-200">
                     <input
                         type="checkbox"
-                        id="video-active"
+                        id="enable-video"
                         checked={data.is_active}
-                        onChange={(e) => handleChange('is_active', e.target.checked)}
-                        className="rounded border-gray-300 text-slate-900 focus:ring-slate-900 h-4 w-4"
+                        onChange={(e) => setData({ ...data, is_active: e.target.checked })}
+                        className="w-5 h-5 text-primary rounded focus:ring-2 focus:ring-primary cursor-pointer"
                     />
-                    <label htmlFor="video-active" className="text-sm font-medium text-slate-700 select-none cursor-pointer">
+                    <label htmlFor="enable-video" className="text-sm font-medium text-slate-700 cursor-pointer">
                         Enable Video Section
                     </label>
                 </div>
 
-                {/* Title */}
-                <div className="space-y-1">
-                    <label className="block text-sm font-medium text-slate-700">Section Title (Optional)</label>
+                {/* Title Input */}
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-slate-700">
+                        Section Title (Optional)
+                    </label>
                     <input
                         type="text"
-                        value={data.title || ''}
-                        onChange={(e) => handleChange('title', e.target.value)}
-                        placeholder="e.g. Experience the Thrill"
-                        className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-slate-900"
+                        value={data.title}
+                        onChange={(e) => setData({ ...data, title: e.target.value })}
+                        placeholder="e.g., Experience the Thrill"
+                        className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                     />
                 </div>
 
                 {/* YouTube URL Input */}
                 <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-700">Video URL</label>
-                    <div className="flex gap-2">
-                        <div className="relative flex-1">
-                            <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                            <input
-                                type="url"
-                                value={data.video || ''}
-                                onChange={(e) => handleChange('video', e.target.value)}
-                                placeholder="https://youtube.com/shorts/TKflY2nTraQ"
-                                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-slate-900"
-                            />
-                        </div>
+                    <label className="block text-sm font-medium text-slate-700">
+                        YouTube Video URL
+                    </label>
+                    <div className="relative">
+                        <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                        <input
+                            type="url"
+                            value={data.video}
+                            onChange={(e) => setData({ ...data, video: e.target.value })}
+                            placeholder="https://youtube.com/shorts/TKflY2nTraQ"
+                            className="w-full pl-11 pr-4 py-2.5 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                        />
                     </div>
                     <p className="text-xs text-slate-500">
                         Paste a YouTube, Vimeo, or other video URL
                     </p>
+                </div>
 
-                    {videoUrl && (
-                        <div className="relative rounded-lg overflow-hidden bg-slate-900 aspect-video mt-4">
-                            {/* YouTube embed preview */}
-                            {videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be') ? (
+                {/* Video Preview */}
+                {data.video && (
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-slate-700">
+                            Preview
+                        </label>
+                        <div className="relative rounded-lg overflow-hidden bg-slate-900 aspect-video">
+                            {isYouTubeUrl && youtubeEmbedUrl ? (
                                 <iframe
-                                    src={getYouTubeEmbedUrl(videoUrl)}
-                                    className="w-full h-full"
+                                    src={youtubeEmbedUrl}
+                                    className="absolute inset-0 w-full h-full"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                     allowFullScreen
+                                    title="Video Preview"
                                 />
                             ) : (
                                 <video
-                                    src={videoUrl}
+                                    src={data.video}
                                     controls
-                                    poster={thumbnailUrl || undefined}
-                                    className="w-full h-full object-contain"
-                                />
+                                    className="absolute inset-0 w-full h-full object-cover"
+                                >
+                                    Your browser does not support the video tag.
+                                </video>
                             )}
                             <button
-                                onClick={() => handleChange('video', '')}
+                                onClick={() => setData({ ...data, video: '' })}
                                 className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors"
                                 title="Remove video"
                             >
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
-                    )}
-                </div>
-
-                {/* Thumbnail Upload Section */}
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-slate-700">Thumbnail Image (Poster)</label>
-
-                    {thumbnailUrl ? (
-                        <div className="relative rounded-lg overflow-hidden bg-slate-100 aspect-video border border-slate-200 w-64">
-                            <img
-                                src={thumbnailUrl}
-                                alt="Thumbnail"
-                                className="w-full h-full object-cover"
-                            />
-                            <button
-                                onClick={() => handleChange('thumbnail', '')}
-                                className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full hover:bg-red-500 transition-colors"
-                                title="Remove thumbnail"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="w-64 aspect-video bg-slate-50 rounded-lg border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400">
-                            <Upload className="w-8 h-8 mb-2 opacity-50" />
-                            <p className="text-xs">No thumbnail</p>
-                        </div>
-                    )}
-
-                    <div className="flex items-center gap-4 mt-2">
-                        <div className="relative w-64">
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleThumbnailUpload}
-                                disabled={thumbnailUploading}
-                                id="thumbnail-upload-input"
-                                className="hidden"
-                            />
-                            <label
-                                htmlFor="thumbnail-upload-input"
-                                className={`flex items-center justify-center gap-2 w-full px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-all cursor-pointer ${thumbnailUploading ? 'opacity-50 cursor-not-allowed' : ''
-                                    }`}
-                            >
-                                <Upload className="w-4 h-4" />
-                                {thumbnailUploading ? 'Uploading...' : (thumbnailUrl ? 'Replace Image' : 'Upload Image')}
-                            </label>
-                        </div>
                     </div>
-                    <p className="text-xs text-slate-500">
-                        Recommended: 1080x1920 (Vertical) or 1920x1080 (Horizontal) • Max 10MB
-                    </p>
-                </div>
+                )}
             </div>
         </div>
     );
-}
-
-// Helper function to convert YouTube URLs to embed URLs
-function getYouTubeEmbedUrl(url: string): string {
-    // Handle youtube.com/watch?v=VIDEO_ID
-    if (url.includes('youtube.com/watch')) {
-        const videoId = new URL(url).searchParams.get('v');
-        return `https://www.youtube.com/embed/${videoId}`;
-    }
-    // Handle youtu.be/VIDEO_ID
-    if (url.includes('youtu.be/')) {
-        const videoId = url.split('youtu.be/')[1].split('?')[0];
-        return `https://www.youtube.com/embed/${videoId}`;
-    }
-    // Handle youtube.com/shorts/VIDEO_ID
-    if (url.includes('youtube.com/shorts/')) {
-        const videoId = url.split('/shorts/')[1].split('?')[0];
-        return `https://www.youtube.com/embed/${videoId}`;
-    }
-    // Return original URL if not recognized
-    return url;
 }
