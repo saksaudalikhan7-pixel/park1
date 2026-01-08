@@ -14,10 +14,44 @@ interface AttractionVideoSectionProps {
     videoData?: VideoData | null;
 }
 
+// Helper function to convert YouTube URLs to embed URLs
+function getYouTubeEmbedUrl(url: string): string | null {
+    if (!url) return null;
+
+    // Handle youtube.com/watch?v=VIDEO_ID
+    if (url.includes('youtube.com/watch')) {
+        try {
+            const videoId = new URL(url).searchParams.get('v');
+            return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+        } catch {
+            return null;
+        }
+    }
+    // Handle youtu.be/VIDEO_ID
+    if (url.includes('youtu.be/')) {
+        const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+        return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    }
+    // Handle youtube.com/shorts/VIDEO_ID
+    if (url.includes('youtube.com/shorts/')) {
+        const videoId = url.split('/shorts/')[1]?.split('?')[0];
+        return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    }
+    return null;
+}
+
 export default function AttractionVideoSection({ videoData }: AttractionVideoSectionProps) {
     const videoRef = React.useRef<HTMLVideoElement>(null);
+    const isYouTube = videoData?.video && (
+        videoData.video.includes('youtube.com') ||
+        videoData.video.includes('youtu.be')
+    );
+    const youtubeEmbedUrl = isYouTube ? getYouTubeEmbedUrl(videoData.video) : null;
 
     React.useEffect(() => {
+        // Only set up auto-play for regular video files, not YouTube embeds
+        if (isYouTube) return;
+
         const videoElement = videoRef.current;
         if (!videoElement) return;
 
@@ -39,7 +73,7 @@ export default function AttractionVideoSection({ videoData }: AttractionVideoSec
         return () => {
             if (videoElement) observer.unobserve(videoElement);
         };
-    }, []);
+    }, [isYouTube]);
 
     // If no video, show placeholder with Dark Theme styling
     if (!videoData || !videoData.video) {
@@ -87,18 +121,28 @@ export default function AttractionVideoSection({ videoData }: AttractionVideoSec
                             {/* Reflection/Glare effect */}
                             <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-white/5 to-transparent pointer-events-none z-20" />
 
-                            <video
-                                ref={videoRef}
-                                muted
-                                loop
-                                playsInline
-                                preload="metadata"
-                                poster={videoData.thumbnail || undefined}
-                                className="absolute inset-0 w-full h-full object-cover bg-black"
-                                src={videoData.video}
-                            >
-                                Your browser does not support the video tag.
-                            </video>
+                            {isYouTube && youtubeEmbedUrl ? (
+                                <iframe
+                                    src={youtubeEmbedUrl}
+                                    className="absolute inset-0 w-full h-full bg-black"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    title={videoData.title || "Attraction Video"}
+                                />
+                            ) : (
+                                <video
+                                    ref={videoRef}
+                                    muted
+                                    loop
+                                    playsInline
+                                    preload="metadata"
+                                    poster={videoData.thumbnail || undefined}
+                                    className="absolute inset-0 w-full h-full object-cover bg-black"
+                                    src={videoData.video}
+                                >
+                                    Your browser does not support the video tag.
+                                </video>
+                            )}
 
                             {/* Optional: Unmute button overlay if needed, currently pure background style */}
                         </div>
