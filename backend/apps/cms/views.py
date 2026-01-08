@@ -450,27 +450,38 @@ def attraction_video_view(request):
         if is_admin:
             # Admin grabs the absolute latest record regardless of status
             video_section = AttractionVideoSection.objects.first()
+            print(f"[GET] Admin request - found section: {video_section}")
         else:
             # Public only sees active
             video_section = AttractionVideoSection.objects.filter(is_active=True).first()
+            print(f"[GET] Public request - found section: {video_section}")
         
         if not video_section:
+            print("[GET] No video section found, returning None")
             return Response(None, status=200)
+        
+        print(f"[GET] Section ID: {video_section.id}")
+        print(f"[GET] youtube_url from DB: '{video_section.youtube_url}'")
+        print(f"[GET] video field: '{video_section.video}'")
         
         # Use the model's helper method to get video URL
         video_url = video_section.get_video_url()
+        print(f"[GET] get_video_url() returned: '{video_url}'")
         if video_url and not video_url.startswith('http'):
             # It's a relative path, make it absolute
             video_url = request.build_absolute_uri(video_url)
+            print(f"[GET] Made absolute: '{video_url}'")
             
         thumb_url = request.build_absolute_uri(video_section.thumbnail.url) if video_section.thumbnail else None
         
-        return Response({
+        response_data = {
             'title': video_section.title,
             'video': video_url,
             'thumbnail': thumb_url,
             'is_active': video_section.is_active
-        })
+        }
+        print(f"[GET] Returning response: {response_data}")
+        return Response(response_data)
 
     if request.method == 'POST':
         # Check permissions manually since we used AllowAny for GET
@@ -483,25 +494,35 @@ def attraction_video_view(request):
 
         try:
             data = request.data
+            print(f"[SAVE] Received POST data: {data}")
             
             # Get latest or create
             video_section = AttractionVideoSection.objects.first()
             if not video_section:
+                print("[SAVE] Creating new AttractionVideoSection")
                 video_section = AttractionVideoSection()
+            else:
+                print(f"[SAVE] Found existing section, ID: {video_section.id}")
+                print(f"[SAVE] Current youtube_url before update: {video_section.youtube_url}")
             
             # Update fields
             if 'title' in data:
                 video_section.title = data['title']
+                print(f"[SAVE] Set title to: {data['title']}")
             if 'is_active' in data:
                 video_section.is_active = data['is_active']
+                print(f"[SAVE] Set is_active to: {data['is_active']}")
                 
             # Handle video URL - store in youtube_url field
             if 'video_url' in data:
                 video_url = data['video_url']
+                print(f"[SAVE] Received video_url: '{video_url}'")
                 if video_url:
                     video_section.youtube_url = video_url
+                    print(f"[SAVE] Set youtube_url to: '{video_url}'")
                 else:
                     video_section.youtube_url = None
+                    print("[SAVE] Cleared youtube_url")
 
             # Handle thumbnail URL update - for uploaded images
             if 'thumbnail_url' in data:
@@ -521,24 +542,36 @@ def attraction_video_view(request):
                 elif thumb_url == '':  # Explicitly empty - clear the field
                     video_section.thumbnail = None
                     
+            print(f"[SAVE] About to save - youtube_url value: '{video_section.youtube_url}'")
             video_section.save()
+            print(f"[SAVE] Saved successfully! ID: {video_section.id}")
+            print(f"[SAVE] After save - youtube_url from DB: '{video_section.youtube_url}'")
+            
+            # Refresh from database to verify
+            video_section.refresh_from_db()
+            print(f"[SAVE] After refresh_from_db - youtube_url: '{video_section.youtube_url}'")
             
             # Return updated data
             video_url = video_section.get_video_url()
+            print(f"[SAVE] get_video_url() returned: '{video_url}'")
             if video_url and not video_url.startswith('http'):
                 video_url = request.build_absolute_uri(video_url)
                 
             new_thumb_url = request.build_absolute_uri(video_section.thumbnail.url) if video_section.thumbnail else None
             
-            return Response({
+            response_data = {
                 'title': video_section.title,
                 'video': video_url,
                 'thumbnail': new_thumb_url,
                 'is_active': video_section.is_active
-            })
+            }
+            print(f"[SAVE] Returning response: {response_data}")
+            return Response(response_data)
         except Exception as e:
             import traceback
-            print(traceback.format_exc()) # Log properly
+            error_trace = traceback.format_exc()
+            print(f"[SAVE ERROR] Exception: {str(e)}")
+            print(f"[SAVE ERROR] Traceback: {error_trace}")
             return Response({'error': f'Failed to save: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class PricingCarouselImageViewSet(BaseCmsViewSet):
