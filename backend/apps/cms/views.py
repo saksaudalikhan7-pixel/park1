@@ -503,11 +503,15 @@ def attraction_video_view(request):
             # Handle video URL - store YouTube URLs directly in the video field
             if 'video_url' in data:
                 video_url = data['video_url']
+                print(f"[DEBUG] Received video_url: {video_url}")
                 if video_url and (video_url.startswith('http://') or video_url.startswith('https://')):
                     # It's a YouTube URL - store it directly as text
+                    print(f"[DEBUG] Storing YouTube URL: {video_url}")
                     video_section.video.name = video_url
+                    print(f"[DEBUG] After setting, video.name = {video_section.video.name}")
                 elif video_url == '':
                     # Clear the field
+                    print("[DEBUG] Clearing video field")
                     video_section.video = None
 
             # Handle thumbnail URL update - for uploaded images
@@ -529,9 +533,12 @@ def attraction_video_view(request):
                     video_section.thumbnail = None
                     
             video_section.save()
+            print(f"[DEBUG] After save, video field value: {video_section.video}")
+            print(f"[DEBUG] After save, video.name: {video_section.video.name if video_section.video else 'None'}")
             
             # Return updated data
             video_value = str(video_section.video) if video_section.video else None
+            print(f"[DEBUG] Returning video_value: {video_value}")
             if video_value and (video_value.startswith('http://') or video_value.startswith('https://')):
                 new_video_url = video_value
             elif video_value:
