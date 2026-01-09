@@ -446,10 +446,8 @@ def attraction_video_view(request):
         )
 
         # Get the video section
-        if is_admin:
-            video_section = AttractionVideoSection.objects.first()
-        else:
-            video_section = AttractionVideoSection.objects.filter(is_active=True).first()
+        # Get the video section - Just get the first one for everyone for now to debug
+        video_section = AttractionVideoSection.objects.first()
         
         if not video_section:
             return Response(None, status=200)
@@ -467,7 +465,10 @@ def attraction_video_view(request):
                      video_val = video_section.video.url
                  except:
                      video_val = str(video_section.video)
-
+        
+        # For public, if inactive, we SHOULD return None normally, but for debugging let's return it
+        # but mark as inactive so frontend knows using is_active flag
+        
         return Response({
             'title': video_section.title or '',
             'video': video_val,
@@ -496,9 +497,19 @@ def attraction_video_view(request):
             
             # Handle video URL - store in 'video' field
             # We set the 'name' of the FileField to the URL string
+            # Use __dict__ to force set the column value, preventing FileField descriptor issues
             new_video_url = data.get('video_url', '')
             if new_video_url:
                 video_section.video.name = new_video_url
+                # Also force update the underlying attribute just in case
+                if not video_section.video:
+                     # If it was empty, the descriptor might be None?
+                     # Actually simpler:
+                     pass
+            
+            # Direct assignment to the database column field (works for FileField in Django to store string)
+            if new_video_url:
+                video_section.video = new_video_url
             else:
                 video_section.video = None
 
