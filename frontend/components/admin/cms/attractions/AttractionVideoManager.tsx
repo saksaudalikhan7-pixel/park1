@@ -37,17 +37,23 @@ function getYouTubeEmbedUrl(url: string): string | null {
     return null;
 }
 
-export default function AttractionVideoManager() {
+interface AttractionVideoManagerProps {
+    initialData?: VideoData | null;
+}
+
+export function AttractionVideoManager({ initialData }: AttractionVideoManagerProps) {
     const [data, setData] = useState<VideoData>({
-        title: '',
-        video: '',
-        is_active: true
+        title: initialData?.title || '',
+        video: initialData?.video || '',
+        is_active: initialData?.is_active !== undefined ? initialData.is_active : true
     });
     const [loading, setLoading] = useState(false);
-    const [initialLoading, setInitialLoading] = useState(true);
+    const [initialLoading, setInitialLoading] = useState(!initialData);
 
-    // Load existing data
+    // Load existing data if not provided via props
     useEffect(() => {
+        if (initialData) return;
+
         async function loadData() {
             try {
                 const result = await getAttractionVideo();
@@ -65,7 +71,7 @@ export default function AttractionVideoManager() {
             }
         }
         loadData();
-    }, []);
+    }, [initialData]);
 
     const handleSave = async () => {
         setLoading(true);
