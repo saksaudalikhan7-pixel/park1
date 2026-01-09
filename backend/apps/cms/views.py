@@ -497,19 +497,12 @@ def attraction_video_view(request):
             
             # Handle video URL - store in 'video' field
             # We set the 'name' of the FileField to the URL string
-            # Use __dict__ to force set the column value, preventing FileField descriptor issues
             new_video_url = data.get('video_url', '')
-            if new_video_url:
-                video_section.video.name = new_video_url
-                # Also force update the underlying attribute just in case
-                if not video_section.video:
-                     # If it was empty, the descriptor might be None?
-                     # Actually simpler:
-                     pass
             
-            # Direct assignment to the database column field (works for FileField in Django to store string)
             if new_video_url:
-                video_section.video = new_video_url
+                # Force updates the column value directly, bypassing descriptor
+                # This ensures the DB column gets the string URL
+                video_section.__dict__['video'] = new_video_url
             else:
                 video_section.video = None
 
