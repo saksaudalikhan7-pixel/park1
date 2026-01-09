@@ -455,14 +455,27 @@ def attraction_video_view(request):
             return Response(None, status=200)
         
         # Return simple data
+        # Handle video field which could be URL or File
+        video_val = ''
+        if video_section.video:
+             # Check if it's a direct URL string stored in the name
+             if str(video_section.video).startswith('http'):
+                 video_val = str(video_section.video)
+             else:
+                 # It's a file, get the URL
+                 try:
+                     video_val = video_section.video.url
+                 except:
+                     video_val = str(video_section.video)
+
         return Response({
             'title': video_section.title or '',
-            'video': video_section.youtube_url or '',
+            'video': video_val,
             'is_active': video_section.is_active
         })
 
     if request.method == 'POST':
-        # Check admin permission
+        # Check permissions manually since we used AllowAny for GET
         if not (request.user.is_authenticated and (
             getattr(request.user, 'role', '') in ['admin', 'manager', 'content_manager'] or 
             request.user.is_staff or 
@@ -480,7 +493,15 @@ def attraction_video_view(request):
             
             # Update simple fields
             video_section.title = data.get('title', '')
-            video_section.youtube_url = data.get('video_url', '')
+            
+            # Handle video URL - store in 'video' field
+            # We set the 'name' of the FileField to the URL string
+            new_video_url = data.get('video_url', '')
+            if new_video_url:
+                video_section.video.name = new_video_url
+            else:
+                video_section.video = None
+
             video_section.is_active = data.get('is_active', True)
             
             # Save
@@ -489,9 +510,9 @@ def attraction_video_view(request):
             # Return updated data
             return Response({
                 'title': video_section.title or '',
-                'video': video_section.youtube_url or '',
+                'video': str(video_section.video) if video_section.video else '',
                 'is_active': video_section.is_active,
-                'debug_payload': data  # Verify what we received
+                'debug_payload': data
             })
             
         except Exception as e:
