@@ -95,3 +95,57 @@ class BirthdayEmailTracker(models.Model):
     
     def __str__(self):
         return f"{self.email} - {self.year}"
+
+class EmailSendLog(models.Model):
+    """
+    Tracks individual email sends for analytics.
+    """
+    STATUS_CHOICES = [
+        ('SENT', 'Sent'),
+        ('FAILED', 'Failed'),
+        ('BOUNCED', 'Bounced'),
+    ]
+    
+    campaign = models.ForeignKey(MarketingCampaign, on_delete=models.CASCADE, related_name='send_logs')
+    recipient_email = models.EmailField(db_index=True)
+    sent_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='SENT')
+    tracking_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    error_message = models.TextField(blank=True, null=True)
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['campaign', 'status']),
+            models.Index(fields=['recipient_email']),
+            models.Index(fields=['tracking_id']),
+        ]
+        ordering = ['-sent_at']
+    
+    def __str__(self):
+        return f"{self.recipient_email} - {self.campaign.title}"
+
+class EmailEngagement(models.Model):
+    """
+    Tracks email opens and link clicks.
+    """
+    EVENT_CHOICES = [
+        ('OPEN', 'Email Opened'),
+        ('CLICK', 'Link Clicked'),
+    ]
+    
+    send_log = models.ForeignKey(EmailSendLog, on_delete=models.CASCADE, related_name='engagements')
+    event_type = models.CharField(max_length=10, choices=EVENT_CHOICES)
+    event_url = models.URLField(null=True, blank=True, help_text="URL clicked (for CLICK events)")
+    created_at = models.DateTimeField(auto_now_add=True)
+    user_agent = models.CharField(max_length=500, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['send_log', 'event_type']),
+            models.Index(fields=['created_at']),
+        ]
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.get_event_type_display()} - {self.send_log.recipient_email}"

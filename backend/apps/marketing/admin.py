@@ -3,7 +3,7 @@ from django.utils.html import format_html
 from django.urls import path
 from django.shortcuts import redirect
 from django.contrib import messages
-from .models import EmailUnsubscribe, EmailTemplate, MarketingCampaign, BirthdayEmailTracker
+from .models import EmailUnsubscribe, EmailTemplate, MarketingCampaign, BirthdayEmailTracker, EmailSendLog, EmailEngagement
 from .services import marketing_service
 
 @admin.register(EmailUnsubscribe)
@@ -62,3 +62,27 @@ class BirthdayEmailTrackerAdmin(admin.ModelAdmin):
     search_fields = ('email',)
     list_filter = ('year',)
     readonly_fields = ('sent_at',)
+
+@admin.register(EmailSendLog)
+class EmailSendLogAdmin(admin.ModelAdmin):
+    list_display = ('recipient_email', 'campaign', 'status', 'sent_at', 'has_opens', 'has_clicks')
+    list_filter = ('status', 'sent_at')
+    search_fields = ('recipient_email', 'campaign__title')
+    readonly_fields = ('tracking_id', 'sent_at')
+    
+    def has_opens(self, obj):
+        return obj.engagements.filter(event_type='OPEN').exists()
+    has_opens.boolean = True
+    has_opens.short_description = 'Opened'
+    
+    def has_clicks(self, obj):
+        return obj.engagements.filter(event_type='CLICK').exists()
+    has_clicks.boolean = True
+    has_clicks.short_description = 'Clicked'
+
+@admin.register(EmailEngagement)
+class EmailEngagementAdmin(admin.ModelAdmin):
+    list_display = ('send_log', 'event_type', 'event_url', 'created_at', 'ip_address')
+    list_filter = ('event_type', 'created_at')
+    search_fields = ('send_log__recipient_email', 'event_url')
+    readonly_fields = ('created_at',)
