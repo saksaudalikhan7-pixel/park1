@@ -490,7 +490,8 @@ def attraction_video_view(request):
             return Response({
                 'title': video_section.title or '',
                 'video': video_section.youtube_url or '',
-                'is_active': video_section.is_active
+                'is_active': video_section.is_active,
+                'debug_payload': data  # Verify what we received
             })
             
         except Exception as e:
