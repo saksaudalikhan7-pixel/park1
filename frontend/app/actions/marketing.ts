@@ -53,3 +53,40 @@ export async function deleteTemplate(id: number) {
     await deleteAPI(`${API_ENDPOINTS.marketing.templates}${id}/`);
     revalidatePath('/admin/marketing/templates');
 }
+
+// Dashboard Stats
+
+export interface MarketingStats {
+    total_campaigns: number;
+    active_campaigns: number;
+    sent_campaigns: number;
+    total_emails_sent: number;
+    avg_open_rate: number;
+    avg_click_rate: number;
+    subscriber_count: number;
+    unsubscribe_count: number;
+    unsubscribe_rate: number;
+    recent_campaigns: {
+        id: number;
+        title: string;
+        sent_at: string;
+        sent_count: number;
+        open_rate: number;
+        click_rate: number;
+    }[];
+    monthly_growth: {
+        month: string;
+        count: number;
+    }[];
+}
+
+export async function getMarketingStats(): Promise<MarketingStats | null> {
+    try {
+        const data = await fetchAPI<MarketingStats>(`${API_ENDPOINTS.marketing.campaigns}dashboard_stats/`);
+        return data;
+    } catch (error) {
+        console.error('Error fetching marketing stats:', error);
+        return null;
+    }
+}
+
