@@ -17,8 +17,12 @@ echo "checking cms migrations..."
 python manage.py showmigrations cms || echo "Could not show cms migrations"
 python manage.py migrate cms --noinput || echo "CMS migration FAILED but continuing..."
 
-echo "Ensuring admin and RBAC users exist..."
-python create_superuser.py || echo "WARNING: User creation failed"
+echo "Running core app migrations (for RBAC users)..."
+python manage.py showmigrations core || echo "Could not show core migrations"
+python manage.py migrate core --noinput || echo "Core migration FAILED but continuing..."
+
+echo "Creating RBAC users via management command..."
+python manage.py create_rbac_users || echo "WARNING: User creation command failed"
 
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
