@@ -80,13 +80,27 @@ export interface MarketingStats {
     }[];
 }
 
-export async function getMarketingStats(): Promise<MarketingStats | null> {
+export async function getMarketingStats(): Promise<MarketingStats> {
     try {
         const data = await fetchAPI<MarketingStats>(`${API_ENDPOINTS.marketing.campaigns}dashboard_stats/`);
         return data;
     } catch (error) {
         console.error('Error fetching marketing stats:', error);
-        return null;
+        // Return empty stats instead of null so UI still renders
+        return {
+            total_campaigns: 0,
+            active_campaigns: 0,
+            sent_campaigns: 0,
+            total_emails_sent: 0,
+            avg_open_rate: 0,
+            avg_click_rate: 0,
+            subscriber_count: 0,
+            unsubscribe_count: 0,
+            unsubscribe_rate: 0,
+            recent_campaigns: [],
+            monthly_growth: [],
+        };
     }
 }
+
 
