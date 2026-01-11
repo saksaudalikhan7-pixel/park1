@@ -111,14 +111,20 @@ class MarketingCampaignViewSet(viewsets.ModelViewSet):
         unsubscribe_count = EmailUnsubscribe.objects.count()
         unsubscribe_rate = (unsubscribe_count / subscriber_count * 100) if subscriber_count > 0 else 0
         
-        # Recent campaigns (last 5)
+        # Recent campaigns (last 5) - show all sent campaigns, not just those with send logs
         recent_campaigns = MarketingCampaign.objects.filter(
             status='SENT'
         ).order_by('-sent_at')[:5]
         
         recent_campaigns_data = []
         for campaign in recent_campaigns:
+            # Use campaign.send_logs if available, otherwise use campaign.sent_count
             campaign_sends = campaign.send_logs.filter(status='SENT').count()
+            
+            # If no send logs, use the sent_count from campaign model
+            if campaign_sends == 0:
+                campaign_sends = campaign.sent_count
+            
             campaign_opens = campaign.send_logs.filter(
                 status='SENT',
                 engagements__event_type='OPEN'

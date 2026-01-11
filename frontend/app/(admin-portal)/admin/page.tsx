@@ -173,6 +173,22 @@ export default async function AdminDashboard() {
                     </Link>
                 </div>
 
+                {/* Info Banner */}
+                {marketingStats.total_emails_sent === 0 && marketingStats.total_campaigns > 0 && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                        <div className="flex items-start gap-3">
+                            <AlertCircle size={20} className="text-blue-600 mt-0.5 shrink-0" />
+                            <div>
+                                <p className="text-sm font-semibold text-blue-900">Email Tracking Active</p>
+                                <p className="text-xs text-blue-700 mt-1">
+                                    Open and click tracking is now enabled. Campaigns sent from now on will show detailed engagement metrics.
+                                    Existing campaigns display basic stats only.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Marketing KPI Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                     <div className="bg-white rounded-xl p-5 border border-purple-100 shadow-sm">
