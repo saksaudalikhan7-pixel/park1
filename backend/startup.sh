@@ -21,6 +21,10 @@ echo "Running core app migrations (for RBAC users)..."
 python manage.py showmigrations core || echo "Could not show core migrations"
 python manage.py migrate core --noinput || echo "Core migration FAILED but continuing..."
 
+echo "Running shop app migrations (for vouchers)..."
+python manage.py showmigrations shop || echo "Could not show shop migrations"
+python manage.py migrate shop --noinput || echo "Shop migration FAILED but continuing..."
+
 echo "Creating RBAC users via management command..."
 python manage.py create_rbac_users || echo "WARNING: User creation command failed"
 
