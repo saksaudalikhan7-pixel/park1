@@ -39,7 +39,7 @@ class VoucherViewSet(viewsets.ModelViewSet):
             }, status=http_status.HTTP_400_BAD_REQUEST)
         
         try:
-            voucher = Voucher.objects.get(code=code)
+            voucher = Voucher.objects.get(code__iexact=code)
         except Voucher.DoesNotExist:
             return Response({
                 'valid': False,
