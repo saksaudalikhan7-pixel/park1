@@ -74,6 +74,40 @@ class VoucherViewSet(viewsets.ModelViewSet):
                 'error': f'Minimum order amount of ₹{voucher.min_order_amount} required'
             })
         
+        # Check minimum hours before booking slot
+        if voucher.min_hours_before_slot > 0:
+            booking_datetime_str = request.data.get('booking_datetime')
+            
+            if not booking_datetime_str:
+                return Response({
+                    'valid': False,
+                    'error': 'Please select a booking time to apply this voucher'
+                })
+            
+            try:
+                # Parse booking datetime (ISO format from frontend)
+                from datetime import datetime
+                booking_datetime = datetime.fromisoformat(booking_datetime_str.replace('Z', '+00:00'))
+                
+                # Make timezone-aware if naive
+                if timezone.is_naive(booking_datetime):
+                    booking_datetime = timezone.make_aware(booking_datetime)
+                
+                # Calculate time difference
+                time_until_booking = booking_datetime - timezone.now()
+                hours_until_booking = time_until_booking.total_seconds() / 3600
+                
+                if hours_until_booking < voucher.min_hours_before_slot:
+                    return Response({
+                        'valid': False,
+                        'error': f'This voucher requires booking at least {voucher.min_hours_before_slot} hours in advance. Please select a later time slot.'
+                    })
+            except (ValueError, TypeError) as e:
+                return Response({
+                    'valid': False,
+                    'error': 'Invalid booking time format'
+                })
+        
         # Calculate discount
         if voucher.discount_type == 'PERCENTAGE':
             discount_amount = (order_amount * voucher.discount_value) / 100

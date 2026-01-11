@@ -29,8 +29,13 @@ class Voucher(models.Model):
     used_count = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
     description = models.TextField(null=True, blank=True)
+    min_hours_before_slot = models.IntegerField(
+        default=0,
+        help_text="Minimum hours required between current time and booking slot. 0 = no restriction."
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.code
+

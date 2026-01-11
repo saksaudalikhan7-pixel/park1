@@ -202,8 +202,13 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
         setVoucherMessage("Validating...");
         const totals = calculateTotal();
 
+        // Construct booking datetime from date and time
+        const bookingDateTime = formData.date && formData.time
+            ? `${formData.date}T${formData.time}:00`
+            : undefined;
+
         try {
-            const result = await validateVoucher(voucher, totals.subtotal); // Discount applies to subtotal
+            const result = await validateVoucher(voucher, totals.subtotal, bookingDateTime); // Pass booking datetime
 
             if (result.success && result.discount) {
                 setDiscount(result.discount);
