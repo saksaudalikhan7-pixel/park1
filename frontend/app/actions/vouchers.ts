@@ -33,6 +33,7 @@ export async function createVoucher(data: {
     expiryDate?: Date;
     usageLimit?: number;
     description?: string;
+    minHoursBeforeSlot?: number;
 }) {
     const session = await getAdminSession();
     if (!session) throw new Error("Unauthorized");
@@ -45,6 +46,7 @@ export async function createVoucher(data: {
         expiry_date: data.expiryDate ? data.expiryDate.toISOString() : null,
         usage_limit: data.usageLimit || null,
         description: data.description || null,
+        min_hours_before_slot: data.minHoursBeforeSlot || 0,
         is_active: true
     };
 
@@ -70,6 +72,7 @@ export async function updateVoucher(id: string, data: {
     usageLimit?: number;
     description?: string;
     isActive?: boolean;
+    minHoursBeforeSlot?: number;
 }) {
     const session = await getAdminSession();
     if (!session) throw new Error("Unauthorized");
@@ -83,6 +86,7 @@ export async function updateVoucher(id: string, data: {
     if (data.usageLimit !== undefined) payload.usage_limit = data.usageLimit;
     if (data.description !== undefined) payload.description = data.description;
     if (data.isActive !== undefined) payload.is_active = data.isActive;
+    if (data.minHoursBeforeSlot !== undefined) payload.min_hours_before_slot = data.minHoursBeforeSlot;
 
     const res = await fetchAPI(`/shop/vouchers/${id}/`, {
         method: "PATCH",
