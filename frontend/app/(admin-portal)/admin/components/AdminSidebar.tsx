@@ -30,7 +30,8 @@ import {
     Menu,
     X,
     Shield,
-    Settings
+    Settings,
+    CreditCard
 } from "lucide-react";
 import { hasPermission, type PermissionCheck } from "../../../lib/permissions";
 import { logoutAdmin } from "@/app/actions/admin";
@@ -73,6 +74,7 @@ const navigation: NavGroup[] = [
             { name: "Party Bookings", href: "/admin/party-bookings", icon: PartyPopper, permission: { entity: 'parties', action: 'read' } },
             { name: "Manual Party Booking", href: "/admin/party-bookings/new", icon: PartyPopper, permission: { entity: 'parties', action: 'write' } },
             { name: "Party Booking History", href: "/admin/party-bookings/history", icon: Clock, permission: { entity: 'parties', action: 'read' } },
+            { name: "Payments", href: "/admin/payments", icon: CreditCard, permission: { entity: 'payments', action: 'read' } },
             { name: "Invitation Templates", href: "/admin/invitations", icon: Image },
             { name: "Booking Blocks", href: "/admin/booking-blocks", icon: Calendar, permission: { entity: 'bookings', action: 'read' } },
             { name: "Customers", href: "/admin/customers", icon: Users, permission: { entity: 'customers', action: 'read' } },
