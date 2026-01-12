@@ -1,6 +1,7 @@
 from django.db import models
 from apps.shop.models import Voucher
 import uuid
+from datetime import datetime
 
 class Customer(models.Model):
     name = models.CharField(max_length=255)
@@ -67,6 +68,7 @@ class Booking(models.Model):
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='PENDING')
     type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='SESSION')
     qr_code = models.CharField(max_length=255, unique=True, null=True, blank=True)
+    booking_number = models.CharField(max_length=50, unique=True, null=True, blank=True, help_text="Unique booking number (NIP-YYYYMMDD-XXXX)")
     
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings')
     voucher = models.ForeignKey(Voucher, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings')
@@ -99,6 +101,28 @@ class Booking(models.Model):
     def remaining_balance(self):
         """Calculate remaining balance to be paid"""
         return self.amount - self.paid_amount
+    
+    def generate_booking_number(self):
+        """Generate unique booking number: NIP-YYYYMMDD-XXXX"""
+        date = datetime.now()
+        year = date.year
+        month = str(date.month).zfill(2)
+        day = str(date.day).zfill(2)
+        
+        # Use booking ID for uniqueness instead of random number
+        # This ensures no collisions
+        booking_id = str(self.id).zfill(4)
+        
+        return f"NIP-{year}{month}{day}-{booking_id}"
+    
+    def save(self, *args, **kwargs):
+        # Generate booking number on first save
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        
+        if is_new and not self.booking_number:
+            self.booking_number = self.generate_booking_number()
+            super().save(update_fields=['booking_number'])
 
 class PartyBooking(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
@@ -142,10 +166,10 @@ class PartyBooking(models.Model):
     waiver_signed_at = models.DateTimeField(null=True, blank=True)
     waiver_ip_address = models.GenericIPAddressField(null=True, blank=True)
     
-    
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='PENDING')
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True, related_name='party_bookings')
+    booking_number = models.CharField(max_length=50, unique=True, null=True, blank=True, help_text="Unique booking number (NIPARTY-YYYYMMDD-XXXX)")
     
     # Arrival tracking (matching Booking model)
     arrived = models.BooleanField(default=False)
@@ -174,6 +198,27 @@ class PartyBooking(models.Model):
     def remaining_balance(self):
         """Calculate remaining balance to be paid"""
         return self.amount - self.paid_amount
+    
+    def generate_booking_number(self):
+        """Generate unique booking number: NIPARTY-YYYYMMDD-XXXX"""
+        date = datetime.now()
+        year = date.year
+        month = str(date.month).zfill(2)
+        day = str(date.day).zfill(2)
+        
+        # Use booking ID for uniqueness
+        booking_id = str(self.id).zfill(4)
+        
+        return f"NIPARTY-{year}{month}{day}-{booking_id}"
+    
+    def save(self, *args, **kwargs):
+        # Generate booking number on first save
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        
+        if is_new and not self.booking_number:
+            self.booking_number = self.generate_booking_number()
+            super().save(update_fields=['booking_number'])
 
 class Waiver(models.Model):
     PARTICIPANT_TYPE_CHOICES = [

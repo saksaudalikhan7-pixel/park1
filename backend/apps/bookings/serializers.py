@@ -98,7 +98,7 @@ class BookingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Booking
-        fields = ['id', 'uuid', 'name', 'email', 'phone', 'date', 'time', 'duration',
+        fields = ['id', 'uuid', 'booking_number', 'name', 'email', 'phone', 'date', 'time', 'duration',
                   'adults', 'kids', 'spectators', 'subtotal', 'discount_amount', 'amount',
                   'voucher_code', 'status', 'booking_status', 'payment_status', 'waiver_status',
                   'type', 'qr_code', 'customer', 'customer_details', 'voucher', 'transactions',
@@ -179,7 +179,7 @@ class PartyBookingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PartyBooking
-        fields = ['id', 'uuid', 'name', 'email', 'phone', 'date', 'time', 'package_name', 
+        fields = ['id', 'uuid', 'booking_number', 'name', 'email', 'phone', 'date', 'time', 'package_name', 
                   'kids', 'adults', 'amount', 'birthday_child_name', 'birthday_child_age',
                   'participants', 'waiver_signed', 'waiver_signed_at', 'waiver_ip_address',
                   'status', 'customer', 'arrived', 'arrived_at', 'created_at', 'updated_at',
