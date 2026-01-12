@@ -943,51 +943,61 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
 
                             {/* Step 6: Payment */}
                             {step === 6 && createdBookingId && (
-                                <PaymentStep
-                                    bookingId={createdBookingId}
-                                    bookingType="session"
-                                    amount={Math.round(Math.max(0, totals.total - discount))}
-                                    bookingDetails={{
-                                        date: formData.date,
-                                        time: formData.time,
-                                        name: formData.name,
-                                        email: formData.email,
-                                        phone: formData.phone
-                                    }}
-                                    onSuccess={() => {
-                                        setBookingComplete(true);
-                                        showToast("success", "Payment successful! Booking confirmed.");
-                                    }}
-                                    onBack={() => setStep(5)}
-                                />
+                                <motion.div
+                                    key="step-6"
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    transition={{ duration: 0.3 }}
+                                >
+                                    <PaymentStep
+                                        bookingId={createdBookingId}
+                                        bookingType="session"
+                                        amount={Math.round(Math.max(0, totals.total - discount))}
+                                        bookingDetails={{
+                                            date: formData.date,
+                                            time: formData.time,
+                                            name: formData.name,
+                                            email: formData.email,
+                                            phone: formData.phone || ""
+                                        }}
+                                        onSuccess={() => {
+                                            setBookingComplete(true);
+                                            showToast("success", "Payment successful! Booking confirmed.");
+                                        }}
+                                        onBack={() => setStep(5)}
+                                    />
+                                </motion.div>
                             )}
                         </AnimatePresence>
 
                         {/* Navigation Buttons */}
-                        <div className="mt-12 flex justify-between items-center">
-                            {step > 1 && (
-                                <motion.button
-                                    type="button"
-                                    onClick={prevStep}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    className="flex items-center px-6 py-3 rounded-xl font-bold text-white/70 hover:text-white hover:bg-white/10 transition-all"
-                                >
-                                    <ChevronLeft className="mr-2 w-5 h-5" /> Back
-                                </motion.button>
-                            )}
-                            {step < 5 && (
-                                <motion.button
-                                    type="button"
-                                    onClick={nextStep}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    className="ml-auto flex items-center bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary-dark text-black font-bold py-4 px-10 rounded-full shadow-lg transition-all uppercase tracking-wide"
-                                >
-                                    Next Step <ChevronRight className="ml-2 w-5 h-5" />
-                                </motion.button>
-                            )}
-                        </div>
+                        {step < 6 && (
+                            <div className="mt-12 flex justify-between items-center">
+                                {step > 1 && (
+                                    <motion.button
+                                        type="button"
+                                        onClick={prevStep}
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        className="flex items-center px-6 py-3 rounded-xl font-bold text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                                    >
+                                        <ChevronLeft className="mr-2 w-5 h-5" /> Back
+                                    </motion.button>
+                                )}
+                                {step < 5 && (
+                                    <motion.button
+                                        type="button"
+                                        onClick={nextStep}
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        className="ml-auto flex items-center bg-gradient-to-r from-primary to-secondary hover:from-primary-dark hover:to-secondary-dark text-black font-bold py-4 px-10 rounded-full shadow-lg transition-all uppercase tracking-wide"
+                                    >
+                                        Next Step <ChevronRight className="ml-2 w-5 h-5" />
+                                    </motion.button>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div >
             </form >

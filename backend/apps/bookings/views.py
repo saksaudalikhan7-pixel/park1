@@ -129,17 +129,21 @@ class BookingViewSet(viewsets.ModelViewSet):
             booking_id = response.data.get('id')
             logger.info(f"Booking {booking_id} created successfully")
             
-            # Trigger confirmation email if enabled
-            if getattr(settings, 'EMAIL_BOOKING_ENABLED', False):
-                try:
-                    from apps.emails.tasks import send_booking_confirmation_email
-                    logger.info(f"EMAIL_BOOKING_ENABLED=True, triggering email for booking {booking_id}")
-                    send_booking_confirmation_email(booking_id)
-                    logger.info(f"Email queued for booking {booking_id}")
-                except Exception as e:
-                    logger.error(f"Failed to queue email for booking {booking_id}: {str(e)}", exc_info=True)
-            else:
-                logger.warning(f"EMAIL_BOOKING_ENABLED=False, skipping email")
+            # NOTE: Email confirmation is now sent AFTER payment verification
+            # See apps/payments/services.py - PaymentService.verify_and_complete_payment()
+            # This ensures customers only receive confirmation after successful payment
+            
+            # Trigger confirmation email if enabled (DISABLED - moved to payment verification)
+            # if getattr(settings, 'EMAIL_BOOKING_ENABLED', False):
+            #     try:
+            #         from apps.emails.tasks import send_booking_confirmation_email
+            #         logger.info(f"EMAIL_BOOKING_ENABLED=True, triggering email for booking {booking_id}")
+            #         send_booking_confirmation_email(booking_id)
+            #         logger.info(f"Email queued for booking {booking_id}")
+            #     except Exception as e:
+            #         logger.error(f"Failed to queue email for booking {booking_id}: {str(e)}", exc_info=True)
+            # else:
+            #     logger.warning(f"EMAIL_BOOKING_ENABLED=False, skipping email")
         
         return response
 

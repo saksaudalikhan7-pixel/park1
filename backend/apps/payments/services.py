@@ -303,21 +303,48 @@ class PaymentService:
         }
     
     def _send_payment_success_email(self, booking, payment):
-        """Send full payment success email"""
-        # Will be implemented in email integration phase
+        """Send full payment success email - triggers booking confirmation"""
         logger.info(f"Sending payment success email for booking {booking.id}")
-        pass
+        
+        try:
+            # Import here to avoid circular imports
+            from django.conf import settings
+            from apps.bookings.models import PartyBooking
+            
+            # Only send email if EMAIL_BOOKING_ENABLED is True
+            if not getattr(settings, 'EMAIL_BOOKING_ENABLED', False):
+                logger.warning(f"EMAIL_BOOKING_ENABLED=False, skipping email for booking {booking.id}")
+                return
+            
+            # Send booking confirmation email after successful payment
+            if isinstance(booking, PartyBooking):
+                # Party booking confirmation
+                from apps.emails.tasks import send_party_confirmation_email
+                logger.info(f"Sending party booking confirmation email for booking {booking.id}")
+                send_party_confirmation_email(booking.id)
+            else:
+                # Session booking confirmation
+                from apps.emails.tasks import send_booking_confirmation_email
+                logger.info(f"Sending session booking confirmation email for booking {booking.id}")
+                send_booking_confirmation_email(booking.id)
+                
+            logger.info(f"Booking confirmation email queued successfully for booking {booking.id}")
+            
+        except Exception as e:
+            logger.error(f"Failed to send booking confirmation email for booking {booking.id}: {str(e)}", exc_info=True)
+            # Don't fail the payment if email fails
     
     def _send_partial_payment_email(self, booking, payment):
         """Send partial payment received email"""
-        # Will be implemented in email integration phase
         logger.info(f"Sending partial payment email for booking {booking.id}")
+        # For partial payments, we can send a different email template in the future
+        # For now, just log it
         pass
     
     def _send_refund_email(self, booking, refund_data, reason):
         """Send refund confirmation email"""
-        # Will be implemented in email integration phase
         logger.info(f"Sending refund email for booking {booking.id}")
+        # Will be implemented when refund email templates are ready
         pass
 
 
