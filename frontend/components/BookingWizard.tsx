@@ -930,13 +930,13 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                                         ) : (
                                             <>
                                                 <Check className="w-6 h-6" />
-                                                Confirm Booking & Pay at Venue
+                                                Confirm Booking
                                             </>
                                         )}
                                     </motion.button>
 
                                     <p className="text-center text-white/40 text-sm">
-                                        🔒 Your booking will be confirmed immediately. Payment will be collected at the venue.
+                                        🔒 Your booking will be confirmed. Payment required in the next step.
                                     </p>
                                 </motion.div>
                             )}
