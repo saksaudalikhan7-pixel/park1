@@ -8,14 +8,68 @@ import { Calendar, Clock, Users, Mail, Phone, User, Cake, MessageSquare, PartyPo
 import { createPartyBooking } from "../../actions/createPartyBooking";
 import ParticipantCollection from "../../../components/ParticipantCollection";
 import { fetchBookingBlocks, isDateBlocked, BookingBlock } from "@/lib/api/booking-blocks";
+import { PageSection } from "@/lib/cms/types";
 
-// ...
+interface PartyBookingWizardProps {
+    cmsContent?: PageSection[];
+}
+
+// E-Invitation Step Component
+function EInvitationStep({ bookingId, bookingDetails, onNext, onSkip, onBack, title, subtitle }: any) {
+    return (
+        <div className="bg-surface-800/50 backdrop-blur-md p-8 rounded-3xl border border-white/10 max-w-3xl mx-auto">
+            <h2 className="text-2xl font-display font-bold mb-4 text-primary">{title}</h2>
+            <p className="text-white/70 mb-6">{subtitle}</p>
+            <div className="bg-background-dark rounded-xl p-6 mb-6">
+                <p className="text-white/80 mb-4">
+                    Send beautiful e-invitations to your guests! You can customize and send invitations after booking.
+                </p>
+                <p className="text-sm text-white/60">
+                    Visit your booking dashboard to manage invitations.
+                </p>
+            </div>
+            <div className="flex gap-4">
+                <button
+                    type="button"
+                    onClick={onBack}
+                    className="px-6 py-3 bg-surface-700 hover:bg-surface-600 text-white font-bold rounded-xl transition-colors"
+                >
+                    Back
+                </button>
+                <button
+                    type="button"
+                    onClick={onSkip}
+                    className="flex-1 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold rounded-xl transition-all"
+                >
+                    Continue to Confirmation
+                </button>
+            </div>
+        </div>
+    );
+}
+
 
 export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWizardProps) {
     const router = useRouter();
+    const MIN_PARTICIPANTS = 10;
+
     // 1: Basic Info, 2: Participants, 3: E-Invitation, 4: Confirmation
     const [step, setStep] = useState(1);
-    const [bookingBlocks, setBookingBlocks] = useState<BookingBlock[]>([]); // Blocks
+    const [bookingBlocks, setBookingBlocks] = useState<BookingBlock[]>([]);
+    const [config, setConfig] = useState<any>(null);
+    const [submitted, setSubmitted] = useState(false);
+    const [tempBookingId, setTempBookingId] = useState<string | null>(null);
+    const [bookingDetails, setBookingDetails] = useState<any>(null);
+    const [participantError, setParticipantError] = useState("");
+
+    // Helper function to get CMS content
+    const getContent = (key: string, defaultTitle: string, defaultSubtitle: string) => {
+        const section = cmsContent?.find(s => s.section_key === key);
+        return {
+            title: section?.title || defaultTitle,
+            subtitle: section?.subtitle || defaultSubtitle
+        };
+    };
 
     const [formData, setFormData] = useState({
         name: "",
@@ -31,6 +85,7 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+
     // ...
 
     // Load party booking config from CMS AND Booking Blocks
