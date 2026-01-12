@@ -62,6 +62,13 @@ export async function postAPI(endpoint: string, data: any) {
     });
 
     if (res.status === 401) return null;
+
+    // Handle non-OK responses
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: 'Request failed' }));
+        throw new Error(errorData.error || `Request failed with status ${res.status}`);
+    }
+
     return res.json();
 }
 
