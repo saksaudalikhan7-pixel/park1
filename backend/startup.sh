@@ -4,6 +4,9 @@ set -e
 echo "Running database migrations..."
 python manage.py migrate --noinput || echo "WARNING: Major migration failed, but continuing startup..."
 
+echo "Running bookings app migration explicitly (CRITICAL)..."
+python manage.py migrate bookings --noinput || echo "Bookings migration warning"
+
 echo "Running emails app migration explicitly..."
 python manage.py migrate emails --noinput || echo "Email migration warning"
 
