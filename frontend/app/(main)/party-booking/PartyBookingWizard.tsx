@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { Calendar, Clock, Users, Mail, Phone, User, Cake, MessageSquare, PartyPopper, CheckCircle } from "lucide-react";
 import { createPartyBooking } from "../../actions/createPartyBooking";
 import ParticipantCollection from "../../../components/ParticipantCollection";
+import { PaymentStep } from "../../../components/PaymentStep";
 import { fetchBookingBlocks, isDateBlocked, BookingBlock } from "@/lib/api/booking-blocks";
 import { PageSection } from "@/lib/cms/types";
 
@@ -41,7 +42,7 @@ function EInvitationStep({ bookingId, bookingDetails, onNext, onSkip, onBack, ti
                     onClick={onSkip}
                     className="flex-1 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold rounded-xl transition-all"
                 >
-                    Continue to Confirmation
+                    Continue to Payment
                 </button>
             </div>
         </div>
@@ -53,7 +54,7 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
     const router = useRouter();
     const MIN_PARTICIPANTS = 10;
 
-    // 1: Basic Info, 2: Participants, 3: E-Invitation, 4: Confirmation
+    // 1: Basic Info, 2: Participants, 3: E-Invitation, 4: Payment, 5: Confirmation
     const [step, setStep] = useState(1);
     const [bookingBlocks, setBookingBlocks] = useState<BookingBlock[]>([]);
     const [config, setConfig] = useState<any>(null);
@@ -204,8 +205,7 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
     };
 
     const handleInvitationNext = () => {
-        // Step 3 finished, go to Step 4 (Confirmation screen)
-        setSubmitted(true);
+        // Step 3 finished, go to Step 4 (Payment)
         setStep(4);
     };
 
@@ -229,8 +229,8 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
 
     const costs = calculateTotal();
 
-    // CONFIRMATION SCREEN (Step 4)
-    if (submitted && bookingDetails) {
+    // CONFIRMATION SCREEN (Step 5)
+    if (submitted && step === 5 && bookingDetails) {
         return (
             <main className="min-h-screen bg-background py-20">
                 <div className="max-w-3xl mx-auto px-4">
@@ -324,12 +324,19 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
                         <div className={`flex items-center justify-center w-10 h-10 rounded-full ${step >= 4 ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-surface-700 text-white/30'} font-bold transition-all`}>
                             4
                         </div>
+                        <div className={`h-1 w-12 ${step >= 5 ? 'bg-primary' : 'bg-surface-700'} transition-all`}></div>
+
+                        {/* 5 */}
+                        <div className={`flex items-center justify-center w-10 h-10 rounded-full ${step >= 5 ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-surface-700 text-white/30'} font-bold transition-all`}>
+                            5
+                        </div>
                     </div>
                     <div className="flex justify-between mt-2 text-xs font-semibold px-4 max-w-lg mx-auto">
                         <span className={step >= 1 ? 'text-primary' : 'text-white/30'}>Details</span>
                         <span className={step >= 2 ? 'text-primary' : 'text-white/30'}>Participants</span>
                         <span className={step >= 3 ? 'text-primary' : 'text-white/30'}>E-Invitation</span>
-                        <span className={step >= 4 ? 'text-primary' : 'text-white/30'}>Confirm</span>
+                        <span className={step >= 4 ? 'text-primary' : 'text-white/30'}>Payment</span>
+                        <span className={step >= 5 ? 'text-primary' : 'text-white/30'}>Confirm</span>
                     </div>
                 </div>
 
@@ -627,6 +634,30 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
                             title={getContent('step-3', 'E-Invitations', '').title}
                             subtitle={getContent('step-3', '', 'Send custom invitations to your guests').subtitle}
                         />
+                    )
+                }
+
+                {
+                    step === 4 && tempBookingId && (
+                        <ScrollReveal animation="slideUp">
+                            <PaymentStep
+                                bookingId={parseInt(tempBookingId)}
+                                bookingType="party"
+                                amount={costs.total}
+                                bookingDetails={{
+                                    date: formData.date,
+                                    time: formData.time,
+                                    name: formData.name,
+                                    email: formData.email,
+                                    phone: formData.phone
+                                }}
+                                onSuccess={() => {
+                                    setSubmitted(true);
+                                    setStep(5);
+                                }}
+                                onBack={() => setStep(3)}
+                            />
+                        </ScrollReveal>
                     )
                 }
             </div >

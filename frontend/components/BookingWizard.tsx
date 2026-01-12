@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { bookingSchema, type BookingFormData, getAvailableTimeSlots, isTimeInPast } from "../lib/api/types";
 import { useToast } from "./ToastProvider";
 import { WaiverForm } from "./WaiverForm";
+import { PaymentStep } from "./PaymentStep";
 import { validateVoucher } from "../app/actions/validateVoucher";
 import { PageSection } from "../lib/cms/types";
 import { fetchBookingBlocks, isDateBlocked, BookingBlock } from "../lib/api/booking-blocks";
@@ -22,6 +23,7 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
     const [bookingComplete, setBookingComplete] = useState(false);
     const [bookingId, setBookingId] = useState<string>("");
     const [bookingNumber, setBookingNumber] = useState<string>("");
+    const [createdBookingId, setCreatedBookingId] = useState<number | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [availableSlots, setAvailableSlots] = useState<string[]>([]);
     const { showToast } = useToast();
@@ -245,8 +247,10 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
             if (result.success && result.bookingId) {
                 setBookingId(result.bookingId);
                 setBookingNumber(result.bookingNumber || result.bookingId);
-                setBookingComplete(true);
-                showToast("success", "Booking confirmed! Check your email for details.");
+                setCreatedBookingId(parseInt(result.bookingId));
+                // Move to payment step instead of completing
+                setStep(6);
+                showToast("success", "Booking created! Please complete payment.");
             } else {
                 showToast("error", result.error || "Booking failed. Please try again.");
             }
@@ -396,7 +400,7 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                                 />
                             </div>
 
-                            {[1, 2, 3, 4, 5].map((i) => (
+                            {[1, 2, 3, 4, 5, 6].map((i) => (
                                 <div key={i} className="flex flex-col items-center relative z-10 px-1 md:px-2">
                                     <motion.div
                                         initial={false}
@@ -411,7 +415,7 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                                     </motion.div>
                                     <span className={`text-[9px] md:text-[10px] lg:text-xs mt-2 md:mt-3 font-bold uppercase tracking-wide transition-colors ${step >= i ? "text-primary" : "text-white/30"}`}
                                     >
-                                        {i === 1 ? "Session" : i === 2 ? "Guests" : i === 3 ? "Details" : i === 4 ? "Waiver" : "Payment"}
+                                        {i === 1 ? "Session" : i === 2 ? "Guests" : i === 3 ? "Details" : i === 4 ? "Waiver" : i === 5 ? "Summary" : "Payment"}
                                     </span>
                                 </div>
                             ))}
@@ -935,6 +939,27 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                                         🔒 Your booking will be confirmed immediately. Payment will be collected at the venue.
                                     </p>
                                 </motion.div>
+                            )}
+
+                            {/* Step 6: Payment */}
+                            {step === 6 && createdBookingId && (
+                                <PaymentStep
+                                    bookingId={createdBookingId}
+                                    bookingType="session"
+                                    amount={Math.round(Math.max(0, totals.total - discount))}
+                                    bookingDetails={{
+                                        date: formData.date,
+                                        time: formData.time,
+                                        name: formData.name,
+                                        email: formData.email,
+                                        phone: formData.phone
+                                    }}
+                                    onSuccess={() => {
+                                        setBookingComplete(true);
+                                        showToast("success", "Payment successful! Booking confirmed.");
+                                    }}
+                                    onBack={() => setStep(5)}
+                                />
                             )}
                         </AnimatePresence>
 
