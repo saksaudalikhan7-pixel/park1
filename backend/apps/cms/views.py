@@ -495,16 +495,9 @@ def attraction_video_view(request):
             # Update simple fields
             video_section.title = data.get('title', '')
             
-            # Handle video URL - store in 'video' field
-            # We set the 'name' of the FileField to the URL string
+            # Handle video URL - now stored as CharField
             new_video_url = data.get('video_url', '')
-            
-            if new_video_url:
-                # Force updates the column value directly, bypassing descriptor
-                # This ensures the DB column gets the string URL
-                video_section.__dict__['video'] = new_video_url
-            else:
-                video_section.video = None
+            video_section.video = new_video_url if new_video_url else None
 
             video_section.is_active = data.get('is_active', True)
             
