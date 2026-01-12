@@ -419,3 +419,67 @@ def get_payment_stats(request):
             {'error': f'Failed to get payment stats: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_payments(request):
+    """
+    List all payments with optional filtering.
+    
+    GET /api/payments/
+    
+    Query params:
+        - status: Filter by status (SUCCESS, FAILED, CREATED, REFUNDED)
+        - provider: Filter by provider (MOCK, RAZORPAY)
+        - limit: Number of results (default: 100)
+        - offset: Pagination offset (default: 0)
+    
+    Returns:
+        {
+            "count": 10,
+            "results": [...]
+        }
+    """
+    try:
+        from .models import Payment
+        from .serializers import PaymentSerializer
+        
+        # Get query parameters
+        status_filter = request.query_params.get('status')
+        provider_filter = request.query_params.get('provider')
+        limit = int(request.query_params.get('limit', 100))
+        offset = int(request.query_params.get('offset', 0))
+        
+        # Build query
+        queryset = Payment.objects.all().select_related('booking', 'party_booking')
+        
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+        
+        if provider_filter:
+            queryset = queryset.filter(provider=provider_filter)
+        
+        # Order by most recent first
+        queryset = queryset.order_by('-created_at')
+        
+        # Get total count
+        total_count = queryset.count()
+        
+        # Apply pagination
+        payments = queryset[offset:offset + limit]
+        
+        # Serialize
+        serializer = PaymentSerializer(payments, many=True)
+        
+        return Response({
+            'count': total_count,
+            'results': serializer.data
+        })
+        
+    except Exception as e:
+        logger.error(f"Error listing payments: {str(e)}")
+        return Response(
+            {'error': f'Failed to list payments: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

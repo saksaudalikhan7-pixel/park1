@@ -13,7 +13,7 @@ import Link from "next/link";
 
 interface Payment {
     id: number;
-    booking_id: number;
+    booking_id: number | null;
     party_booking_id: number | null;
     provider: string;
     order_id: string;
@@ -22,6 +22,10 @@ interface Payment {
     currency: string;
     status: string;
     created_at: string;
+    customer_name: string;
+    customer_email: string;
+    booking_number: string;
+    booking_date: string;
 }
 
 export default function PaymentsListPage() {
@@ -39,7 +43,7 @@ export default function PaymentsListPage() {
         setLoading(true);
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-            const response = await fetch(`${API_URL}/admin/payments/`, {
+            const response = await fetch(`${API_URL}/payments/`, {
                 credentials: "include",
                 cache: "no-store",
             });
@@ -47,6 +51,8 @@ export default function PaymentsListPage() {
             if (response.ok) {
                 const data = await response.json();
                 setPayments(data.results || data);
+            } else {
+                console.error("Failed to fetch payments:", response.status, response.statusText);
             }
         } catch (error) {
             console.error("Failed to fetch payments:", error);
@@ -208,7 +214,7 @@ export default function PaymentsListPage() {
                                         ID
                                     </th>
                                     <th className="px-6 py-4 text-left text-xs font-bold text-white/60 uppercase tracking-wider">
-                                        Order ID
+                                        Customer
                                     </th>
                                     <th className="px-6 py-4 text-left text-xs font-bold text-white/60 uppercase tracking-wider">
                                         Booking
@@ -241,23 +247,26 @@ export default function PaymentsListPage() {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-mono">
                                             #{payment.id}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white/80 font-mono">
-                                            {payment.order_id}
+                                        <td className="px-6 py-4 text-sm">
+                                            <div className="flex flex-col">
+                                                <span className="text-white font-medium">{payment.customer_name || 'N/A'}</span>
+                                                <span className="text-white/40 text-xs">{payment.customer_email || ''}</span>
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                                             {payment.booking_id ? (
                                                 <Link
-                                                    href={`/admin/bookings/${payment.booking_id}`}
+                                                    href={`/admin/session-bookings/${payment.booking_id}`}
                                                     className="text-primary hover:text-primary/80 font-medium"
                                                 >
-                                                    Session #{payment.booking_id}
+                                                    {payment.booking_number || `#${payment.booking_id}`}
                                                 </Link>
                                             ) : payment.party_booking_id ? (
                                                 <Link
                                                     href={`/admin/party-bookings/${payment.party_booking_id}`}
                                                     className="text-primary hover:text-primary/80 font-medium"
                                                 >
-                                                    Party #{payment.party_booking_id}
+                                                    {payment.booking_number || `P#${payment.party_booking_id}`}
                                                 </Link>
                                             ) : (
                                                 <span className="text-white/40">-</span>
@@ -265,8 +274,8 @@ export default function PaymentsListPage() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`px-2 py-1 rounded-md text-xs font-bold ${payment.provider === "MOCK"
-                                                    ? "bg-blue-500/20 text-blue-400"
-                                                    : "bg-purple-500/20 text-purple-400"
+                                                ? "bg-blue-500/20 text-blue-400"
+                                                : "bg-purple-500/20 text-purple-400"
                                                 }`}>
                                                 {payment.provider}
                                             </span>
