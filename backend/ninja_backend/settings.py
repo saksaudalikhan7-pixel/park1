@@ -304,6 +304,6 @@ RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', '')
 RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', '')
 
 # Payment Settings
-ALLOW_PARTIAL_PAYMENTS = True
-MINIMUM_DEPOSIT_PERCENTAGE = 50  # Minimum 50% deposit required for partial payments
+ALLOW_PARTIAL_PAYMENTS = False  # Require full payment (no partial payments)
+MINIMUM_DEPOSIT_PERCENTAGE = 50  # Not used when ALLOW_PARTIAL_PAYMENTS = False
 
