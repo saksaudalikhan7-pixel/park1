@@ -69,7 +69,7 @@ class GlobalSettingsViewSet(viewsets.ModelViewSet):
     serializer_class = GlobalSettingsSerializer
     
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'fix_db_schema']:
             return [permissions.AllowAny()]
         return [permissions.IsAdminUser()]
 
