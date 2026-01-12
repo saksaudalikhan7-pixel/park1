@@ -84,6 +84,8 @@ class Booking(models.Model):
         indexes = [
             models.Index(fields=['date', 'time']),  # For availability checks
             models.Index(fields=['email']),  # For customer lookups
+            models.Index(fields=['name']),   # For global search
+            models.Index(fields=['phone']),  # For global search
             models.Index(fields=['uuid']),  # For ticket retrieval
             models.Index(fields=['booking_status']),  # For filtering by status
             models.Index(fields=['payment_status']),  # For payment tracking
@@ -182,6 +184,8 @@ class PartyBooking(models.Model):
         indexes = [
             models.Index(fields=['date', 'time']),  # For availability checks
             models.Index(fields=['email']),  # For customer lookups
+            models.Index(fields=['name']),   # For global search
+            models.Index(fields=['phone']),  # For global search
             models.Index(fields=['uuid']),  # For ticket retrieval
             models.Index(fields=['status']),  # For filtering by status
             models.Index(fields=['-created_at']),  # For sorting by newest
@@ -257,6 +261,7 @@ class Waiver(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=['email']),  # For customer lookups
+            models.Index(fields=['name']),   # For global search
             models.Index(fields=['booking']),  # Foreign key lookup
             models.Index(fields=['party_booking']),  # Foreign key lookup
             models.Index(fields=['customer']),  # Foreign key lookup
