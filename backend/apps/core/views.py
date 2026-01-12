@@ -73,6 +73,17 @@ class GlobalSettingsViewSet(viewsets.ModelViewSet):
             return [permissions.AllowAny()]
         return [permissions.IsAdminUser()]
 
+    @action(detail=False, methods=['post', 'get'])
+    def fix_db_schema(self, request):
+        """Force run bookings migration manually"""
+        from django.core.management import call_command
+        try:
+            # Force migration for bookings app
+            call_command('migrate', 'bookings')
+            return Response({'status': 'success', 'message': 'Bookings migration applied successfully'})
+        except Exception as e:
+            return Response({'status': 'error', 'message': str(e)}, status=500)
+
 class LogoViewSet(viewsets.ModelViewSet):
     queryset = Logo.objects.all()
     serializer_class = LogoSerializer
