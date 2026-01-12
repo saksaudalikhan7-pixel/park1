@@ -102,7 +102,9 @@ class PaymentService:
         if amount <= 0:
             raise ValueError("Payment amount must be positive")
         
-        if amount > booking.remaining_balance:
+        # Validate amount (allow small rounding differences due to GST calculations)
+        rounding_tolerance = Decimal('0.50')  # Allow up to 50 paise difference for rounding
+        if amount > (booking.remaining_balance + rounding_tolerance):
             raise ValueError(
                 f"Payment amount (₹{amount}) exceeds remaining balance (₹{booking.remaining_balance})"
             )
