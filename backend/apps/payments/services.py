@@ -109,7 +109,7 @@ class PaymentService:
         
         # Check minimum deposit if partial payment
         if settings.ALLOW_PARTIAL_PAYMENTS and amount < booking.amount:
-            min_deposit = booking.amount * (settings.MINIMUM_DEPOSIT_PERCENTAGE / 100)
+            min_deposit = booking.amount * (Decimal(str(settings.MINIMUM_DEPOSIT_PERCENTAGE)) / Decimal('100'))
             if booking.paid_amount == 0 and amount < min_deposit:
                 raise ValueError(
                     f"Minimum deposit of ₹{min_deposit} ({settings.MINIMUM_DEPOSIT_PERCENTAGE}%) required"
