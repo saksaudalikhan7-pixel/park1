@@ -4,6 +4,7 @@ import { Bell, Search, User } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getUnreadNotifications, getUnreadCount, markAsRead, markAllAsRead, type Notification } from "@/app/actions/notifications";
 import Link from "next/link";
+import { GlobalSearch } from "./GlobalSearch";
 
 interface AdminHeaderProps {
     title?: string;
@@ -81,14 +82,9 @@ export function AdminHeader({ title, description, actions, user }: AdminHeaderPr
 
                     {/* Right Section */}
                     <div className="flex items-center gap-4">
-                        {/* Search */}
-                        <div className="hidden md:block relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                            <input
-                                type="text"
-                                placeholder="Search..."
-                                className="pl-10 pr-4 py-2.5 w-64 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-slate-400"
-                            />
+                        {/* Global Search */}
+                        <div className="hidden md:block">
+                            <GlobalSearch />
                         </div>
 
                         {/* Notifications */}
