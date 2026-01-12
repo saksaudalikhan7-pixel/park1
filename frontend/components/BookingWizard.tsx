@@ -248,14 +248,18 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                 setBookingId(result.bookingId);
                 setBookingNumber(result.bookingNumber || result.bookingId);
                 setCreatedBookingId(parseInt(result.bookingId));
-                // Move to payment step instead of completing
+
+                // Small delay to ensure booking is committed to database
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                // Move to payment step
                 setStep(6);
                 showToast("success", "Booking created! Please complete payment.");
             } else {
                 showToast("error", result.error || "Booking failed. Please try again.");
             }
         } catch (error) {
-            console.error(error);
+            console.error("Booking creation error:", error);
             showToast("error", "An unexpected error occurred. Please try again.");
         } finally {
             setIsSubmitting(false);

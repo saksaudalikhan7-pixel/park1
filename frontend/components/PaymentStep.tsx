@@ -127,7 +127,17 @@ export function PaymentStep({
             }
         } catch (err: any) {
             console.error("Payment error:", err);
-            setError(err.message || "Payment failed. Please try again.");
+            const errorMessage = err.message || "Payment failed. Please try again.";
+
+            // Check for specific errors
+            if (errorMessage.includes("not found")) {
+                setError("Booking not found. Please go back and try again.");
+            } else if (errorMessage.includes("Decimal")) {
+                setError("Payment calculation error. Please contact support.");
+            } else {
+                setError(errorMessage);
+            }
+
             setPaymentStatus("failed");
             setIsProcessing(false);
         }
@@ -177,10 +187,10 @@ export function PaymentStep({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className={`rounded-2xl p-6 border-2 ${paymentStatus === "success"
-                            ? "bg-green-500/10 border-green-500/30"
-                            : paymentStatus === "failed"
-                                ? "bg-red-500/10 border-red-500/30"
-                                : "bg-primary/10 border-primary/30"
+                        ? "bg-green-500/10 border-green-500/30"
+                        : paymentStatus === "failed"
+                            ? "bg-red-500/10 border-red-500/30"
+                            : "bg-primary/10 border-primary/30"
                         }`}
                 >
                     <div className="flex items-center gap-3">
