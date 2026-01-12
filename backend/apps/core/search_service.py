@@ -6,11 +6,8 @@ Provides unified search across all admin modules with RBAC filtering.
 
 from django.db.models import Q
 from django.contrib.auth import get_user_model
-from apps.bookings.models import Booking, PartyBooking, Waiver
-from apps.payments.models import Payment
-from apps.shop.models import Voucher
-from apps.marketing.models import MarketingCampaign as Campaign
-from apps.cms.models import ContactMessage
+from django.db.models import Q
+from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
@@ -87,6 +84,8 @@ class GlobalSearchService:
     
     def _search_bookings(self):
         """Search session and party bookings."""
+        from apps.bookings.models import Booking, PartyBooking
+
         # Session bookings
         session_bookings = Booking.objects.filter(
             Q(booking_number__icontains=self.query) |
@@ -143,6 +142,8 @@ class GlobalSearchService:
     
     def _search_payments(self):
         """Search payment records."""
+        from apps.payments.models import Payment
+
         payments = Payment.objects.filter(
             Q(order_id__icontains=self.query) |
             Q(payment_id__icontains=self.query) |
@@ -168,6 +169,8 @@ class GlobalSearchService:
     
     def _search_vouchers(self):
         """Search voucher codes."""
+        from apps.shop.models import Voucher
+
         vouchers = Voucher.objects.filter(
             Q(code__icontains=self.query) |
             Q(description__icontains=self.query)
@@ -186,6 +189,8 @@ class GlobalSearchService:
     
     def _search_waivers(self):
         """Search waiver records."""
+        from apps.bookings.models import Waiver
+
         waivers = Waiver.objects.filter(
             Q(name__icontains=self.query) |
             Q(email__icontains=self.query) |
@@ -211,6 +216,7 @@ class GlobalSearchService:
     def _search_campaigns(self):
         """Search marketing campaigns."""
         try:
+            from apps.marketing.models import MarketingCampaign as Campaign
             campaigns = Campaign.objects.filter(
                 Q(name__icontains=self.query) |
                 Q(subject__icontains=self.query)
@@ -232,6 +238,7 @@ class GlobalSearchService:
     def _search_messages(self):
         """Search contact messages."""
         try:
+            from apps.cms.models import ContactMessage
             messages = ContactMessage.objects.filter(
                 Q(name__icontains=self.query) |
                 Q(email__icontains=self.query) |
