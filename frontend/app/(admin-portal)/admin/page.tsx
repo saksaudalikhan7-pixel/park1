@@ -214,11 +214,15 @@ export default async function AdminDashboard() {
                             </div>
                             <div>
                                 <p className="text-xs font-semibold text-slate-500 uppercase">Open Rate</p>
-                                <h3 className="text-2xl font-bold text-slate-900">{marketingStats.avg_open_rate}%</h3>
+                                <h3 className="text-2xl font-bold text-slate-900">
+                                    {marketingStats.total_emails_sent > 0 ? `${marketingStats.avg_open_rate}%` : 'N/A'}
+                                </h3>
                             </div>
                         </div>
                         <p className="text-xs text-slate-600">
-                            {marketingStats.total_emails_sent} emails sent
+                            {marketingStats.total_emails_sent > 0
+                                ? `${marketingStats.total_emails_sent} emails sent`
+                                : '0 emails sent'}
                         </p>
                     </div>
 
@@ -229,11 +233,15 @@ export default async function AdminDashboard() {
                             </div>
                             <div>
                                 <p className="text-xs font-semibold text-slate-500 uppercase">Click Rate</p>
-                                <h3 className="text-2xl font-bold text-slate-900">{marketingStats.avg_click_rate}%</h3>
+                                <h3 className="text-2xl font-bold text-slate-900">
+                                    {marketingStats.total_emails_sent > 0 ? `${marketingStats.avg_click_rate}%` : 'N/A'}
+                                </h3>
                             </div>
                         </div>
                         <p className="text-xs text-slate-600">
-                            Engagement tracking active
+                            {marketingStats.total_emails_sent > 0
+                                ? 'Engagement tracking active'
+                                : 'Send campaigns to track engagement'}
                         </p>
                     </div>
 
