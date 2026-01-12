@@ -9,8 +9,8 @@ from django.contrib.auth import get_user_model
 from apps.bookings.models import Booking, PartyBooking, Waiver
 from apps.payments.models import Payment
 from apps.shop.models import Voucher
-from apps.marketing.models import Campaign
-from apps.core.models import ContactMessage
+from apps.marketing.models import MarketingCampaign as Campaign
+from apps.cms.models import ContactMessage
 
 User = get_user_model()
 
