@@ -26,6 +26,7 @@ import {
     UserPlus,
     UserMinus
 } from "lucide-react";
+import { PaymentOverviewWidget } from "./components/PaymentOverviewWidget";
 
 export default async function AdminDashboard() {
     const session = await getAdminSession() as { email: string; role: string } | null;
@@ -294,6 +295,11 @@ export default async function AdminDashboard() {
                         </div>
                     </div>
                 )}
+            </div>
+
+            {/* Payment Overview Section */}
+            <div className="mb-8">
+                <PaymentOverviewWidget />
             </div>
 
             <div className="grid grid-cols-1 gap-8 mb-8">

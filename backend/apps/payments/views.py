@@ -276,3 +276,146 @@ def get_booking_payment_status(request, booking_id, booking_type):
             {'error': f'Failed to get payment status: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])  # Only admins can view stats
+def get_payment_stats(request):
+    """
+    Get payment statistics and analytics.
+    
+    GET /api/payments/stats
+    
+    Returns comprehensive payment analytics including:
+    - Total payments, successful, failed, refunds
+    - Revenue metrics (total, today, week, month)
+    - Average transaction value
+    - Success rate
+    - Recent payments
+    - Payment methods breakdown
+    - Daily revenue trend
+    """
+    try:
+        from .models import Payment
+        from apps.bookings.models import Booking
+        from apps.party_bookings.models import PartyBooking
+        from django.db.models import Sum, Count, Q, Avg
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        # Get all payments
+        all_payments = Payment.objects.all()
+        
+        # Basic counts
+        total_payments = all_payments.count()
+        successful_payments = all_payments.filter(status='SUCCESS', amount__gt=0).count()
+        failed_payments = all_payments.filter(status='FAILED').count()
+        total_refunds = all_payments.filter(amount__lt=0).count()
+        
+        # Revenue calculations (only successful payments with positive amounts)
+        successful_payment_qs = all_payments.filter(status='SUCCESS', amount__gt=0)
+        total_revenue = successful_payment_qs.aggregate(total=Sum('amount'))['total'] or 0
+        
+        # Time-based revenue
+        now = timezone.now()
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        week_start = today_start - timedelta(days=today_start.weekday())
+        month_start = today_start.replace(day=1)
+        
+        today_revenue = successful_payment_qs.filter(
+            created_at__gte=today_start
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        this_week_revenue = successful_payment_qs.filter(
+            created_at__gte=week_start
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        this_month_revenue = successful_payment_qs.filter(
+            created_at__gte=month_start
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        
+        # Average transaction value
+        avg_transaction = successful_payment_qs.aggregate(avg=Avg('amount'))['avg'] or 0
+        
+        # Success rate
+        success_rate = (successful_payments / total_payments * 100) if total_payments > 0 else 0
+        
+        # Payment methods breakdown
+        payment_methods = {
+            'MOCK': all_payments.filter(provider='MOCK').count(),
+            'RAZORPAY': all_payments.filter(provider='RAZORPAY').count()
+        }
+        
+        # Recent payments (last 10)
+        recent_payments_qs = all_payments.select_related(
+            'booking', 'party_booking'
+        ).order_by('-created_at')[:10]
+        
+        recent_payments = []
+        for payment in recent_payments_qs:
+            booking_info = None
+            if payment.booking:
+                booking_info = {
+                    'id': payment.booking.id,
+                    'type': 'session',
+                    'name': payment.booking.name,
+                    'email': payment.booking.email,
+                    'date': payment.booking.date.isoformat() if payment.booking.date else None,
+                }
+            elif payment.party_booking:
+                booking_info = {
+                    'id': payment.party_booking.id,
+                    'type': 'party',
+                    'name': payment.party_booking.name,
+                    'email': payment.party_booking.email,
+                    'date': payment.party_booking.date.isoformat() if payment.party_booking.date else None,
+                }
+            
+            recent_payments.append({
+                'id': payment.id,
+                'order_id': payment.order_id,
+                'payment_id': payment.payment_id,
+                'amount': float(payment.amount),
+                'status': payment.status,
+                'provider': payment.provider,
+                'created_at': payment.created_at.isoformat(),
+                'booking': booking_info
+            })
+        
+        # Daily revenue for last 7 days
+        daily_revenue = []
+        for i in range(6, -1, -1):
+            day_start = today_start - timedelta(days=i)
+            day_end = day_start + timedelta(days=1)
+            day_revenue = successful_payment_qs.filter(
+                created_at__gte=day_start,
+                created_at__lt=day_end
+            ).aggregate(total=Sum('amount'))['total'] or 0
+            
+            daily_revenue.append({
+                'date': day_start.strftime('%Y-%m-%d'),
+                'revenue': float(day_revenue)
+            })
+        
+        return Response({
+            'total_payments': total_payments,
+            'successful_payments': successful_payments,
+            'failed_payments': failed_payments,
+            'total_refunds': total_refunds,
+            'total_revenue': float(total_revenue),
+            'today_revenue': float(today_revenue),
+            'this_week_revenue': float(this_week_revenue),
+            'this_month_revenue': float(this_month_revenue),
+            'avg_transaction_value': float(avg_transaction),
+            'success_rate': round(success_rate, 2),
+            'payment_methods': payment_methods,
+            'recent_payments': recent_payments,
+            'daily_revenue': daily_revenue
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting payment stats: {str(e)}")
+        return Response(
+            {'error': f'Failed to get payment stats: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
