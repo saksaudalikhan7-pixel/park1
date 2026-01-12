@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'apps.cms',
     'apps.shop',
     'apps.invitations',
+    'apps.payments',  # Payment system with mock and Razorpay gateways
     'apps.emails.apps.EmailsConfig',  # Email system - use full path to ensure signals are registered
     'apps.marketing.apps.MarketingConfig',  # Azure Email Marketing System
 ]
@@ -290,4 +291,19 @@ LOGGING = {
         },
     },
 }
+
+# ====================================================
+# PAYMENT GATEWAY CONFIGURATION
+# ====================================================
+
+# Payment Mode: 'mock' (default, no real money) or 'razorpay' (production)
+PAYMENT_MODE = os.getenv('PAYMENT_MODE', 'mock')
+
+# Razorpay Credentials (only needed when PAYMENT_MODE='razorpay')
+RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', '')
+RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', '')
+
+# Payment Settings
+ALLOW_PARTIAL_PAYMENTS = True
+MINIMUM_DEPOSIT_PERCENTAGE = 50  # Minimum 50% deposit required for partial payments
 

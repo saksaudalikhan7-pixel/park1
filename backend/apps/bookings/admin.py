@@ -1,5 +1,62 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from .models import Customer, Booking, PartyBooking, Waiver, Transaction, BookingBlock, SessionBookingHistory, PartyBookingHistory
+
+# Payment inline for Booking admin
+class PaymentInline(admin.TabularInline):
+    """Inline display of payments for bookings"""
+    from apps.payments.models import Payment
+    model = Payment
+    fk_name = 'booking'
+    extra = 0
+    can_delete = False
+    readonly_fields = ['provider', 'order_id', 'payment_id', 'amount_display', 'status_display', 'created_at']
+    fields = ['provider', 'order_id', 'payment_id', 'amount_display', 'status_display', 'created_at']
+    
+    def amount_display(self, obj):
+        """Display amount with color"""
+        if obj.amount < 0:
+            return format_html('<span style="color: red;">-₹{}</span>', abs(obj.amount))
+        return format_html('₹{}', obj.amount)
+    amount_display.short_description = 'Amount'
+    
+    def status_display(self, obj):
+        """Display status with color"""
+        colors = {'CREATED': 'blue', 'SUCCESS': 'green', 'FAILED': 'red', 'REFUNDED': 'orange'}
+        color = colors.get(obj.status, 'gray')
+        return format_html('<span style="color: {}; font-weight: bold;">{}</span>', color, obj.status)
+    status_display.short_description = 'Status'
+    
+    def has_add_permission(self, request, obj=None):
+        return False
+
+# Party Payment inline
+class PartyPaymentInline(admin.TabularInline):
+    """Inline display of payments for party bookings"""
+    from apps.payments.models import Payment
+    model = Payment
+    fk_name = 'party_booking'
+    extra = 0
+    can_delete = False
+    readonly_fields = ['provider', 'order_id', 'payment_id', 'amount_display', 'status_display', 'created_at']
+    fields = ['provider', 'order_id', 'payment_id', 'amount_display', 'status_display', 'created_at']
+    
+    def amount_display(self, obj):
+        """Display amount with color"""
+        if obj.amount < 0:
+            return format_html('<span style="color: red;">-₹{}</span>', abs(obj.amount))
+        return format_html('₹{}', obj.amount)
+    amount_display.short_description = 'Amount'
+    
+    def status_display(self, obj):
+        """Display status with color"""
+        colors = {'CREATED': 'blue', 'SUCCESS': 'green', 'FAILED': 'red', 'REFUNDED': 'orange'}
+        color = colors.get(obj.status, 'gray')
+        return format_html('<span style="color: {}; font-weight: bold;">{}</span>', color, obj.status)
+    status_display.short_description = 'Status'
+    
+    def has_add_permission(self, request, obj=None):
+        return False
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
@@ -10,11 +67,34 @@ class CustomerAdmin(admin.ModelAdmin):
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ['id', 'uuid', 'name', 'email', 'date', 'time', 'adults', 'kids', 'amount', 'booking_status', 'payment_status', 'waiver_status', 'created_at']
+    list_display = ['id', 'uuid', 'name', 'email', 'date', 'time', 'adults', 'kids', 'amount_display', 'paid_amount_display', 'remaining_display', 'booking_status', 'payment_status', 'waiver_status', 'created_at']
     list_filter = ['booking_status', 'payment_status', 'waiver_status', 'type', 'date', 'created_at']
     search_fields = ['name', 'email', 'phone', 'uuid']
-    readonly_fields = ['uuid', 'created_at', 'updated_at']
+    readonly_fields = ['uuid', 'created_at', 'updated_at', 'remaining_balance_display']
     ordering = ['-created_at']
+    inlines = [PaymentInline]
+    
+    def amount_display(self, obj):
+        return format_html('₹{}', obj.amount)
+    amount_display.short_description = 'Total Amount'
+    amount_display.admin_order_field = 'amount'
+    
+    def paid_amount_display(self, obj):
+        return format_html('₹{}', obj.paid_amount)
+    paid_amount_display.short_description = 'Paid'
+    paid_amount_display.admin_order_field = 'paid_amount'
+    
+    def remaining_display(self, obj):
+        remaining = obj.remaining_balance
+        if remaining > 0:
+            return format_html('<span style="color: orange;">₹{}</span>', remaining)
+        return format_html('<span style="color: green;">₹0</span>')
+    remaining_display.short_description = 'Remaining'
+    
+    def remaining_balance_display(self, obj):
+        return format_html('₹{}', obj.remaining_balance)
+    remaining_balance_display.short_description = 'Remaining Balance'
+    
     fieldsets = (
         ('Basic Information', {
             'fields': ('uuid', 'name', 'email', 'phone', 'customer')
@@ -23,7 +103,7 @@ class BookingAdmin(admin.ModelAdmin):
             'fields': ('date', 'time', 'duration', 'type', 'adults', 'kids', 'spectators')
         }),
         ('Payment', {
-            'fields': ('amount', 'subtotal', 'discount_amount', 'voucher_code', 'voucher')
+            'fields': ('amount', 'paid_amount', 'remaining_balance_display', 'subtotal', 'discount_amount', 'voucher_code', 'voucher')
         }),
         ('Status', {
             'fields': ('booking_status', 'payment_status', 'waiver_status', 'status')
@@ -38,17 +118,40 @@ class BookingAdmin(admin.ModelAdmin):
 
 @admin.register(PartyBooking)
 class PartyBookingAdmin(admin.ModelAdmin):
-    list_display = ['id', 'uuid', 'name', 'email', 'date', 'time', 'package_name', 'kids', 'adults', 'amount', 'status', 'waiver_signed', 'created_at']
-    list_filter = ['status', 'waiver_signed', 'date', 'created_at']
+    list_display = ['id', 'uuid', 'name', 'email', 'date', 'time', 'package_name', 'kids', 'adults', 'amount_display', 'paid_amount_display', 'remaining_display', 'status', 'payment_status', 'waiver_signed', 'created_at']
+    list_filter = ['status', 'payment_status', 'waiver_signed', 'date', 'created_at']
     search_fields = ['name', 'email', 'phone', 'uuid', 'package_name', 'birthday_child_name']
-    readonly_fields = ['uuid', 'created_at', 'updated_at']
+    readonly_fields = ['uuid', 'created_at', 'updated_at', 'remaining_balance_display']
     ordering = ['-created_at']
+    inlines = [PartyPaymentInline]
+    
+    def amount_display(self, obj):
+        return format_html('₹{}', obj.amount)
+    amount_display.short_description = 'Total Amount'
+    amount_display.admin_order_field = 'amount'
+    
+    def paid_amount_display(self, obj):
+        return format_html('₹{}', obj.paid_amount)
+    paid_amount_display.short_description = 'Paid'
+    paid_amount_display.admin_order_field = 'paid_amount'
+    
+    def remaining_display(self, obj):
+        remaining = obj.remaining_balance
+        if remaining > 0:
+            return format_html('<span style="color: orange;">₹{}</span>', remaining)
+        return format_html('<span style="color: green;">₹0</span>')
+    remaining_display.short_description = 'Remaining'
+    
+    def remaining_balance_display(self, obj):
+        return format_html('₹{}', obj.remaining_balance)
+    remaining_balance_display.short_description = 'Remaining Balance'
+    
     fieldsets = (
         ('Basic Information', {
             'fields': ('uuid', 'name', 'email', 'phone', 'customer')
         }),
         ('Party Details', {
-            'fields': ('date', 'time', 'package_name', 'kids', 'adults', 'amount')
+            'fields': ('date', 'time', 'package_name', 'kids', 'adults', 'amount', 'paid_amount', 'remaining_balance_display')
         }),
         ('Birthday Child', {
             'fields': ('birthday_child_name', 'birthday_child_age')
@@ -57,7 +160,7 @@ class PartyBookingAdmin(admin.ModelAdmin):
             'fields': ('participants', 'waiver_signed', 'waiver_signed_at', 'waiver_ip_address')
         }),
         ('Status', {
-            'fields': ('status',)
+            'fields': ('status', 'payment_status')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at')

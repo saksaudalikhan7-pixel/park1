@@ -22,6 +22,7 @@ urlpatterns = [
     path('api/v1/shop/', include('apps.shop.urls')),
     path('api/v1/cms/', include('apps.cms.urls')),
     path('api/v1/bookings/', include('apps.bookings.urls')),
+    path('api/v1/payments/', include('apps.payments.urls')),  # Payment system
     path('api/v1/invitations/', include('apps.invitations.urls')),
     path('api/v1/emails/', include('apps.emails.urls')),
     path('api/v1/marketing/', include('apps.marketing.urls')),

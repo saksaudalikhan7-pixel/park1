@@ -31,7 +31,8 @@ class Booking(models.Model):
     ]
     PAYMENT_STATUS_CHOICES = [
         ('PENDING', 'Pending'),
-        ('PAID', 'Paid'),
+        ('PARTIAL', 'Partially Paid'),
+        ('PAID', 'Fully Paid'),
         ('REFUNDED', 'Refunded'),
         ('FAILED', 'Failed'),
     ]
@@ -57,6 +58,7 @@ class Booking(models.Model):
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    paid_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Total amount paid so far")
     voucher_code = models.CharField(max_length=50, null=True, blank=True)
     
     status = models.CharField(max_length=20, default='CONFIRMED') # Legacy
@@ -92,6 +94,11 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"Booking {self.id} - {self.name}"
+    
+    @property
+    def remaining_balance(self):
+        """Calculate remaining balance to be paid"""
+        return self.amount - self.paid_amount
 
 class PartyBooking(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
@@ -100,6 +107,13 @@ class PartyBooking(models.Model):
         ('CONFIRMED', 'Confirmed'),
         ('CANCELLED', 'Cancelled'),
         ('COMPLETED', 'Completed'),
+    ]
+    PAYMENT_STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('PARTIAL', 'Partially Paid'),
+        ('PAID', 'Fully Paid'),
+        ('REFUNDED', 'Refunded'),
+        ('FAILED', 'Failed'),
     ]
     
     name = models.CharField(max_length=255)
@@ -111,6 +125,7 @@ class PartyBooking(models.Model):
     kids = models.IntegerField(default=0)
     adults = models.IntegerField(default=0)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    paid_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Total amount paid so far")
     
     birthday_child_name = models.CharField(max_length=255, null=True, blank=True)
     birthday_child_age = models.IntegerField(null=True, blank=True)
@@ -129,6 +144,7 @@ class PartyBooking(models.Model):
     
     
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='PENDING')
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True, related_name='party_bookings')
     
     # Arrival tracking (matching Booking model)
@@ -153,6 +169,11 @@ class PartyBooking(models.Model):
 
     def __str__(self):
         return f"Party {self.id} - {self.name}"
+    
+    @property
+    def remaining_balance(self):
+        """Calculate remaining balance to be paid"""
+        return self.amount - self.paid_amount
 
 class Waiver(models.Model):
     PARTICIPANT_TYPE_CHOICES = [
