@@ -4,8 +4,8 @@ set -e
 echo "Running database migrations..."
 python manage.py migrate --noinput || echo "WARNING: Major migration failed, but continuing startup..."
 
-echo "FORCING booking_number migration (CRITICAL)..."
-python manage.py force_booking_migration || echo "Force migration command not found, trying standard migrate..."
+echo "COMPREHENSIVE MIGRATION FIX (ALL APPS)..."
+python manage.py fix_all_migrations || echo "Comprehensive fix command not found, trying individual migrations..."
 
 echo "Running bookings app migration explicitly (CRITICAL)..."
 python manage.py migrate bookings --noinput || echo "Bookings migration warning"
