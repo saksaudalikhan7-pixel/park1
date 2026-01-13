@@ -1,5 +1,5 @@
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ninjainflablepark-gbhwbbdna5hjgvf9.centralindia-01.azurewebsites.net/api/v1';
 
 export const API_ENDPOINTS = {
     // CMS Endpoints
@@ -59,8 +59,8 @@ export const API_ENDPOINTS = {
 
     // Auth Endpoints
     auth: {
-        token: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/token/`,
-        refresh: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/token/refresh/`,
+        token: `${process.env.NEXT_PUBLIC_API_URL || 'https://ninjainflablepark-gbhwbbdna5hjgvf9.centralindia-01.azurewebsites.net'}/api/token/`,
+        refresh: `${process.env.NEXT_PUBLIC_API_URL || 'https://ninjainflablepark-gbhwbbdna5hjgvf9.centralindia-01.azurewebsites.net'}/api/token/refresh/`,
     },
 };
 

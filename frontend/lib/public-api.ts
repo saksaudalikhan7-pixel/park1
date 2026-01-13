@@ -1,5 +1,6 @@
 // Public API functions - fetch from Django backend
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+// Use production URL by default, fallback to env variable
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ninjainflablepark-gbhwbbdna5hjgvf9.centralindia-01.azurewebsites.net/api/v1';
 
 async function fetchFromAPI(endpoint: string) {
     try {
