@@ -17,24 +17,29 @@ export const metadata = {
 };
 
 export default async function Home() {
-    // Fetch all data in parallel using public APIs
-    const [
-        banners,
-        activities,
-        gallery,
-        sections,
-        reels,
-        statCards,
-        settings
-    ] = await Promise.all([
-        getPublicBanners(),
-        getPublicActivities(),
-        getPublicGallery(),
-        getPublicPageSections('home'),
-        getPublicInstagramReels(),
-        getPublicStatCards('home'),
-        getGlobalSettings()
-    ]);
+    // Fetch all data in parallel using public APIs with fallback
+    let banners = [];
+    let activities = [];
+    let gallery = [];
+    let sections = [];
+    let reels = [];
+    let statCards = [];
+    let settings = null;
+
+    try {
+        [banners, activities, gallery, sections, reels, statCards, settings] = await Promise.all([
+            getPublicBanners().catch(() => []),
+            getPublicActivities().catch(() => []),
+            getPublicGallery().catch(() => []),
+            getPublicPageSections('home').catch(() => []),
+            getPublicInstagramReels().catch(() => []),
+            getPublicStatCards('home').catch(() => []),
+            getGlobalSettings().catch(() => null)
+        ]);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        // Use empty arrays as fallback
+    }
 
     // Extract page sections
     const heroSection = sections.find((s: any) => s.section_key === 'hero');
