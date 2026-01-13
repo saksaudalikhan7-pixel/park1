@@ -80,26 +80,37 @@ export function GlobalSearch() {
         const timer = setTimeout(async () => {
             try {
                 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-                const response = await fetch(
-                    `${API_URL}/core/admin/search/?q=${encodeURIComponent(query)}`,
-                    {
-                        credentials: "include",
-                        cache: "no-store",
-                    }
-                );
+                const searchUrl = `${API_URL}/core/admin/search/?q=${encodeURIComponent(query)}`;
+
+                console.log('[GlobalSearch] Searching for:', query);
+                console.log('[GlobalSearch] API URL:', searchUrl);
+
+                const response = await fetch(searchUrl, {
+                    credentials: "include",
+                    cache: "no-store",
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                console.log('[GlobalSearch] Response status:', response.status);
 
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('[GlobalSearch] Results:', data);
                     setResults(data.results || []);
                     setShowResults(true);
                     setSelectedIndex(0);
                 } else {
-                    console.error("Search failed:", response.status);
+                    const errorText = await response.text();
+                    console.error('[GlobalSearch] Search failed:', response.status, errorText);
                     setResults([]);
+                    setShowResults(true); // Show "No results" message
                 }
             } catch (error) {
-                console.error("Search error:", error);
+                console.error('[GlobalSearch] Search error:', error);
                 setResults([]);
+                setShowResults(true); // Show error state
             } finally {
                 setIsSearching(false);
             }
@@ -258,8 +269,8 @@ export function GlobalSearch() {
                                                         key={`${result.type}-${index}`}
                                                         onClick={() => handleResultClick(result.route)}
                                                         className={`w-full px-4 py-3 text-left transition-colors ${isSelected
-                                                                ? "bg-blue-50 border-l-2 border-blue-500"
-                                                                : "hover:bg-slate-50 border-l-2 border-transparent"
+                                                            ? "bg-blue-50 border-l-2 border-blue-500"
+                                                            : "hover:bg-slate-50 border-l-2 border-transparent"
                                                             }`}
                                                     >
                                                         <div className="flex items-start gap-3">
