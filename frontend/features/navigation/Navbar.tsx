@@ -28,7 +28,7 @@ export function Navbar({ settings }: { settings?: any }) {
         // Fetch dynamic logo on mount
         const fetchLogo = async () => {
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'}/core/logos/active/`);
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://ninjainflablepark-gbhwbbdna5hjgvf9.centralindia-01.azurewebsites.net/api/v1'}/core/logos/active/`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data.image_url) {
@@ -36,7 +36,8 @@ export function Navbar({ settings }: { settings?: any }) {
                     }
                 }
             } catch (error) {
-                console.error("Failed to fetch logo:", error);
+                // Silently fail and use default logo
+                console.log("Using default logo");
             }
         };
         fetchLogo();
