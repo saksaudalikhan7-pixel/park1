@@ -10,44 +10,13 @@ import ParticipantCollection from "../../../components/ParticipantCollection";
 import { PaymentStep } from "../../../components/PaymentStep";
 import { fetchBookingBlocks, isDateBlocked, BookingBlock } from "@/lib/api/booking-blocks";
 import { PageSection } from "@/lib/cms/types";
+import { HybridDateInput } from "../../../components/HybridDateInput";
+import EInvitationStep from "./steps/EInvitationStep";
 
 interface PartyBookingWizardProps {
     cmsContent?: PageSection[];
 }
 
-// E-Invitation Step Component
-function EInvitationStep({ bookingId, bookingDetails, onNext, onSkip, onBack, title, subtitle }: any) {
-    return (
-        <div className="bg-surface-800/50 backdrop-blur-md p-8 rounded-3xl border border-white/10 max-w-3xl mx-auto">
-            <h2 className="text-2xl font-display font-bold mb-4 text-primary">{title}</h2>
-            <p className="text-white/70 mb-6">{subtitle}</p>
-            <div className="bg-background-dark rounded-xl p-6 mb-6">
-                <p className="text-white/80 mb-4">
-                    Send beautiful e-invitations to your guests! You can customize and send invitations after booking.
-                </p>
-                <p className="text-sm text-white/60">
-                    Visit your booking dashboard to manage invitations.
-                </p>
-            </div>
-            <div className="flex gap-4">
-                <button
-                    type="button"
-                    onClick={onBack}
-                    className="px-6 py-3 bg-surface-700 hover:bg-surface-600 text-white font-bold rounded-xl transition-colors"
-                >
-                    Back
-                </button>
-                <button
-                    type="button"
-                    onClick={onSkip}
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold rounded-xl transition-all"
-                >
-                    Continue to Payment
-                </button>
-            </div>
-        </div>
-    );
-}
 
 
 export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWizardProps) {
@@ -110,8 +79,7 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
 
     // ...
 
-    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newDate = e.target.value;
+    const handleDateChange = (newDate: string) => {
         const blockReason = isDateBlocked(newDate, bookingBlocks);
 
         if (blockReason) {
@@ -150,12 +118,13 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
             const result = await createPartyBooking(formData);
 
             if (result.success) {
-                setTempBookingId(result.bookingId);
+                // Store integer ID for payment step
+                setTempBookingId(result.booking.id.toString());
                 // Store complete booking details including the integer id for invitation step
                 setBookingDetails({
                     ...formData,
                     ...result.booking, // Include full booking object (id, uuid, etc.)
-                    bookingId: result.bookingId
+                    bookingId: result.booking.id
                 });
                 setStep(2); // Move to participant collection
             } else {
@@ -427,12 +396,12 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
                                             <Calendar className="w-4 h-4 inline mr-2" />
                                             Party Date *
                                         </label>
-                                        <input
-                                            type="date"
-                                            required
+                                        <HybridDateInput
                                             value={formData.date}
-                                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                            onChange={handleDateChange}
+                                            placeholder="DD-MM-YYYY"
                                             className="w-full px-4 py-3 bg-background-dark border-2 border-surface-700 rounded-xl focus:border-primary focus:outline-none transition-colors text-white"
+                                            min={new Date().toISOString().split('T')[0]}
                                         />
                                     </div>
 
@@ -618,6 +587,9 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
                                 totalParticipants={formData.participants}
                                 title={getContent('step-2', 'Participants', '').title}
                                 subtitle={getContent('step-2', '', `Add details for all ${formData.participants} participants`).subtitle}
+                                primaryContactName={formData.name}
+                                primaryContactEmail={formData.email}
+                                primaryContactPhone={formData.phone}
                             />
                         </ScrollReveal>
                     )

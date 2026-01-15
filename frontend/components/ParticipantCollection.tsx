@@ -26,14 +26,17 @@ interface ParticipantCollectionProps {
     totalParticipants: number;
     title?: string;
     subtitle?: string;
+    primaryContactName?: string;
+    primaryContactEmail?: string;
+    primaryContactPhone?: string;
 }
 
-export default function ParticipantCollection({ onSubmit, onBack, totalParticipants, title, subtitle }: ParticipantCollectionProps) {
+export default function ParticipantCollection({ onSubmit, onBack, totalParticipants, title, subtitle, primaryContactName, primaryContactEmail, primaryContactPhone }: ParticipantCollectionProps) {
     const [adults, setAdults] = useState<Adult[]>([{
         id: '1',
-        name: '',
-        email: '',
-        phone: '',
+        name: primaryContactName || '',
+        email: primaryContactEmail || '',
+        phone: primaryContactPhone || '',
         dob: '',
         isPrimary: true
     }]);
