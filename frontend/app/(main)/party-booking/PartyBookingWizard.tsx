@@ -228,7 +228,7 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
                             <div className="bg-background-dark rounded-2xl p-6 mb-8 text-left">
                                 <h3 className="font-bold text-lg mb-4 text-white">Booking Summary</h3>
                                 <div className="space-y-2 text-white/70">
-                                    <p><strong className="text-white">Booking ID:</strong> {bookingDetails.bookingId}</p>
+                                    <p><strong className="text-white">Booking ID:</strong> {bookingDetails.uuid || bookingDetails.id}</p>
                                     <p><strong className="text-white">Total Amount:</strong> ₹{costs.total.toFixed(2)}</p>
                                     <p><strong className="text-white">Deposit Required (50%):</strong> ₹{costs.deposit.toFixed(2)}</p>
                                     <p><strong className="text-white">Date:</strong> {formData.date}</p>
@@ -245,7 +245,7 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
                             </div>
 
                             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                <BouncyButton size="lg" variant="primary" onClick={() => router.push(`/tickets/${bookingDetails.bookingId}`)}>
+                                <BouncyButton size="lg" variant="primary" onClick={() => router.push(`/tickets/${bookingDetails.uuid || bookingDetails.id}`)}>
                                     View Ticket
                                 </BouncyButton>
                                 {/* We could also link to the public invitation page here! */}
