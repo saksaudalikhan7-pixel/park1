@@ -160,8 +160,9 @@ export async function createPartyBooking(formData: any) {
 
         return {
             success: true,
-            bookingId: booking.uuid || booking.id,
-            booking: booking, // Include full booking object with id, uuid, etc.
+            bookingId: booking.uuid,  // UUID for participant and invitation endpoints
+            bookingIntId: booking.id,  // Integer ID for payment endpoint
+            booking: booking,  // Full booking object with both id and uuid
             amount: totalAmount,
             depositAmount: totalAmount * 0.5 // 50% deposit
         };

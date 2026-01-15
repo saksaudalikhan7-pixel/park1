@@ -118,14 +118,15 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
             const result = await createPartyBooking(formData);
 
             if (result.success) {
-                // Store integer ID for payment step
-                setTempBookingId(result.booking.id.toString());
-                // Store complete booking details including the integer id for invitation step
+                // Store UUID as primary identifier (for participants and invitations)
+                setTempBookingId(result.bookingId);
+
+                // Store complete booking details
                 setBookingDetails({
                     ...formData,
-                    ...result.booking, // Include full booking object (id, uuid, etc.)
-                    bookingId: result.booking.id
+                    ...result.booking,  // Contains id (int), uuid (string), and all other fields
                 });
+
                 setStep(2); // Move to participant collection
             } else {
                 alert(result.error || "Failed to create booking. Please try again.");
@@ -139,11 +140,17 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
     };
 
     const handleParticipantSubmit = async (data: { adults: any[]; minors: any[]; waiverSigned: boolean }) => {
-        if (!tempBookingId) return;
+        if (!tempBookingId) {
+            alert("Booking ID not found. Please go back and try again.");
+            return;
+        }
 
         setIsSubmitting(true);
 
         try {
+            console.log('[Party Wizard] Saving participants for booking:', tempBookingId);
+            console.log('[Party Wizard] Participant data:', data);
+
             const response = await fetch(`/api/party-bookings/${tempBookingId}/participants`, {
                 method: 'POST',
                 headers: {
@@ -160,13 +167,16 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
             });
 
             if (response.ok) {
+                console.log('[Party Wizard] Participants saved successfully');
                 // Instead of finishing immediately, we go to Step 3 (Invitation)
                 setStep(3);
             } else {
-                alert("Failed to save participants. Please try again.");
+                const errorData = await response.json().catch(() => ({}));
+                console.error('[Party Wizard] Failed to save participants:', errorData);
+                alert(errorData.error || "Failed to save participants. Please try again.");
             }
         } catch (error) {
-            console.error("Error saving participants:", error);
+            console.error("[Party Wizard] Error saving participants:", error);
             alert("An error occurred. Please try again.");
         } finally {
             setIsSubmitting(false);
@@ -610,10 +620,10 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
                 }
 
                 {
-                    step === 4 && tempBookingId && (
+                    step === 4 && bookingDetails && (
                         <ScrollReveal animation="slideUp">
                             <PaymentStep
-                                bookingId={parseInt(tempBookingId)}
+                                bookingId={bookingDetails.id}
                                 bookingType="party"
                                 amount={costs.total}
                                 bookingDetails={{
