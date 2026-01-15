@@ -1,5 +1,4 @@
 import { getDashboardStats } from "@/app/actions/admin";
-import { getMarketingStats } from "@/app/actions/marketing";
 import { getAdminSession, requirePermission } from "../../lib/admin-auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -20,11 +19,7 @@ import {
     Image,
     Ticket,
     UserCheck,
-    Repeat,
-    Mail,
-    MousePointerClick,
-    UserPlus,
-    UserMinus
+    Repeat
 } from "lucide-react";
 import { PaymentOverviewWidget } from "./components/PaymentOverviewWidget";
 
@@ -41,7 +36,6 @@ export default async function AdminDashboard() {
     }
 
     const stats = await getDashboardStats();
-    const marketingStats = await getMarketingStats();
 
     // Calculate max revenue for chart scaling
     const maxRevenue = Math.max(...stats.monthlyRevenue.map((d: any) => d.total), 1000);
@@ -165,145 +159,7 @@ export default async function AdminDashboard() {
                 </div>
             </div>
 
-            {/* Email Marketing Performance Section */}
-            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-8 border border-purple-200 mb-8">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-slate-900">📧 Email Marketing Performance</h2>
-                    <Link href="/admin/marketing" className="text-sm font-medium text-purple-600 hover:text-purple-700 flex items-center gap-1">
-                        View Campaigns <ArrowRight size={16} />
-                    </Link>
-                </div>
 
-                {/* Info Banner */}
-                {marketingStats.total_emails_sent === 0 && marketingStats.total_campaigns > 0 && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                        <div className="flex items-start gap-3">
-                            <AlertCircle size={20} className="text-blue-600 mt-0.5 shrink-0" />
-                            <div>
-                                <p className="text-sm font-semibold text-blue-900">Email Tracking Active</p>
-                                <p className="text-xs text-blue-700 mt-1">
-                                    Open and click tracking is now enabled. Campaigns sent from now on will show detailed engagement metrics.
-                                    Existing campaigns display basic stats only.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Marketing KPI Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                    <div className="bg-white rounded-xl p-5 border border-purple-100 shadow-sm">
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="p-2.5 bg-purple-100 rounded-lg">
-                                <Mail size={20} className="text-purple-600" />
-                            </div>
-                            <div>
-                                <p className="text-xs font-semibold text-slate-500 uppercase">Total Campaigns</p>
-                                <h3 className="text-2xl font-bold text-slate-900">{marketingStats.total_campaigns}</h3>
-                            </div>
-                        </div>
-                        <p className="text-xs text-slate-600">
-                            {marketingStats.active_campaigns} active • {marketingStats.sent_campaigns} sent
-                        </p>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-5 border border-emerald-100 shadow-sm">
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="p-2.5 bg-emerald-100 rounded-lg">
-                                <Mail size={20} className="text-emerald-600" />
-                            </div>
-                            <div>
-                                <p className="text-xs font-semibold text-slate-500 uppercase">Open Rate</p>
-                                <h3 className="text-2xl font-bold text-slate-900">
-                                    {marketingStats.total_emails_sent > 0 ? `${marketingStats.avg_open_rate}%` : 'N/A'}
-                                </h3>
-                            </div>
-                        </div>
-                        <p className="text-xs text-slate-600">
-                            {marketingStats.total_emails_sent > 0
-                                ? `${marketingStats.total_emails_sent} emails sent`
-                                : '0 emails sent'}
-                        </p>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-5 border border-blue-100 shadow-sm">
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="p-2.5 bg-blue-100 rounded-lg">
-                                <MousePointerClick size={20} className="text-blue-600" />
-                            </div>
-                            <div>
-                                <p className="text-xs font-semibold text-slate-500 uppercase">Click Rate</p>
-                                <h3 className="text-2xl font-bold text-slate-900">
-                                    {marketingStats.total_emails_sent > 0 ? `${marketingStats.avg_click_rate}%` : 'N/A'}
-                                </h3>
-                            </div>
-                        </div>
-                        <p className="text-xs text-slate-600">
-                            {marketingStats.total_emails_sent > 0
-                                ? 'Engagement tracking active'
-                                : 'Send campaigns to track engagement'}
-                        </p>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-5 border border-indigo-100 shadow-sm">
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="p-2.5 bg-indigo-100 rounded-lg">
-                                <UserPlus size={20} className="text-indigo-600" />
-                            </div>
-                            <div>
-                                <p className="text-xs font-semibold text-slate-500 uppercase">Subscribers</p>
-                                <h3 className="text-2xl font-bold text-slate-900">{marketingStats.subscriber_count}</h3>
-                            </div>
-                        </div>
-                        <p className="text-xs text-slate-600">
-                            {marketingStats.unsubscribe_rate}% unsubscribe rate
-                        </p>
-                    </div>
-                </div>
-
-                {/* Recent Campaigns Table */}
-                {marketingStats.recent_campaigns.length > 0 && (
-                    <div className="bg-white rounded-xl border border-purple-100 overflow-hidden">
-                        <div className="p-4 border-b border-slate-200 bg-slate-50">
-                            <h3 className="text-sm font-bold text-slate-900">Recent Campaigns</h3>
-                        </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left">
-                                <thead className="bg-slate-50 border-b border-slate-200">
-                                    <tr>
-                                        <th className="px-4 py-3 text-xs font-bold text-slate-600 uppercase">Campaign</th>
-                                        <th className="px-4 py-3 text-xs font-bold text-slate-600 uppercase">Sent</th>
-                                        <th className="px-4 py-3 text-xs font-bold text-slate-600 uppercase">Recipients</th>
-                                        <th className="px-4 py-3 text-xs font-bold text-slate-600 uppercase">Open Rate</th>
-                                        <th className="px-4 py-3 text-xs font-bold text-slate-600 uppercase">Click Rate</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                    {marketingStats.recent_campaigns.map((campaign) => (
-                                        <tr key={campaign.id} className="hover:bg-purple-50/50 transition-colors">
-                                            <td className="px-4 py-3 text-sm font-medium text-slate-900">{campaign.title}</td>
-                                            <td className="px-4 py-3 text-sm text-slate-600">
-                                                {new Date(campaign.sent_at).toLocaleDateString()}
-                                            </td>
-                                            <td className="px-4 py-3 text-sm text-slate-600">{campaign.sent_count}</td>
-                                            <td className="px-4 py-3">
-                                                <span className="text-sm font-bold text-emerald-600">
-                                                    {campaign.open_rate.toFixed(1)}%
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <span className="text-sm font-bold text-blue-600">
-                                                    {campaign.click_rate.toFixed(1)}%
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                )}
-            </div>
 
             {/* Payment Overview Section */}
             <div className="mb-8">
