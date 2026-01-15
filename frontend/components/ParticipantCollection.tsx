@@ -216,6 +216,7 @@ export default function ParticipantCollection({ onSubmit, onBack, totalParticipa
                                                 onChange={(val) => updateAdult(adult.id, 'dob', val)}
                                                 max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
                                                 placeholder="DD-MM-YYYY"
+                                                className="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-lg focus:border-primary focus:outline-none text-white placeholder:text-slate-400"
                                             />
                                         </div>
                                     </div>
@@ -295,6 +296,7 @@ export default function ParticipantCollection({ onSubmit, onBack, totalParticipa
                                                     onChange={(val) => updateMinor(minor.id, 'dob', val)}
                                                     max={new Date().toISOString().split('T')[0]}
                                                     placeholder="DD-MM-YYYY"
+                                                    className="w-full px-4 py-3 bg-surface-800 border border-surface-700 rounded-lg focus:border-primary focus:outline-none text-white placeholder:text-slate-400"
                                                 />
                                             </div>
 
