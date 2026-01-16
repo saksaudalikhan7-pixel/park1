@@ -37,7 +37,12 @@ export default function BookingsTable({ bookings }: BookingsTableProps) {
                                     onClick={() => setEditingBooking(booking)}
                                 >
                                     <td className="py-4 px-6 text-sm font-medium text-gray-900">
-                                        #{String(booking.id).slice(-6).toUpperCase()}
+                                        <div className="flex flex-col">
+                                            <span>{booking.booking_reference || booking.booking_number || `#${booking.id}`}</span>
+                                            {(booking.booking_reference || booking.booking_number) && (
+                                                <span className="text-xs text-gray-400">#{booking.id}</span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="py-4 px-6">
                                         <div className="text-sm font-medium text-gray-900">{booking.name}</div>

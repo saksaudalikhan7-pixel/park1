@@ -274,7 +274,12 @@ export default function PartyBookingsPage() {
                                 filteredBookings.slice(0, displayCount).map((booking: any) => (
                                     <tr key={booking.id} className="hover:bg-purple-50/30 transition-all duration-200">
                                         <td className="px-6 py-4">
-                                            <span className="text-sm font-bold text-slate-900">#{booking.id}</span>
+                                            <div className="flex flex-col">
+                                                <span className="text-sm font-bold text-slate-900">{booking.booking_reference || booking.booking_number || `#${booking.id}`}</span>
+                                                {(booking.booking_reference || booking.booking_number) && (
+                                                    <span className="text-xs text-slate-500">#{booking.id}</span>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col">
