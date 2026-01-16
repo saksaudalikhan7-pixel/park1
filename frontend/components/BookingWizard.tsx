@@ -245,12 +245,20 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
             const result = await onSubmit(data);
 
             if (result.success && result.bookingId) {
+                const bookingIdNum = parseInt(result.bookingId);
+
+                if (isNaN(bookingIdNum)) {
+                    showToast("error", "Invalid booking ID received. Please try again.");
+                    setIsSubmitting(false);
+                    return;
+                }
+
                 setBookingId(result.bookingId);
                 setBookingNumber(result.bookingNumber || result.bookingId);
-                setCreatedBookingId(parseInt(result.bookingId));
+                setCreatedBookingId(bookingIdNum);
 
-                // Small delay to ensure booking is committed to database
-                await new Promise(resolve => setTimeout(resolve, 500));
+                // Longer delay to ensure booking is fully committed to database
+                await new Promise(resolve => setTimeout(resolve, 1000));
 
                 // Move to payment step
                 setStep(6);
