@@ -114,7 +114,7 @@ export default function PaymentsListPage() {
                         <CreditCard className="w-8 h-8 text-primary" />
                         Payments
                     </h1>
-                    <p className="text-white/60 mt-1">Manage all payment transactions</p>
+                    <p className="text-white/90 mt-1">Manage all payment transactions</p>
                 </div>
                 <button
                     onClick={fetchPayments}
@@ -128,23 +128,23 @@ export default function PaymentsListPage() {
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="bg-surface-800/50 backdrop-blur-md p-4 rounded-xl border border-white/10">
-                    <p className="text-white/60 text-sm font-medium">Total Payments</p>
+                    <p className="text-white/90 text-sm font-semibold">Total Payments</p>
                     <p className="text-2xl font-black text-white mt-1">{stats.total}</p>
                 </div>
                 <div className="bg-green-500/10 backdrop-blur-md p-4 rounded-xl border border-green-500/30">
-                    <p className="text-green-400 text-sm font-medium">Successful</p>
+                    <p className="text-green-400 text-sm font-semibold">Successful</p>
                     <p className="text-2xl font-black text-green-400 mt-1">{stats.success}</p>
                 </div>
                 <div className="bg-red-500/10 backdrop-blur-md p-4 rounded-xl border border-red-500/30">
-                    <p className="text-red-400 text-sm font-medium">Failed</p>
+                    <p className="text-red-400 text-sm font-semibold">Failed</p>
                     <p className="text-2xl font-black text-red-400 mt-1">{stats.failed}</p>
                 </div>
                 <div className="bg-orange-500/10 backdrop-blur-md p-4 rounded-xl border border-orange-500/30">
-                    <p className="text-orange-400 text-sm font-medium">Refunds</p>
+                    <p className="text-orange-400 text-sm font-semibold">Refunds</p>
                     <p className="text-2xl font-black text-orange-400 mt-1">{stats.refunded}</p>
                 </div>
                 <div className="bg-primary/10 backdrop-blur-md p-4 rounded-xl border border-primary/30">
-                    <p className="text-primary text-sm font-medium">Total Revenue</p>
+                    <p className="text-primary text-sm font-semibold">Total Revenue</p>
                     <p className="text-2xl font-black text-primary mt-1">₹{stats.totalAmount.toLocaleString('en-IN')}</p>
                 </div>
             </div>
@@ -159,7 +159,7 @@ export default function PaymentsListPage() {
                             placeholder="Search by Order ID, Payment ID..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-surface-900 border border-white/10 rounded-lg text-white placeholder-white/40 focus:border-primary focus:outline-none"
+                            className="w-full pl-10 pr-4 py-2 bg-surface-900 border border-white/20 rounded-lg text-white placeholder-white/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                         />
                     </div>
                     <select
@@ -195,7 +195,7 @@ export default function PaymentsListPage() {
                 ) : filteredPayments.length === 0 ? (
                     <div className="p-12 text-center">
                         <CreditCard className="w-12 h-12 text-white/20 mx-auto mb-4" />
-                        <p className="text-white/60">No payments found</p>
+                        <p className="text-white/90 text-lg">No payments found</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
@@ -220,10 +220,10 @@ export default function PaymentsListPage() {
                                     <th className="px-6 py-4 text-left text-xs font-bold text-white/60 uppercase tracking-wider">
                                         Status
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-white/60 uppercase tracking-wider">
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-white/90 uppercase tracking-wider">
                                         Date
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-white/60 uppercase tracking-wider">
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-white/90 uppercase tracking-wider">
                                         Actions
                                     </th>
                                 </tr>
@@ -283,7 +283,7 @@ export default function PaymentsListPage() {
                                                 {payment.status}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white/60">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white/90">
                                             {new Date(payment.created_at).toLocaleDateString('en-IN', {
                                                 day: 'numeric',
                                                 month: 'short',
