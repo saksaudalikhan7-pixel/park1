@@ -104,6 +104,11 @@ class Booking(models.Model):
         """Calculate remaining balance to be paid"""
         return self.amount - self.paid_amount
     
+    @property
+    def booking_reference(self):
+        """Canonical booking reference for display and search"""
+        return self.booking_number or f"NIP-TEMP-{self.id}"
+    
     def generate_booking_number(self):
         """Generate unique booking number: NIP-YYYYMMDD-XXXX"""
         date = datetime.now()
@@ -202,6 +207,11 @@ class PartyBooking(models.Model):
     def remaining_balance(self):
         """Calculate remaining balance to be paid"""
         return self.amount - self.paid_amount
+    
+    @property
+    def booking_reference(self):
+        """Canonical booking reference for display and search"""
+        return self.booking_number or f"NIPARTY-TEMP-{self.id}"
     
     def generate_booking_number(self):
         """Generate unique booking number: NIPARTY-YYYYMMDD-XXXX"""

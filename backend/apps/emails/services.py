@@ -232,6 +232,7 @@ class EmailService:
             'spectators': booking.spectators,
             'amount': booking.amount,
             'booking_uuid': str(booking.uuid),
+            'booking_number': booking.booking_number or f"NIP-{booking.id}",
         }
         
         email_log = self.send_email(
@@ -273,6 +274,7 @@ class EmailService:
             'birthday_child_name': party_booking.birthday_child_name,
             'birthday_child_age': party_booking.birthday_child_age,
             'booking_uuid': str(party_booking.uuid),
+            'booking_number': party_booking.booking_number or f"NIPARTY-{party_booking.id}",
         }
         
         email_log = self.send_email(
