@@ -200,7 +200,7 @@ export default function PaymentsListPage() {
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-surface-900/50 border-b border-white/10">
+                            <thead className="bg-surface-900/80 border-b border-white/10">
                                 <tr>
                                     <th className="px-6 py-4 text-left text-xs font-bold text-white/60 uppercase tracking-wider">
                                         ID
@@ -234,15 +234,15 @@ export default function PaymentsListPage() {
                                         key={payment.id}
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
-                                        className="hover:bg-white/5 transition-colors"
+                                        className="hover:bg-white/5 transition-colors border-b border-white/5"
                                     >
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-mono">
                                             #{payment.id}
                                         </td>
                                         <td className="px-6 py-4 text-sm">
-                                            <div className="flex flex-col">
-                                                <span className="text-white font-medium">{payment.customer_name || 'N/A'}</span>
-                                                <span className="text-white/40 text-xs">{payment.customer_email || ''}</span>
+                                            <div className="flex flex-col max-w-xs">
+                                                <span className="text-white font-medium truncate">{payment.customer_name || 'N/A'}</span>
+                                                <span className="text-white/60 text-xs truncate" title={payment.customer_email}>{payment.customer_email || ''}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
