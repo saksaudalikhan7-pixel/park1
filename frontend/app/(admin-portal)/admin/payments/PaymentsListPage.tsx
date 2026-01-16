@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { CreditCard, Search, Filter, Download, RefreshCw, CheckCircle, XCircle, Clock, DollarSign } from "lucide-react";
 import Link from "next/link";
+import { getPayments } from "@/app/actions/payments";
 
 interface Payment {
     id: number;
@@ -42,28 +43,9 @@ export default function PaymentsListPage() {
     const fetchPayments = async () => {
         setLoading(true);
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-            console.log("Fetching payments from:", `${API_URL}/payments/`);
-
-            const response = await fetch(`${API_URL}/payments/`, {
-                credentials: "include",
-                cache: "no-store",
-            });
-
-            console.log("Payment API Response:", response.status, response.statusText);
-
-            if (response.ok) {
-                const data = await response.json();
-                console.log("Payments data:", data);
-                setPayments(data.results || data);
-            } else {
-                const errorText = await response.text();
-                console.error("Failed to fetch payments:", {
-                    status: response.status,
-                    statusText: response.statusText,
-                    error: errorText
-                });
-            }
+            const data = await getPayments();
+            console.log("Payments data:", data);
+            setPayments(data.results || []);
         } catch (error) {
             console.error("Failed to fetch payments:", error);
         } finally {
