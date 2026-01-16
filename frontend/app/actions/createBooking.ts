@@ -297,8 +297,9 @@ export async function createBooking(formData: any) {
 
         return {
             success: true,
-            bookingId: booking.uuid || booking.id,
-            bookingNumber: bookingNumber
+            bookingId: String(booking.id), // Return numeric ID for payment processing
+            bookingNumber: booking.booking_number || bookingNumber,
+            uuid: booking.uuid // Keep UUID for tickets/QR codes
         };
     } catch (error) {
         console.error("Failed to create booking:", error);
