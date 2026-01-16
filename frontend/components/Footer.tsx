@@ -27,7 +27,7 @@ export const Footer = ({ settings, socialLinks }: { settings?: any; socialLinks?
                     }
                 }
             } catch (error) {
-                console.error("Failed to fetch logo:", error);
+                // Silently fail and use default logo
             }
         };
         fetchLogo();
