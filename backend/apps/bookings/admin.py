@@ -67,9 +67,9 @@ class CustomerAdmin(admin.ModelAdmin):
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ['id', 'uuid', 'name', 'email', 'date', 'time', 'adults', 'kids', 'amount_display', 'paid_amount_display', 'remaining_display', 'booking_status', 'payment_status', 'waiver_status', 'created_at']
+    list_display = ['id', 'booking_number', 'uuid', 'name', 'email', 'date', 'time', 'adults', 'kids', 'amount_display', 'paid_amount_display', 'remaining_display', 'booking_status', 'payment_status', 'waiver_status', 'created_at']
     list_filter = ['booking_status', 'payment_status', 'waiver_status', 'type', 'date', 'created_at']
-    search_fields = ['name', 'email', 'phone', 'uuid']
+    search_fields = ['name', 'email', 'phone', 'uuid', 'booking_number']
     readonly_fields = ['uuid', 'created_at', 'updated_at', 'remaining_balance_display']
     ordering = ['-created_at']
     inlines = [PaymentInline]
@@ -97,7 +97,7 @@ class BookingAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('uuid', 'name', 'email', 'phone', 'customer')
+            'fields': ('uuid', 'booking_number', 'name', 'email', 'phone', 'customer')
         }),
         ('Booking Details', {
             'fields': ('date', 'time', 'duration', 'type', 'adults', 'kids', 'spectators')
@@ -118,9 +118,9 @@ class BookingAdmin(admin.ModelAdmin):
 
 @admin.register(PartyBooking)
 class PartyBookingAdmin(admin.ModelAdmin):
-    list_display = ['id', 'uuid', 'name', 'email', 'date', 'time', 'package_name', 'kids', 'adults', 'amount_display', 'paid_amount_display', 'remaining_display', 'status', 'payment_status', 'waiver_signed', 'created_at']
+    list_display = ['id', 'booking_number', 'uuid', 'name', 'email', 'date', 'time', 'package_name', 'kids', 'adults', 'amount_display', 'paid_amount_display', 'remaining_display', 'status', 'payment_status', 'waiver_signed', 'created_at']
     list_filter = ['status', 'payment_status', 'waiver_signed', 'date', 'created_at']
-    search_fields = ['name', 'email', 'phone', 'uuid', 'package_name', 'birthday_child_name']
+    search_fields = ['name', 'email', 'phone', 'uuid', 'booking_number', 'package_name', 'birthday_child_name']
     readonly_fields = ['uuid', 'created_at', 'updated_at', 'remaining_balance_display']
     ordering = ['-created_at']
     inlines = [PartyPaymentInline]
@@ -148,7 +148,7 @@ class PartyBookingAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('uuid', 'name', 'email', 'phone', 'customer')
+            'fields': ('uuid', 'booking_number', 'name', 'email', 'phone', 'customer')
         }),
         ('Party Details', {
             'fields': ('date', 'time', 'package_name', 'kids', 'adults', 'amount', 'paid_amount', 'remaining_balance_display')
