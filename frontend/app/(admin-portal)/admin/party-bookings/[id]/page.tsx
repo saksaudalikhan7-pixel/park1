@@ -98,8 +98,10 @@ export default function PartyBookingDetailPage({ params }: { params: { id: strin
 
             <div className="flex justify-between items-start mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900">Party #{String(booking.id).padStart(6, '0')}</h1>
-                    <p className="text-slate-500 mt-1">Created on {new Date(booking.created_at).toLocaleDateString()}</p>
+                    <h1 className="text-3xl font-bold text-slate-900">
+                        {booking.booking_reference || booking.booking_number || `Party #${String(booking.id).padStart(6, '0')}`}
+                    </h1>
+                    <p className="text-slate-500 mt-1">Created on {new Date(booking.created_at).toLocaleDateString()} • ID: {booking.id}</p>
                 </div>
                 <div className="flex gap-3">
                     <button

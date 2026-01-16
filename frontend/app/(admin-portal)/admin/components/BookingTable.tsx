@@ -43,6 +43,8 @@ interface Booking {
     bookingStatus?: string;
     createdAt?: string;
     has_arrived?: boolean;
+    booking_number?: string;
+    booking_reference?: string;
 }
 
 interface BookingTableProps {
@@ -207,7 +209,7 @@ export function BookingTable({ bookings, title, type, readOnly = false }: Bookin
                                             {format(new Date(booking.date), "MMM d, yyyy")}
                                         </div>
                                         <div className="text-slate-500 text-xs mt-0.5">
-                                            {booking.time} • {String(booking.id).slice(-6).toUpperCase()}
+                                            {booking.time} • {booking.booking_reference || booking.booking_number || `#${String(booking.id).slice(-6).toUpperCase()}`}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
@@ -244,8 +246,8 @@ export function BookingTable({ bookings, title, type, readOnly = false }: Bookin
                                                 onClick={() => handleToggleArrival(booking.id, booking.has_arrived || false)}
                                                 disabled={togglingArrival === booking.id}
                                                 className={`p-2 rounded-lg transition-colors ${booking.has_arrived
-                                                        ? 'text-green-600 bg-green-50 hover:bg-green-100'
-                                                        : 'text-slate-400 hover:text-green-600 hover:bg-green-50'
+                                                    ? 'text-green-600 bg-green-50 hover:bg-green-100'
+                                                    : 'text-slate-400 hover:text-green-600 hover:bg-green-50'
                                                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                                                 title={booking.has_arrived ? "Arrived" : "Mark as Arrived"}
                                             >

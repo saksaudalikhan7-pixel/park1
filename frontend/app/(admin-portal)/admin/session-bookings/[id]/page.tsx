@@ -71,8 +71,10 @@ export default function SessionBookingDetailPage({ params }: { params: { id: str
 
             <div className="flex justify-between items-start mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900">Booking #{String(booking.id).padStart(6, '0')}</h1>
-                    <p className="text-slate-500 mt-1">Created on {new Date(booking.created_at).toLocaleDateString()}</p>
+                    <h1 className="text-3xl font-bold text-slate-900">
+                        {booking.booking_reference || booking.booking_number || `Booking #${String(booking.id).padStart(6, '0')}`}
+                    </h1>
+                    <p className="text-slate-500 mt-1">Created on {new Date(booking.created_at).toLocaleDateString()} • ID: {booking.id}</p>
                 </div>
                 <div className="flex gap-3">
                     <button
@@ -167,8 +169,8 @@ export default function SessionBookingDetailPage({ params }: { params: { id: str
                         </h2>
                         <div className="mt-4">
                             <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${booking.waiver_status === 'SIGNED'
-                                    ? 'bg-green-100 text-green-700'
-                                    : 'bg-yellow-100 text-yellow-700'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-yellow-100 text-yellow-700'
                                 }`}>
                                 {booking.waiver_status === 'SIGNED' ? (
                                     <>
@@ -218,8 +220,8 @@ export default function SessionBookingDetailPage({ params }: { params: { id: str
                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                         <h2 className="text-lg font-bold text-slate-900 mb-4">Arrival Status</h2>
                         <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${booking.has_arrived
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-slate-100 text-slate-700'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-slate-100 text-slate-700'
                             }`}>
                             {booking.has_arrived ? (
                                 <>
