@@ -177,7 +177,7 @@ export function PaymentOverviewWidget() {
             </div>
 
             {/* Recent Payments Table */}
-            {stats.recent_payments.length > 0 && (
+            {stats.recent_payments?.length > 0 && (
                 <div className="bg-white rounded-xl border border-emerald-100 overflow-hidden">
                     <div className="p-4 border-b border-slate-200 bg-slate-50">
                         <h3 className="text-sm font-bold text-slate-900">Recent Payments</h3>
@@ -205,8 +205,8 @@ export function PaymentOverviewWidget() {
                                         </td>
                                         <td className="px-4 py-3">
                                             <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${payment.booking?.type === 'party'
-                                                    ? 'bg-purple-100 text-purple-700'
-                                                    : 'bg-blue-100 text-blue-700'
+                                                ? 'bg-purple-100 text-purple-700'
+                                                : 'bg-blue-100 text-blue-700'
                                                 }`}>
                                                 {payment.booking?.type || "-"}
                                             </span>

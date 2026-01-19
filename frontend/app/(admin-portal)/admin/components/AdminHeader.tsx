@@ -26,13 +26,19 @@ export function AdminHeader({ title, description, actions, user }: AdminHeaderPr
     // Fetch notifications
     const fetchNotifications = async () => {
         setIsLoading(true);
-        const [unread, count] = await Promise.all([
-            getUnreadNotifications(),
-            getUnreadCount()
-        ]);
-        setNotifications(unread);
-        setUnreadCount(count);
-        setIsLoading(false);
+        try {
+            const [unread, count] = await Promise.all([
+                getUnreadNotifications().catch(() => []),
+                getUnreadCount().catch(() => 0)
+            ]);
+            setNotifications(Array.isArray(unread) ? unread : []);
+            setUnreadCount(typeof count === 'number' ? count : 0);
+        } catch (error) {
+            console.error("Failed to fetch notifications:", error);
+            setNotifications([]);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     // Initial fetch

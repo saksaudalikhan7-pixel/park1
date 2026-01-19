@@ -49,7 +49,7 @@ export default async function AdminDashboard() {
                     <p className="text-slate-500 mt-1">Welcome back, {session.email}</p>
                 </div>
                 <div className="flex gap-3">
-                    <div className="bg-white border border-slate-300 text-slate-700 text-sm rounded-lg px-3 py-2">
+                    <div className="bg-white border border-slate-300 text-slate-700 text-sm rounded-lg px-3 py-2" suppressHydrationWarning>
                         {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                     </div>
                 </div>
