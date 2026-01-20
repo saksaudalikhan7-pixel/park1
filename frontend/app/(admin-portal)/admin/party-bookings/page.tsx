@@ -42,6 +42,13 @@ export default function PartyBookingsPage() {
 
     useEffect(() => {
         loadBookings();
+
+        // Auto-refresh every 30 seconds to show new bookings
+        const interval = setInterval(() => {
+            loadBookings();
+        }, 30000); // 30 seconds
+
+        return () => clearInterval(interval);
     }, []);
 
     useEffect(() => {
@@ -158,13 +165,22 @@ export default function PartyBookingsPage() {
                     { label: "Party Bookings" },
                 ]}
                 actions={
-                    <Button
-                        variant="primary"
-                        icon={<Plus size={16} />}
-                        onClick={() => router.push("/admin/party-bookings/new")}
-                    >
-                        Create New Booking
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="secondary"
+                            icon={<RefreshCw size={16} />}
+                            onClick={() => loadBookings()}
+                        >
+                            Refresh
+                        </Button>
+                        <Button
+                            variant="primary"
+                            icon={<Plus size={16} />}
+                            onClick={() => router.push("/admin/party-bookings/new")}
+                        >
+                            Create New Booking
+                        </Button>
+                    </div>
                 }
             />
 
