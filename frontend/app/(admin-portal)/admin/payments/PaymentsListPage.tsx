@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { CreditCard, Search, Filter, Download, RefreshCw, CheckCircle, XCircle, Clock, DollarSign } from "lucide-react";
+import { CreditCard, Search, Filter, Download, RefreshCw, CheckCircle, XCircle, Clock, DollarSign, Wallet, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { getPayments } from "@/app/actions/payments";
 
@@ -126,26 +126,52 @@ export default function PaymentsListPage() {
             </div>
 
             {/* Stats Cards */}
+            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="bg-surface-800/50 backdrop-blur-md p-4 rounded-xl border border-white/10">
-                    <p className="text-white/90 text-sm font-semibold">Total Payments</p>
-                    <p className="text-2xl font-black text-white mt-1">{stats.total}</p>
+                <div className="bg-surface-800/50 backdrop-blur-md p-4 rounded-xl border border-white/10 flex items-center justify-between">
+                    <div>
+                        <p className="text-white text-sm font-semibold">Total Payments</p>
+                        <p className="text-2xl font-black text-white mt-1">{stats.total}</p>
+                    </div>
+                    <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                        <CreditCard className="w-5 h-5 text-white/80" />
+                    </div>
                 </div>
-                <div className="bg-green-500/10 backdrop-blur-md p-4 rounded-xl border border-green-500/30">
-                    <p className="text-green-400 text-sm font-semibold">Successful</p>
-                    <p className="text-2xl font-black text-green-400 mt-1">{stats.success}</p>
+                <div className="bg-green-500/10 backdrop-blur-md p-4 rounded-xl border border-green-500/30 flex items-center justify-between">
+                    <div>
+                        <p className="text-green-400 text-sm font-semibold">Successful</p>
+                        <p className="text-2xl font-black text-green-400 mt-1">{stats.success}</p>
+                    </div>
+                    <div className="p-3 bg-green-500/20 rounded-lg border border-green-500/30">
+                        <CheckCircle className="w-5 h-5 text-green-400" />
+                    </div>
                 </div>
-                <div className="bg-red-500/10 backdrop-blur-md p-4 rounded-xl border border-red-500/30">
-                    <p className="text-red-400 text-sm font-semibold">Failed</p>
-                    <p className="text-2xl font-black text-red-400 mt-1">{stats.failed}</p>
+                <div className="bg-red-500/10 backdrop-blur-md p-4 rounded-xl border border-red-500/30 flex items-center justify-between">
+                    <div>
+                        <p className="text-red-400 text-sm font-semibold">Failed</p>
+                        <p className="text-2xl font-black text-red-400 mt-1">{stats.failed}</p>
+                    </div>
+                    <div className="p-3 bg-red-500/20 rounded-lg border border-red-500/30">
+                        <XCircle className="w-5 h-5 text-red-400" />
+                    </div>
                 </div>
-                <div className="bg-orange-500/10 backdrop-blur-md p-4 rounded-xl border border-orange-500/30">
-                    <p className="text-orange-400 text-sm font-semibold">Refunds</p>
-                    <p className="text-2xl font-black text-orange-400 mt-1">{stats.refunded}</p>
+                <div className="bg-orange-500/10 backdrop-blur-md p-4 rounded-xl border border-orange-500/30 flex items-center justify-between">
+                    <div>
+                        <p className="text-orange-400 text-sm font-semibold">Refunds</p>
+                        <p className="text-2xl font-black text-orange-400 mt-1">{stats.refunded}</p>
+                    </div>
+                    <div className="p-3 bg-orange-500/20 rounded-lg border border-orange-500/30">
+                        <RotateCcw className="w-5 h-5 text-orange-400" />
+                    </div>
                 </div>
-                <div className="bg-primary/10 backdrop-blur-md p-4 rounded-xl border border-primary/30">
-                    <p className="text-primary text-sm font-semibold">Total Revenue</p>
-                    <p className="text-2xl font-black text-primary mt-1">₹{stats.totalAmount.toLocaleString('en-IN')}</p>
+                <div className="bg-primary/10 backdrop-blur-md p-4 rounded-xl border border-primary/30 flex items-center justify-between">
+                    <div>
+                        <p className="text-primary text-sm font-semibold">Total Revenue</p>
+                        <p className="text-2xl font-black text-primary mt-1">₹ {stats.totalAmount.toLocaleString('en-IN')}</p>
+                    </div>
+                    <div className="p-3 bg-primary/20 rounded-lg border border-primary/30">
+                        <Wallet className="w-5 h-5 text-primary" />
+                    </div>
                 </div>
             </div>
 
@@ -159,7 +185,7 @@ export default function PaymentsListPage() {
                             placeholder="Search by Order ID, Payment ID..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-surface-900 border border-white/20 rounded-lg text-white placeholder-white/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            className="w-full pl-10 pr-4 py-2 bg-surface-900 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                         />
                     </div>
                     <select
@@ -220,10 +246,10 @@ export default function PaymentsListPage() {
                                     <th className="px-6 py-4 text-left text-xs font-bold text-white/60 uppercase tracking-wider">
                                         Status
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-white/90 uppercase tracking-wider">
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-white/60 uppercase tracking-wider">
                                         Date
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-white/90 uppercase tracking-wider">
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-white/60 uppercase tracking-wider">
                                         Actions
                                     </th>
                                 </tr>
