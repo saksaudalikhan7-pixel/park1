@@ -31,15 +31,12 @@ class Command(BaseCommand):
         session_count = session_bookings.count()
         party_count = party_bookings.count()
         
-        # Get related waivers and transactions
+        # Get related waivers and transactions (only session bookings have these)
         session_waivers = Waiver.objects.filter(booking__in=session_bookings)
-        party_waivers = Waiver.objects.filter(party_booking__in=party_bookings)
-        
         session_transactions = Transaction.objects.filter(booking__in=session_bookings)
-        party_transactions = Transaction.objects.filter(party_booking__in=party_bookings)
         
-        waiver_count = session_waivers.count() + party_waivers.count()
-        transaction_count = session_transactions.count() + party_transactions.count()
+        waiver_count = session_waivers.count()
+        transaction_count = session_transactions.count()
         
         # Get load test customers (those only associated with load test bookings)
         load_test_customers = Customer.objects.filter(
@@ -70,8 +67,8 @@ class Command(BaseCommand):
         try:
             with transaction.atomic():
                 # Delete in correct order (related objects first)
-                deleted_waivers = session_waivers.delete()[0] + party_waivers.delete()[0]
-                deleted_transactions = session_transactions.delete()[0] + party_transactions.delete()[0]
+                deleted_waivers = session_waivers.delete()[0]
+                deleted_transactions = session_transactions.delete()[0]
                 deleted_session = session_bookings.delete()[0]
                 deleted_party = party_bookings.delete()[0]
                 deleted_customers = load_test_customers.delete()[0]
