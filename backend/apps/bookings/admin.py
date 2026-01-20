@@ -73,6 +73,30 @@ class BookingAdmin(admin.ModelAdmin):
     readonly_fields = ['uuid', 'created_at', 'updated_at', 'remaining_balance_display']
     ordering = ['-created_at']
     inlines = [PaymentInline]
+    actions = ['delete_loadtest_bookings']
+    
+    def delete_loadtest_bookings(self, request, queryset):
+        """Bulk delete all load test bookings"""
+        from django.db import transaction
+        
+        # Filter for load test bookings
+        loadtest_bookings = Booking.objects.filter(name__istartswith='LoadTest')
+        count = loadtest_bookings.count()
+        
+        if count == 0:
+            self.message_user(request, "No load test bookings found.")
+            return
+        
+        # Delete in transaction
+        with transaction.atomic():
+            deleted = loadtest_bookings.delete()
+            self.message_user(
+                request,
+                f"Successfully deleted {deleted[0]} load test bookings and related data.",
+                level='SUCCESS'
+            )
+    
+    delete_loadtest_bookings.short_description = "🗑️ Delete ALL Load Test Bookings"
     
     def amount_display(self, obj):
         return format_html('₹{}', obj.amount)
