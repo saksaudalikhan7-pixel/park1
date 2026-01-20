@@ -209,10 +209,12 @@ SIMPLE_JWT = {
 }
 
 # REST Framework Configuration
-REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 100,  # Limit to 100 items per page to prevent memory issues
-}
+# TEMPORARILY DISABLED - Breaks frontend which expects plain arrays
+# Will re-enable after updating frontend to handle paginated responses
+# REST_FRAMEWORK = {
+#     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+#     'PAGE_SIZE': 100,  # Limit to 100 items per page to prevent memory issues
+# }
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Ninja Park API',
