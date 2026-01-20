@@ -38,4 +38,5 @@ echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
 echo "Starting Gunicorn..."
-exec gunicorn --bind=0.0.0.0:8000 --timeout 600 --workers 2 --access-logfile - --error-logfile - ninja_backend.wsgi:application
+exec gunicorn --bind=0.0.0.0:8000 --timeout 120 --workers 1 --worker-class sync --max-requests 1000 --max-requests-jitter 50 --access-logfile - --error-logfile - ninja_backend.wsgi:application
+
