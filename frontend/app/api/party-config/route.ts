@@ -3,10 +3,6 @@ import { cookies } from 'next/headers';
 
 const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1").replace('localhost', '127.0.0.1');
 
-// Force dynamic rendering - this route makes backend API calls
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 // GET party booking config
 export async function GET(request: NextRequest) {
     try {
