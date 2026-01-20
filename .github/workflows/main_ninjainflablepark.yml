@@ -34,13 +34,17 @@ jobs:
           source antenv/bin/activate
           pip install -r requirements.txt
                 
+      # Copy backend contents to root for deployment
+      - name: Prepare deployment package
+        run: |
+          mkdir -p deploy
+          cp -r backend/* deploy/
+          
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
         with:
           name: python-app
-          path: |
-            backend/
-            !backend/antenv/
+          path: deploy/
 
   deploy:
     runs-on: ubuntu-latest
