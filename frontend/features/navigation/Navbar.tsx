@@ -170,14 +170,14 @@ export function Navbar({ settings }: { settings?: any }) {
                                         })}
 
                                         {/* Action Buttons - Inline with navigation */}
-                                        <div className="pt-2 space-y-2">
-                                            <Link href="/book" onClick={() => dispatch({ type: "CLOSE_MOBILE_MENU" })}>
+                                        <div className="pt-2 space-y-4">
+                                            <Link href="/book" className="block" onClick={() => dispatch({ type: "CLOSE_MOBILE_MENU" })}>
                                                 <div className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-semibold text-sm transition-all text-center shadow-md">
                                                     Book Session
                                                 </div>
                                             </Link>
 
-                                            <Link href="/admin" onClick={() => dispatch({ type: "CLOSE_MOBILE_MENU" })}>
+                                            <Link href="/admin" className="block" onClick={() => dispatch({ type: "CLOSE_MOBILE_MENU" })}>
                                                 <div className="w-full py-3 px-4 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold text-sm transition-colors text-center">
                                                     Admin
                                                 </div>
