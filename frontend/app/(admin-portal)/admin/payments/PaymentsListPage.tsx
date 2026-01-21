@@ -101,8 +101,8 @@ export default function PaymentsListPage() {
         failed: payments.filter((p) => p.status === "FAILED").length,
         refunded: payments.filter((p) => p.amount < 0).length,
         totalAmount: payments
-            .filter((p) => p.status === "SUCCESS" && p.amount > 0)
-            .reduce((sum, p) => sum + p.amount, 0),
+            .filter((p) => p.status === "SUCCESS" && Number(p.amount) > 0)
+            .reduce((sum, p) => sum + Number(p.amount), 0),
     };
 
     return (
