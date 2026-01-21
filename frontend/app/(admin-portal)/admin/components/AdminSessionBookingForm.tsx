@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createBooking } from "@/app/actions/createBooking";
+import { createManualBooking } from "@/app/actions/createManualBooking";
 import { useRouter } from "next/navigation";
 import { Calendar, Clock, Users, User, Mail, Phone, Info } from "lucide-react";
 
@@ -28,7 +28,7 @@ export function AdminSessionBookingForm() {
                 phone: formData.get("phone"),
             };
 
-            const result = await createBooking(data);
+            const result = await createManualBooking(data);
 
             if (result.success) {
                 router.push("/admin/bookings");

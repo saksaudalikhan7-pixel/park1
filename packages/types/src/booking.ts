@@ -7,23 +7,10 @@ const phoneRegex = /^(\+91|91)?[6-9]\d{9}$/;
 // Email validation (comprehensive)
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-export const bookingSchema = z.object({
+const bookingBase = {
     // Session Details
     date: z.string()
         .min(1, "Please select a date")
-        // .refine((date) => {
-        //     try {
-        //         // Parse date string (yyyy-mm-dd) manually to ensure local time comparison
-        //         const parts = date.split('-');
-        //         if (parts.length !== 3) return false;
-        //         const selectedDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-        //         const today = new Date();
-        //         today.setHours(0, 0, 0, 0);
-        //         return selectedDate >= today;
-        //     } catch {
-        //         return false;
-        //     }
-        // }, "Cannot book for past dates")
         .refine((date) => {
             try {
                 const selectedDate = new Date(date);
@@ -37,7 +24,7 @@ export const bookingSchema = z.object({
     time: z.string()
         .min(1, "Please select a time slot"),
 
-    duration: z.enum(["60", "120"]),
+    duration: z.enum(["60", "90", "120"]),
 
     // Guest Details
     adults: z.number()
@@ -90,7 +77,9 @@ export const bookingSchema = z.object({
     // Waiver
     waiverAccepted: z.boolean()
         .refine((val) => val === true, "You must accept the waiver to proceed")
-}).refine((data) => {
+};
+
+export const bookingSchema = z.object(bookingBase).refine((data) => {
     // At least one jumper (adult or kid) must be selected
     return data.adults > 0 || data.kids > 0;
 }, {
@@ -98,6 +87,25 @@ export const bookingSchema = z.object({
     path: ["adults"]
 }).refine((data) => {
     // Total guests should not exceed 100
+    const totalGuests = data.adults + data.kids + data.spectators;
+    return totalGuests <= 100;
+}, {
+    message: "Total guests cannot exceed 100 per booking",
+    path: ["spectators"]
+});
+
+export const adminBookingSchema = z.object({
+    ...bookingBase,
+    // Override strict waiver fields for admin/manual booking
+    dateOfBirth: z.string().optional(),
+    dateOfArrival: z.string().optional(),
+    waiverAccepted: z.boolean().optional(),
+}).refine((data) => {
+    return data.adults > 0 || data.kids > 0;
+}, {
+    message: "At least one jumper (adult or kid) is required for booking",
+    path: ["adults"]
+}).refine((data) => {
     const totalGuests = data.adults + data.kids + data.spectators;
     return totalGuests <= 100;
 }, {
