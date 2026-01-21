@@ -110,15 +110,15 @@ export default function PaymentsListPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-display font-black text-white flex items-center gap-3">
+                    <h1 className="text-3xl font-display font-black text-slate-800 flex items-center gap-3">
                         <CreditCard className="w-8 h-8 text-primary" />
                         Payments
                     </h1>
-                    <p className="text-white/90 mt-1">Manage all payment transactions</p>
+                    <p className="text-slate-500 mt-1">Manage all payment transactions</p>
                 </div>
                 <button
                     onClick={fetchPayments}
-                    className="px-4 py-2 bg-primary/20 hover:bg-primary/30 text-primary font-bold rounded-lg transition-colors flex items-center gap-2"
+                    className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-lg transition-colors flex items-center gap-2 shadow-sm"
                 >
                     <RefreshCw className="w-4 h-4" />
                     Refresh
@@ -126,72 +126,71 @@ export default function PaymentsListPage() {
             </div>
 
             {/* Stats Cards */}
-            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="bg-surface-800/50 backdrop-blur-md p-4 rounded-xl border border-white/10 flex items-center justify-between">
+                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
-                        <p className="text-white text-sm font-semibold">Total Payments</p>
-                        <p className="text-2xl font-black text-white mt-1">{stats.total}</p>
+                        <p className="text-slate-500 text-sm font-semibold">Total Payments</p>
+                        <p className="text-2xl font-black text-slate-800 mt-1">{stats.total}</p>
                     </div>
-                    <div className="p-3 bg-white/5 rounded-lg border border-white/10">
-                        <CreditCard className="w-5 h-5 text-white/80" />
+                    <div className="p-3 bg-slate-100 rounded-lg">
+                        <CreditCard className="w-5 h-5 text-slate-600" />
                     </div>
                 </div>
-                <div className="bg-green-500/10 backdrop-blur-md p-4 rounded-xl border border-green-500/30 flex items-center justify-between">
+                <div className="bg-white p-4 rounded-xl border border-green-200 shadow-sm flex items-center justify-between">
                     <div>
-                        <p className="text-green-400 text-sm font-semibold">Successful</p>
-                        <p className="text-2xl font-black text-green-400 mt-1">{stats.success}</p>
+                        <p className="text-green-600 text-sm font-semibold">Successful</p>
+                        <p className="text-2xl font-black text-green-700 mt-1">{stats.success}</p>
                     </div>
-                    <div className="p-3 bg-green-500/20 rounded-lg border border-green-500/30">
-                        <CheckCircle className="w-5 h-5 text-green-400" />
+                    <div className="p-3 bg-green-50 rounded-lg">
+                        <CheckCircle className="w-5 h-5 text-green-600" />
                     </div>
                 </div>
-                <div className="bg-red-500/10 backdrop-blur-md p-4 rounded-xl border border-red-500/30 flex items-center justify-between">
+                <div className="bg-white p-4 rounded-xl border border-red-200 shadow-sm flex items-center justify-between">
                     <div>
-                        <p className="text-red-400 text-sm font-semibold">Failed</p>
-                        <p className="text-2xl font-black text-red-400 mt-1">{stats.failed}</p>
+                        <p className="text-red-600 text-sm font-semibold">Failed</p>
+                        <p className="text-2xl font-black text-red-700 mt-1">{stats.failed}</p>
                     </div>
-                    <div className="p-3 bg-red-500/20 rounded-lg border border-red-500/30">
-                        <XCircle className="w-5 h-5 text-red-400" />
+                    <div className="p-3 bg-red-50 rounded-lg">
+                        <XCircle className="w-5 h-5 text-red-600" />
                     </div>
                 </div>
-                <div className="bg-orange-500/10 backdrop-blur-md p-4 rounded-xl border border-orange-500/30 flex items-center justify-between">
+                <div className="bg-white p-4 rounded-xl border border-orange-200 shadow-sm flex items-center justify-between">
                     <div>
-                        <p className="text-orange-400 text-sm font-semibold">Refunds</p>
-                        <p className="text-2xl font-black text-orange-400 mt-1">{stats.refunded}</p>
+                        <p className="text-orange-600 text-sm font-semibold">Refunds</p>
+                        <p className="text-2xl font-black text-orange-700 mt-1">{stats.refunded}</p>
                     </div>
-                    <div className="p-3 bg-orange-500/20 rounded-lg border border-orange-500/30">
-                        <RotateCcw className="w-5 h-5 text-orange-400" />
+                    <div className="p-3 bg-orange-50 rounded-lg">
+                        <RotateCcw className="w-5 h-5 text-orange-600" />
                     </div>
                 </div>
-                <div className="bg-primary/10 backdrop-blur-md p-4 rounded-xl border border-primary/30 flex items-center justify-between">
+                <div className="bg-white p-4 rounded-xl border border-primary/20 shadow-sm flex items-center justify-between">
                     <div>
                         <p className="text-primary text-sm font-semibold">Total Revenue</p>
                         <p className="text-2xl font-black text-primary mt-1">₹ {stats.totalAmount.toLocaleString('en-IN')}</p>
                     </div>
-                    <div className="p-3 bg-primary/20 rounded-lg border border-primary/30">
+                    <div className="p-3 bg-primary/10 rounded-lg">
                         <Wallet className="w-5 h-5 text-primary" />
                     </div>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="bg-surface-800/50 backdrop-blur-md p-4 rounded-xl border border-white/10">
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                         <input
                             type="text"
                             placeholder="Search by Order ID, Payment ID..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-surface-900 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                         />
                     </div>
                     <select
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value)}
-                        className="px-4 py-2 bg-surface-900 border border-white/10 rounded-lg text-white focus:border-primary focus:outline-none"
+                        className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:border-primary focus:outline-none transition-all"
                     >
                         <option value="all">All Status</option>
                         <option value="SUCCESS">Success</option>
@@ -202,7 +201,7 @@ export default function PaymentsListPage() {
                     <select
                         value={filterProvider}
                         onChange={(e) => setFilterProvider(e.target.value)}
-                        className="px-4 py-2 bg-surface-900 border border-white/10 rounded-lg text-white focus:border-primary focus:outline-none"
+                        className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:border-primary focus:outline-none transition-all"
                     >
                         <option value="all">All Providers</option>
                         <option value="MOCK">Mock</option>
@@ -212,63 +211,63 @@ export default function PaymentsListPage() {
             </div>
 
             {/* Payments Table */}
-            <div className="bg-surface-800/50 backdrop-blur-md rounded-xl border border-white/10 overflow-hidden">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 {loading ? (
                     <div className="p-12 text-center">
                         <RefreshCw className="w-8 h-8 text-primary animate-spin mx-auto mb-4" />
-                        <p className="text-white/60">Loading payments...</p>
+                        <p className="text-slate-500">Loading payments...</p>
                     </div>
                 ) : filteredPayments.length === 0 ? (
                     <div className="p-12 text-center">
-                        <CreditCard className="w-12 h-12 text-white/20 mx-auto mb-4" />
-                        <p className="text-white/90 text-lg">No payments found</p>
+                        <CreditCard className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                        <p className="text-slate-500 text-lg">No payments found</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-surface-900/80 border-b border-white/10">
+                            <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-white/60 uppercase tracking-wider">
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
                                         ID
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-white/60 uppercase tracking-wider">
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
                                         Customer
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-white/60 uppercase tracking-wider">
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
                                         Booking
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-white/60 uppercase tracking-wider">
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
                                         Provider
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-white/60 uppercase tracking-wider">
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
                                         Amount
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-white/60 uppercase tracking-wider">
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
                                         Status
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-white/60 uppercase tracking-wider">
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
                                         Date
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-white/60 uppercase tracking-wider">
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
                                         Actions
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/10">
+                            <tbody className="divide-y divide-slate-100">
                                 {filteredPayments.map((payment) => (
                                     <motion.tr
                                         key={payment.id}
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
-                                        className="hover:bg-white/5 transition-colors border-b border-white/5"
+                                        className="hover:bg-slate-50 transition-colors"
                                     >
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-mono">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 font-mono">
                                             #{payment.id}
                                         </td>
                                         <td className="px-6 py-4 text-sm">
                                             <div className="flex flex-col max-w-xs">
-                                                <span className="text-white font-medium truncate">{payment.customer_name || 'N/A'}</span>
-                                                <span className="text-white/60 text-xs truncate" title={payment.customer_email}>{payment.customer_email || ''}</span>
+                                                <span className="text-slate-900 font-medium truncate">{payment.customer_name || 'N/A'}</span>
+                                                <span className="text-slate-500 text-xs truncate" title={payment.customer_email}>{payment.customer_email || ''}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -287,29 +286,34 @@ export default function PaymentsListPage() {
                                                     {payment.booking_number || `P#${payment.party_booking_id}`}
                                                 </Link>
                                             ) : (
-                                                <span className="text-white/40">-</span>
+                                                <span className="text-slate-400">-</span>
                                             )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`px-2 py-1 rounded-md text-xs font-bold ${payment.provider === "MOCK"
-                                                ? "bg-blue-500/20 text-blue-400"
-                                                : "bg-purple-500/20 text-purple-400"
+                                                ? "bg-blue-100 text-blue-700"
+                                                : "bg-purple-100 text-purple-700"
                                                 }`}>
                                                 {payment.provider}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-bold">
-                                            <span className={payment.amount < 0 ? "text-red-400" : "text-green-400"}>
+                                            <span className={payment.amount < 0 ? "text-red-600" : "text-green-600"}>
                                                 {payment.amount < 0 ? "-" : ""}₹{Math.abs(payment.amount).toLocaleString('en-IN')}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border ${getStatusColor(payment.status)}`}>
+                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold ${payment.status === "SUCCESS" ? "bg-green-100 text-green-700 border border-green-200" :
+                                                    payment.status === "FAILED" ? "bg-red-100 text-red-700 border border-red-200" :
+                                                        payment.status === "CREATED" ? "bg-blue-100 text-blue-700 border border-blue-200" :
+                                                            payment.status === "REFUNDED" ? "bg-orange-100 text-orange-700 border border-orange-200" :
+                                                                "bg-slate-100 text-slate-700 border border-slate-200"
+                                                }`}>
                                                 {getStatusIcon(payment.status)}
                                                 {payment.status}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white/90">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                                             {new Date(payment.created_at).toLocaleDateString('en-IN', {
                                                 day: 'numeric',
                                                 month: 'short',
