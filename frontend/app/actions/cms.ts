@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchAPI, postAPI, putAPI, deleteAPI, API_ENDPOINTS } from "@/lib/api";
+import { fetchAPI, postAPI, putAPI, patchAPI, deleteAPI, API_ENDPOINTS } from "@/lib/api";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
@@ -46,5 +46,52 @@ export async function createPricingCarouselImage(payload: any) {
     } catch (error: any) {
         console.error("Create Record Error:", error);
         return { success: false, error: error.message || "Failed to create record" };
+    }
+}
+
+// Free Entry Actions
+
+export async function getFreeEntries() {
+    try {
+        return await fetchAPI<any[]>(API_ENDPOINTS.cms.freeEntries);
+    } catch (error) {
+        console.error("Failed to fetch free entries:", error);
+        return [];
+    }
+}
+
+export async function createFreeEntry(payload: any) {
+    try {
+        await postAPI(API_ENDPOINTS.cms.freeEntries, payload);
+        revalidatePath('/admin/free-entries');
+        return { success: true };
+    } catch (error: any) {
+        console.error("Create Entry Error:", error);
+        throw error;
+    }
+}
+
+export async function updateFreeEntryStatus(id: number, status: string, notes?: string) {
+    try {
+        const payload: any = { status };
+        if (notes) payload.notes = notes;
+
+        await patchAPI(`${API_ENDPOINTS.cms.freeEntries}${id}/`, payload);
+        revalidatePath('/admin/free-entries');
+        return { success: true };
+    } catch (error: any) {
+        console.error("Update Entry Error:", error);
+        throw error;
+    }
+}
+
+export async function deleteFreeEntry(id: number) {
+    try {
+        await deleteAPI(`${API_ENDPOINTS.cms.freeEntries}${id}/`);
+        revalidatePath('/admin/free-entries');
+        return { success: true };
+    } catch (error: any) {
+        console.error("Delete Entry Error:", error);
+        throw error;
     }
 }

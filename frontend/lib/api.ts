@@ -6,7 +6,7 @@
  * to properly handle httpOnly cookies for admin operations.
  */
 
-import { fetchAPI as serverFetchAPI, postAPI as serverPostAPI, putAPI as serverPutAPI, deleteAPI as serverDeleteAPI } from '@/app/lib/server-api';
+import { fetchAPI as serverFetchAPI, postAPI as serverPostAPI, putAPI as serverPutAPI, patchAPI as serverPatchAPI, deleteAPI as serverDeleteAPI } from '@/app/lib/server-api';
 
 import API_ENDPOINTS, { API_BASE_URL } from './api-endpoints';
 
@@ -54,6 +54,22 @@ export async function putAPI<T>(url: string, data: any, options?: RequestInit): 
     // Extract just the endpoint path from the full URL
     const endpoint = url.replace(API_BASE_URL, '');
     const result = await serverPutAPI(endpoint, data);
+
+    if (result === null) {
+        throw new Error('Authentication failed');
+    }
+
+    return result as T;
+}
+
+/**
+ * Helper function to patch data via API
+ * Uses server-side authentication with httpOnly cookies
+ */
+export async function patchAPI<T>(url: string, data: any, options?: RequestInit): Promise<T> {
+    // Extract just the endpoint path from the full URL
+    const endpoint = url.replace(API_BASE_URL, '');
+    const result = await serverPatchAPI(endpoint, data);
 
     if (result === null) {
         throw new Error('Authentication failed');

@@ -94,6 +94,28 @@ export async function putAPI(endpoint: string, data: any) {
     return res.json();
 }
 
+export async function patchAPI(endpoint: string, data: any) {
+    const isFormData = data instanceof FormData;
+
+    const headers: Record<string, string> = {
+        ...getAuthHeader(),
+    };
+
+    if (!isFormData) {
+        headers["Content-Type"] = "application/json";
+    }
+
+    const res = await fetch(`${API_URL}${endpoint}`, {
+        method: "PATCH",
+        headers,
+        body: isFormData ? data : JSON.stringify(data),
+        cache: "no-store",
+    });
+
+    if (res.status === 401) return null;
+    return res.json();
+}
+
 export async function deleteAPI(endpoint: string) {
     const headers: Record<string, string> = {
         "Content-Type": "application/json",
