@@ -14,7 +14,7 @@ import { PageSection } from "../lib/cms/types";
 import { fetchBookingBlocks, isDateBlocked, BookingBlock } from "../lib/api/booking-blocks";
 
 interface BookingWizardProps {
-    onSubmit: (data: any) => Promise<{ success: boolean; bookingId?: string; bookingNumber?: string; error?: string }>;
+    onSubmit: (data: any) => Promise<{ success: boolean; bookingId?: string; bookingNumber?: string; uuid?: string; error?: string }>;
     cmsContent?: PageSection[];
 }
 
@@ -22,6 +22,7 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
     const [step, setStep] = useState(1);
     const [bookingComplete, setBookingComplete] = useState(false);
     const [bookingId, setBookingId] = useState<string>("");
+    const [bookingUuid, setBookingUuid] = useState<string>("");
     const [bookingNumber, setBookingNumber] = useState<string>("");
     const [createdBookingId, setCreatedBookingId] = useState<number | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -254,6 +255,7 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                 }
 
                 setBookingId(result.bookingId);
+                setBookingUuid(result.uuid || result.bookingId);
                 setBookingNumber(result.bookingNumber || result.bookingId);
                 setCreatedBookingId(bookingIdNum);
 
@@ -379,7 +381,7 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                 </motion.div>
 
                 <motion.a
-                    href={`/tickets/${bookingId}`}
+                    href={`/tickets/${bookingUuid}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     whileHover={{ scale: 1.05 }}
