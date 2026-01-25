@@ -70,3 +70,9 @@ db.sqlite3-journal
 
 
 
+
+# Database Backups
+*.sql
+*.dump
+*.backup
+ninjapark_backup.sql
