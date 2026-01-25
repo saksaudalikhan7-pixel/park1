@@ -46,6 +46,8 @@ interface PaymentStats {
     }>;
 }
 
+import { getPaymentStats } from "@/app/actions/payments";
+
 export function PaymentOverviewWidget() {
     const [stats, setStats] = useState<PaymentStats | null>(null);
     const [loading, setLoading] = useState(true);
@@ -56,14 +58,8 @@ export function PaymentOverviewWidget() {
 
     const fetchStats = async () => {
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-            const response = await fetch(`${API_URL}/payments/stats/`, {
-                credentials: "include",
-                cache: "no-store",
-            });
-
-            if (response.ok) {
-                const data = await response.json();
+            const data = await getPaymentStats();
+            if (data) {
                 setStats(data);
             }
         } catch (error) {

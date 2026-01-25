@@ -28,6 +28,8 @@ interface Payment {
     updated_at: string;
 }
 
+import { getPaymentById, processRefund } from "@/app/actions/payments";
+
 export default function PaymentDetailPage() {
     const params = useParams();
     const router = useRouter();
@@ -47,14 +49,8 @@ export default function PaymentDetailPage() {
     const fetchPaymentDetails = async () => {
         setLoading(true);
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-            const response = await fetch(`${API_URL}/admin/payments/${paymentId}/`, {
-                credentials: "include",
-                cache: "no-store",
-            });
-
-            if (response.ok) {
-                const data = await response.json();
+            const data = await getPaymentById(paymentId);
+            if (data) {
                 setPayment(data);
                 setRefundAmount(Math.abs(data.amount).toString());
             }
@@ -72,21 +68,7 @@ export default function PaymentDetailPage() {
         setRefundError("");
 
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-            const response = await fetch(`${API_URL}/payments/refund/`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify({
-                    payment_id: payment.id,
-                    amount: parseFloat(refundAmount),
-                    reason: refundReason,
-                }),
-            });
-
-            const result = await response.json();
+            const result = await processRefund(payment.id, parseFloat(refundAmount), refundReason);
 
             if (result.success) {
                 alert("Refund processed successfully!");

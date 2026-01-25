@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchAPI, API_ENDPOINTS } from "@/lib/api";
+import { fetchAPI, postAPI, API_ENDPOINTS } from "@/lib/api";
 
 export interface Payment {
     id: number;
@@ -62,5 +62,35 @@ export async function getPaymentStats() {
     } catch (error) {
         console.error('Error fetching payment stats:', error);
         return null;
+    }
+}
+
+/**
+ * Get payment details by ID
+ */
+export async function getPaymentById(id: string | number) {
+    try {
+        const data = await fetchAPI<any>(`/admin/payments/${id}/`);
+        return data;
+    } catch (error) {
+        console.error(`Error fetching payment ${id}:`, error);
+        return null;
+    }
+}
+
+/**
+ * Process a refund
+ */
+export async function processRefund(paymentId: number, amount: number, reason?: string) {
+    try {
+        const data = await postAPI<any>('/payments/refund/', {
+            payment_id: paymentId,
+            amount,
+            reason
+        });
+        return data;
+    } catch (error: any) {
+        console.error('Error processing refund:', error);
+        return { success: false, error: error.message || 'Failed to process refund' };
     }
 }
