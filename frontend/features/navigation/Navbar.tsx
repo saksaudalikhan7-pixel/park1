@@ -66,23 +66,23 @@ export function Navbar({ settings }: { settings?: any }) {
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0118] border-b border-white/10">
-            <div className="w-full max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
                 <Link href="/" className="relative z-50 block flex-shrink-0">
                     <img
                         src={logoUrl}
                         alt="Ninja Inflatable Park"
-                        className="h-10 md:h-12 w-auto object-contain transition-transform duration-300 hover:scale-105"
+                        className="h-10 md:h-12 lg:h-14 w-auto object-contain transition-transform duration-300 hover:scale-105"
                         style={{ background: 'transparent' }}
                     />
                 </Link>
 
 
-                <nav className="hidden md:flex items-center gap-8">
+                <nav className="hidden md:flex items-center gap-4 lg:gap-8">
                     {navLinks.map((link) => (
                         <Link
                             key={link.href}
                             href={link.href}
-                            className={`text-sm font-bold uppercase tracking-wider transition-colors hover:text-primary ${pathname === link.href ? "text-primary" : "text-white/80"}`}
+                            className={`text-sm lg:text-base font-bold uppercase tracking-wider transition-colors hover:text-primary whitespace-nowrap ${pathname === link.href ? "text-primary" : "text-white/80"}`}
                         >
                             {link.label}
                         </Link>
@@ -101,12 +101,16 @@ export function Navbar({ settings }: { settings?: any }) {
 
                 <div className="md:hidden flex items-center gap-2 relative z-50">
                     <Link href="/book">
-                        <BouncyButton size="sm" variant="accent" className="text-xs px-3 py-1.5" as="div">
+                        <BouncyButton size="sm" variant="accent" className="text-xs px-3 py-2" as="div">
                             Book
                         </BouncyButton>
                     </Link>
-                    <button className="text-white" onClick={() => dispatch({ type: "TOGGLE_MOBILE_MENU" })}>
-                        {isMobileMenuOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
+                    <button
+                        className="text-white p-2 -mr-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        onClick={() => dispatch({ type: "TOGGLE_MOBILE_MENU" })}
+                        aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+                    >
+                        {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                     </button>
                 </div>
 
@@ -134,16 +138,16 @@ export function Navbar({ settings }: { settings?: any }) {
                                 animate={{ x: 0 }}
                                 exit={{ x: '100%' }}
                                 transition={{ duration: 0.3, ease: 'easeInOut' }}
-                                className="fixed top-0 right-0 bottom-0 w-[280px] z-[70] md:hidden bg-[#261645] shadow-2xl"
+                                className="fixed top-0 right-0 bottom-0 w-[85%] max-w-[320px] z-[70] md:hidden bg-[#261645] shadow-2xl"
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                <div className="h-full flex flex-col p-5">
+                                <div className="h-full flex flex-col p-5 pb-safe">
                                     {/* Close Button */}
                                     <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/20">
                                         <span className="text-white/70 text-xs font-semibold uppercase tracking-wider">Menu</span>
                                         <button
                                             onClick={() => dispatch({ type: "CLOSE_MOBILE_MENU" })}
-                                            className="w-9 h-9 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                                            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
                                             aria-label="Close menu"
                                         >
                                             <X className="w-5 h-5 text-white" />
@@ -159,7 +163,7 @@ export function Navbar({ settings }: { settings?: any }) {
                                                     key={link.href}
                                                     href={link.href}
                                                     onClick={() => dispatch({ type: "CLOSE_MOBILE_MENU" })}
-                                                    className={`block px-4 py-3 rounded-lg text-sm font-semibold transition-colors ${isActive
+                                                    className={`block px-4 py-3.5 rounded-lg text-base font-semibold transition-colors min-h-[44px] flex items-center ${isActive
                                                         ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white"
                                                         : "text-white/90 hover:bg-white/10"
                                                         }`}
@@ -170,15 +174,15 @@ export function Navbar({ settings }: { settings?: any }) {
                                         })}
 
                                         {/* Action Buttons - Inline with navigation */}
-                                        <div className="pt-2 space-y-4">
+                                        <div className="pt-2 space-y-3">
                                             <Link href="/book" className="block" onClick={() => dispatch({ type: "CLOSE_MOBILE_MENU" })}>
-                                                <div className="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-semibold text-sm transition-all text-center shadow-md">
+                                                <div className="w-full py-3.5 px-4 rounded-lg bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-semibold text-base transition-all text-center shadow-md min-h-[44px] flex items-center justify-center">
                                                     Book Session
                                                 </div>
                                             </Link>
 
                                             <Link href="/admin" className="block" onClick={() => dispatch({ type: "CLOSE_MOBILE_MENU" })}>
-                                                <div className="w-full py-3 px-4 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold text-sm transition-colors text-center">
+                                                <div className="w-full py-3.5 px-4 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold text-base transition-colors text-center min-h-[44px] flex items-center justify-center">
                                                     Admin
                                                 </div>
                                             </Link>

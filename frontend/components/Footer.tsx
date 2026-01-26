@@ -52,23 +52,23 @@ export const Footer = ({ settings, socialLinks }: { settings?: any; socialLinks?
     const mapUrl = settings?.mapUrl || siteConfig.contact.mapUrl;
 
     return (
-        <footer className="relative bg-background-dark text-white pt-20 pb-10">
+        <footer className="relative bg-background-dark text-white pt-12 sm:pt-16 lg:pt-20 pb-8 sm:pb-10">
             {/* Decorative Top Border */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent" />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Main Footer Content */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8 lg:gap-12 mb-12">
                     {/* Brand Column */}
-                    <div className="lg:col-span-2">
+                    <div className="sm:col-span-2 xl:col-span-2">
                         <Link href="/" className="inline-block mb-4">
                             <img
                                 src={logoUrl}
                                 alt="Ninja Inflatable Park"
-                                className="h-16 w-auto drop-shadow-neon-blue"
+                                className="h-12 sm:h-14 lg:h-16 w-auto drop-shadow-neon-blue"
                             />
                         </Link>
-                        <p className="text-white/70 mb-6 max-w-sm">
+                        <p className="text-white/70 mb-6 max-w-sm text-sm sm:text-base">
                             {siteConfig.description}
                         </p>
 
@@ -82,7 +82,7 @@ export const Footer = ({ settings, socialLinks }: { settings?: any; socialLinks?
                                     rel="noopener noreferrer"
                                     whileHover={{ scale: 1.1, y: -2 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="w-10 h-10 rounded-full bg-surface-800 border border-primary/30 flex items-center justify-center text-primary hover:bg-primary hover:text-black transition-all shadow-neon-blue"
+                                    className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-surface-800 border border-primary/30 flex items-center justify-center text-primary hover:bg-primary hover:text-black transition-all shadow-neon-blue"
                                     aria-label={social.label}
                                 >
                                     {social.icon}
@@ -93,16 +93,16 @@ export const Footer = ({ settings, socialLinks }: { settings?: any; socialLinks?
 
                     {/* Link Columns */}
                     {footerLinks.map((group) => (
-                        <div key={group.title}>
-                            <h3 className="text-lg font-display font-bold mb-4 text-secondary">
+                        <div key={group.title} className="min-w-0">
+                            <h3 className="text-base sm:text-lg font-display font-bold mb-4 text-secondary">
                                 {group.title}
                             </h3>
-                            <ul className="space-y-3">
+                            <ul className="space-y-2.5 sm:space-y-3">
                                 {group.items.map((link) => (
                                     <li key={link.title}>
                                         <Link
                                             href={link.href}
-                                            className="text-white/70 hover:text-primary transition-colors inline-block hover:translate-x-1 transform duration-200"
+                                            className="text-white/70 hover:text-primary transition-colors inline-block hover:translate-x-1 transform duration-200 text-sm sm:text-base min-h-[44px] flex items-center py-1"
                                         >
                                             {link.title}
                                         </Link>
@@ -114,33 +114,33 @@ export const Footer = ({ settings, socialLinks }: { settings?: any; socialLinks?
                 </div>
 
                 {/* Contact Info Bar */}
-                <div className="border-t border-white/10 pt-8 mb-8">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="border-t border-white/10 pt-6 sm:pt-8 mb-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         <motion.a
                             href={`tel:${phone}`}
                             whileHover={{ scale: 1.02 }}
-                            className="flex items-center gap-3 p-4 bg-surface-800/50 rounded-2xl border border-primary/20 hover:border-primary/50 transition-all"
+                            className="flex items-center gap-3 p-4 bg-surface-800/50 rounded-2xl border border-primary/20 hover:border-primary/50 transition-all min-h-[72px]"
                         >
-                            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                            <div className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
                                 <Phone className="w-5 h-5 text-primary" />
                             </div>
-                            <div>
+                            <div className="min-w-0 flex-1">
                                 <div className="text-xs text-white/60">Call Us</div>
-                                <div className="font-bold text-white">{phone}</div>
+                                <div className="font-bold text-white text-sm sm:text-base truncate">{phone}</div>
                             </div>
                         </motion.a>
 
                         <motion.a
                             href={`mailto:${email}`}
                             whileHover={{ scale: 1.02 }}
-                            className="flex items-center gap-3 p-4 bg-surface-800/50 rounded-2xl border border-secondary/20 hover:border-secondary/50 transition-all"
+                            className="flex items-center gap-3 p-4 bg-surface-800/50 rounded-2xl border border-secondary/20 hover:border-secondary/50 transition-all min-h-[72px]"
                         >
-                            <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center">
+                            <div className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-secondary/20 flex items-center justify-center flex-shrink-0">
                                 <Mail className="w-5 h-5 text-secondary" />
                             </div>
-                            <div>
+                            <div className="min-w-0 flex-1">
                                 <div className="text-xs text-white/60">Email Us</div>
-                                <div className="font-bold text-white">{email}</div>
+                                <div className="font-bold text-white text-sm sm:text-base truncate">{email}</div>
                             </div>
                         </motion.a>
 
@@ -149,14 +149,14 @@ export const Footer = ({ settings, socialLinks }: { settings?: any; socialLinks?
                             target="_blank"
                             rel="noopener noreferrer"
                             whileHover={{ scale: 1.02 }}
-                            className="flex items-center gap-3 p-4 bg-surface-800/50 rounded-2xl border border-accent/20 hover:border-accent/50 transition-all"
+                            className="flex items-center gap-3 p-4 bg-surface-800/50 rounded-2xl border border-accent/20 hover:border-accent/50 transition-all min-h-[72px] sm:col-span-2 lg:col-span-1"
                         >
-                            <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+                            <div className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
                                 <MapPin className="w-5 h-5 text-accent" />
                             </div>
-                            <div className="flex-1">
+                            <div className="flex-1 min-w-0">
                                 <div className="text-xs text-white/60">Visit Us</div>
-                                <div className="font-bold text-white text-sm">
+                                <div className="font-bold text-white text-sm sm:text-base line-clamp-2">
                                     {address}
                                 </div>
                             </div>
@@ -165,11 +165,11 @@ export const Footer = ({ settings, socialLinks }: { settings?: any; socialLinks?
                 </div>
 
                 {/* Bottom Bar */}
-                <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-white/60 text-sm">
+                <div className="border-t border-white/10 pt-6 sm:pt-8 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
+                    <p className="text-white/60 text-xs sm:text-sm text-center sm:text-left">
                         © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
                     </p>
-                    <p className="text-white/60 text-sm flex items-center gap-1">
+                    <p className="text-white/60 text-xs sm:text-sm flex items-center gap-1">
                         Made with <Heart className="w-4 h-4 text-accent fill-accent" /> for bouncing fun
                     </p>
                 </div>

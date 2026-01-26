@@ -262,71 +262,72 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
 
     // MAIN FORM
     return (
-        <main className="min-h-screen bg-background py-20">
-            <div className="max-w-5xl mx-auto px-4">
+        <main className="min-h-screen bg-background py-12 sm:py-16 lg:py-20">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6">
                 {/* Header */}
-                <div className="text-center mb-8">
+                <div className="text-center mb-6 sm:mb-8">
                     <ScrollReveal animation="slideUp">
-                        <h1 className="text-4xl md:text-6xl font-display font-black mb-4">
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-black mb-3 sm:mb-4">
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
                                 Book Your Party
                             </span>
                         </h1>
-                        <p className="text-xl text-white/70 max-w-2xl mx-auto">
+                        <p className="text-base sm:text-lg lg:text-xl text-white/70 max-w-2xl mx-auto px-4">
                             Fill in the details below to reserve your party at Ninja Inflatable Park
                         </p>
                     </ScrollReveal>
                 </div>
 
                 {/* Progress Indicator */}
-                <div className="max-w-3xl mx-auto mb-10">
-                    <div className="flex items-center justify-center gap-2">
+                <div className="max-w-3xl mx-auto mb-8 sm:mb-10 overflow-x-auto scrollbar-hide">
+                    <div className="flex items-center justify-center gap-1.5 sm:gap-2 min-w-max px-4">
                         {/* 1 */}
-                        <div className={`flex items-center justify-center w-10 h-10 rounded-full ${step >= 1 ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-surface-700 text-white/30'} font-bold transition-all`}>
+                        <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full ${step >= 1 ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-surface-700 text-white/30'} font-bold transition-all text-sm sm:text-base flex-shrink-0`}>
                             1
                         </div>
-                        <div className={`h-1 w-12 ${step >= 2 ? 'bg-primary' : 'bg-surface-700'} transition-all`}></div>
+                        <div className={`h-1 w-8 sm:w-12 ${step >= 2 ? 'bg-primary' : 'bg-surface-700'} transition-all flex-shrink-0`}></div>
 
                         {/* 2 */}
-                        <div className={`flex items-center justify-center w-10 h-10 rounded-full ${step >= 2 ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-surface-700 text-white/30'} font-bold transition-all`}>
+                        <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full ${step >= 2 ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-surface-700 text-white/30'} font-bold transition-all text-sm sm:text-base flex-shrink-0`}>
                             2
                         </div>
-                        <div className={`h-1 w-12 ${step >= 3 ? 'bg-primary' : 'bg-surface-700'} transition-all`}></div>
+                        <div className={`h-1 w-8 sm:w-12 ${step >= 3 ? 'bg-primary' : 'bg-surface-700'} transition-all flex-shrink-0`}></div>
 
                         {/* 3 */}
-                        <div className={`flex items-center justify-center w-10 h-10 rounded-full ${step >= 3 ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-surface-700 text-white/30'} font-bold transition-all`}>
+                        <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full ${step >= 3 ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-surface-700 text-white/30'} font-bold transition-all text-sm sm:text-base flex-shrink-0`}>
                             3
                         </div>
-                        <div className={`h-1 w-12 ${step >= 4 ? 'bg-primary' : 'bg-surface-700'} transition-all`}></div>
+                        <div className={`h-1 w-8 sm:w-12 ${step >= 4 ? 'bg-primary' : 'bg-surface-700'} transition-all flex-shrink-0`}></div>
 
                         {/* 4 */}
-                        <div className={`flex items-center justify-center w-10 h-10 rounded-full ${step >= 4 ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-surface-700 text-white/30'} font-bold transition-all`}>
+                        <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full ${step >= 4 ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-surface-700 text-white/30'} font-bold transition-all text-sm sm:text-base flex-shrink-0`}>
                             4
                         </div>
-                        <div className={`h-1 w-12 ${step >= 5 ? 'bg-primary' : 'bg-surface-700'} transition-all`}></div>
+                        <div className={`h-1 w-8 sm:w-12 ${step >= 5 ? 'bg-primary' : 'bg-surface-700'} transition-all flex-shrink-0`}></div>
 
                         {/* 5 */}
-                        <div className={`flex items-center justify-center w-10 h-10 rounded-full ${step >= 5 ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-surface-700 text-white/30'} font-bold transition-all`}>
+                        <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full ${step >= 5 ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-surface-700 text-white/30'} font-bold transition-all text-sm sm:text-base flex-shrink-0`}>
                             5
                         </div>
                     </div>
-                    <div className="flex justify-between mt-2 text-xs font-semibold px-4 max-w-lg mx-auto">
-                        <span className={step >= 1 ? 'text-primary' : 'text-white/30'}>Details</span>
-                        <span className={step >= 2 ? 'text-primary' : 'text-white/30'}>Participants</span>
-                        <span className={step >= 3 ? 'text-primary' : 'text-white/30'}>E-Invitation</span>
-                        <span className={step >= 4 ? 'text-primary' : 'text-white/30'}>Payment</span>
-                        <span className={step >= 5 ? 'text-primary' : 'text-white/30'}>Confirm</span>
+                    <div className="flex justify-between mt-2 text-[10px] sm:text-xs font-semibold px-2 sm:px-4 max-w-lg mx-auto">
+                        <span className={`${step >= 1 ? 'text-primary' : 'text-white/30'} truncate`}>Details</span>
+                        <span className={`${step >= 2 ? 'text-primary' : 'text-white/30'} truncate`}>Participants</span>
+                        <span className={`${step >= 3 ? 'text-primary' : 'text-white/30'} truncate hidden xs:inline`}>E-Invitation</span>
+                        <span className={`${step >= 3 ? 'text-primary' : 'text-white/30'} truncate xs:hidden`}>Invite</span>
+                        <span className={`${step >= 4 ? 'text-primary' : 'text-white/30'} truncate`}>Payment</span>
+                        <span className={`${step >= 5 ? 'text-primary' : 'text-white/30'} truncate`}>Confirm</span>
                     </div>
                 </div>
 
                 {step === 1 && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
                         {/* Booking Form */}
                         <div className="lg:col-span-2">
-                            <form onSubmit={handleBasicInfoSubmit} className="bg-surface-800/50 backdrop-blur-md p-8 rounded-3xl border border-white/10">
-                                <h2 className="text-2xl font-display font-bold mb-6 text-primary">{getContent('step-1', 'Party Details', '').title}</h2>
+                            <form onSubmit={handleBasicInfoSubmit} className="bg-surface-800/50 backdrop-blur-md p-5 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border border-white/10">
+                                <h2 className="text-xl sm:text-2xl font-display font-bold mb-5 sm:mb-6 text-primary">{getContent('step-1', 'Party Details', '').title}</h2>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                                     {/* Contact Information */}
                                     <div>
                                         <label className="block text-sm font-bold mb-2 text-white/80">
@@ -338,7 +339,7 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
                                             required
                                             value={formData.name}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                            className="w-full px-4 py-3 bg-background-dark border-2 border-surface-700 rounded-xl focus:border-primary focus:outline-none transition-colors text-white"
+                                            className="w-full px-4 py-3 sm:py-3.5 bg-background-dark border-2 border-surface-700 rounded-xl focus:border-primary focus:outline-none transition-colors text-white text-base"
                                             placeholder="John Doe"
                                         />
                                     </div>
@@ -504,7 +505,7 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
                                 <button
                                     type="submit"
                                     disabled={isSubmitting || formData.participants < MIN_PARTICIPANTS}
-                                    className="w-full mt-8 px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    className="w-full mt-6 sm:mt-8 px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[48px] text-base sm:text-lg"
                                 >
                                     {isSubmitting ? (
                                         <>

@@ -22,6 +22,7 @@ import {
     Repeat
 } from "lucide-react";
 import { PaymentOverviewWidget } from "./components/PaymentOverviewWidget";
+import { AutoRefresh } from "./components/AutoRefresh";
 
 export default async function AdminDashboard() {
     const session = await getAdminSession() as { email: string; role: string } | null;
@@ -42,6 +43,7 @@ export default async function AdminDashboard() {
 
     return (
         <div className="p-8">
+            <AutoRefresh intervalMs={30000} />
             {/* Header */}
             <div className="mb-8 flex justify-between items-end">
                 <div>

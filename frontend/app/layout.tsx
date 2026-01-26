@@ -10,7 +10,15 @@ import { getMetadata } from "@/seo/seo.config";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
-export const metadata: Metadata = getMetadata();
+export const metadata: Metadata = {
+    ...getMetadata(),
+    viewport: {
+        width: 'device-width',
+        initialScale: 1,
+        maximumScale: 5,
+        userScalable: true,
+    },
+};
 export default function RootLayout({
     children,
 }: {
