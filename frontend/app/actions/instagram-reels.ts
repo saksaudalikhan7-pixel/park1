@@ -2,6 +2,7 @@
 
 import { fetchAPI } from "../lib/server-api";
 import { logActivity } from "../lib/audit-log";
+import { requirePermission } from "../lib/admin-auth";
 import { revalidatePath } from "next/cache";
 import { transformCmsItem } from "../lib/transformers";
 
