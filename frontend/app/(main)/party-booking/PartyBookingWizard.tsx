@@ -626,7 +626,7 @@ export default function PartyBookingWizard({ cmsContent = [] }: PartyBookingWiza
                             <PaymentStep
                                 bookingId={bookingDetails.id}
                                 bookingType="party"
-                                amount={costs.total}
+                                amount={costs.deposit}
                                 bookingDetails={{
                                     date: formData.date,
                                     time: formData.time,

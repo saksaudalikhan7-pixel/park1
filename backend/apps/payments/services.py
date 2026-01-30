@@ -341,7 +341,15 @@ class PaymentService:
         logger.info(f"Sending partial payment email for booking {booking.id}")
         # For partial payments, we can send a different email template in the future
         # For now, just log it
-        pass
+        if isinstance(booking, PartyBooking):
+            try:
+                from apps.emails.tasks import send_party_confirmation_email
+                logger.info(f"Sending party confirmation email for partial payment on booking {booking.id}")
+                send_party_confirmation_email(booking.id)
+            except ImportError:
+                logger.error("Could not import send_party_confirmation_email")
+        else:
+            logger.info("Partial payment for non-party booking, skipping email for now")
     
     def _send_refund_email(self, booking, refund_data, reason):
         """Send refund confirmation email"""
