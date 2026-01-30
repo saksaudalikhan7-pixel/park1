@@ -39,9 +39,11 @@ if not DEBUG and not os.getenv('SECRET_KEY'):
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key-fallback')
 
 # Azure App Service will set WEBSITE_HOSTNAME
+# We allow '*' in Azure because the App Service Load Balancer handles domain verification.
+# This prevents "DisallowedHost" errors from Azure's internal health probes (169.254.x.x).
 ALLOWED_HOSTS = get_env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1')
 if 'WEBSITE_HOSTNAME' in os.environ:
-    ALLOWED_HOSTS.append(os.environ['WEBSITE_HOSTNAME'])
+    ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
     'https://ninjainflablepark-gbhwbbdna5hjgvf9.centralindia-01.azurewebsites.net',

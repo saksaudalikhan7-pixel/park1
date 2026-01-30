@@ -10,6 +10,7 @@ django-filter==24.3
 # Django Extensions
 django-cors-headers==4.6.0
 django-storages[azure]==1.14.4
+django-ratelimit==4.1.0
 
 # Database
 psycopg2-binary==2.9.10
