@@ -297,8 +297,7 @@ def get_payment_stats(request):
     """
     try:
         from .models import Payment
-        from apps.bookings.models import Booking
-        from apps.party_bookings.models import PartyBooking
+        from apps.bookings.models import Booking, PartyBooking
         from django.db.models import Sum, Count, Q, Avg
         from django.utils import timezone
         from datetime import timedelta
