@@ -310,9 +310,41 @@ export default function AdminBookings() {
                                             <span className="text-sm font-bold text-slate-900">{formatCurrency(booking.amount || 0)}</span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
-                                                Paid
-                                            </span>
+                                            {(() => {
+                                                const status = booking.paymentStatus || booking.payment_status || 'PENDING';
+                                                let badgeClass = "bg-slate-100 text-slate-700 border-slate-200";
+                                                let label = status;
+
+                                                switch (String(status).toUpperCase()) {
+                                                    case 'PAID':
+                                                        badgeClass = "bg-emerald-100 text-emerald-700 border-emerald-200";
+                                                        label = "Paid";
+                                                        break;
+                                                    case 'PARTIAL':
+                                                    case 'PARTIALLY_PAID':
+                                                        badgeClass = "bg-blue-100 text-blue-700 border-blue-200";
+                                                        label = "Partial";
+                                                        break;
+                                                    case 'PENDING':
+                                                        badgeClass = "bg-amber-100 text-amber-700 border-amber-200";
+                                                        label = "Pending";
+                                                        break;
+                                                    case 'REFUNDED':
+                                                        badgeClass = "bg-purple-100 text-purple-700 border-purple-200";
+                                                        label = "Refunded";
+                                                        break;
+                                                    case 'FAILED':
+                                                        badgeClass = "bg-red-100 text-red-700 border-red-200";
+                                                        label = "Failed";
+                                                        break;
+                                                }
+
+                                                return (
+                                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ${badgeClass}`}>
+                                                        {label}
+                                                    </span>
+                                                );
+                                            })()}
                                         </td>
                                         <td className="px-6 py-4">
                                             <ArrivedToggle
@@ -404,4 +436,3 @@ function formatTime(date: Date): string {
         hour12: true
     }).toLowerCase();
 }
-
