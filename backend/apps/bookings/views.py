@@ -157,7 +157,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             created_at__gte=duplicate_check_window
         ).exists()
         
-        ).exists()
+
         
         return Response({'exists': exists})
 
