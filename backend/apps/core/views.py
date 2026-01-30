@@ -159,13 +159,28 @@ class DashboardViewSet(viewsets.ViewSet):
         first_day_of_month = today.replace(day=1)
 
         # Session Bookings (Standard Booking model)
-        session_bookings_today = Booking.objects.filter(date=today).exclude(status='CANCELLED').count()
-        total_session_bookings = Booking.objects.exclude(status='CANCELLED').count()
+        # Count only bookings with actual payments (PAID or PARTIAL)
+        session_bookings_today = Booking.objects.filter(
+            date=today,
+            payment_status__in=['PAID', 'PARTIAL']
+        ).exclude(status='CANCELLED').count()
+        
+        total_session_bookings = Booking.objects.filter(
+            payment_status__in=['PAID', 'PARTIAL']
+        ).exclude(status='CANCELLED').count()
+        
         session_revenue = Booking.objects.exclude(status='CANCELLED').aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
 
         # Party Bookings (New PartyBooking model)
-        party_bookings_today = PartyBooking.objects.filter(date=today).exclude(status='CANCELLED').count()
-        total_party_bookings = PartyBooking.objects.exclude(status='CANCELLED').count()
+        party_bookings_today = PartyBooking.objects.filter(
+            date=today,
+            payment_status__in=['PAID', 'PARTIAL']
+        ).exclude(status='CANCELLED').count()
+        
+        total_party_bookings = PartyBooking.objects.filter(
+            payment_status__in=['PAID', 'PARTIAL']
+        ).exclude(status='CANCELLED').count()
+        
         party_revenue = PartyBooking.objects.exclude(status='CANCELLED').aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
 
         # Aggregated Stats
