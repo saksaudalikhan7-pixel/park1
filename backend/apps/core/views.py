@@ -386,7 +386,7 @@ class DashboardViewSet(viewsets.ViewSet):
                                 'phone': booking.customer.phone if booking.customer else booking.phone,
                             } if booking.customer or booking.name else None
                         })
-                        })
+
                     except Exception as e:
                         logger.error(f"Error serializing session booking {booking.id}: {e}")
             
