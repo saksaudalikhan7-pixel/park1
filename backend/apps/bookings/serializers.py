@@ -198,12 +198,7 @@ class PartyBookingSerializer(serializers.ModelSerializer):
         # For now, return the UUID which can be used to generate client-side or mocked
         return f"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={obj.uuid}"
 
-    def get_payment_status(self, obj):
-        # Party bookings usually default to PENDING until deposit is paid
-        # But we'll map the main status to payment status for now
-        if obj.status == 'CONFIRMED' or obj.status == 'COMPLETED':
-            return 'PAID'
-        return 'PENDING'
+
 
     def get_waiver_status(self, obj):
         if obj.waivers.exists():
