@@ -161,12 +161,12 @@ class DashboardViewSet(viewsets.ViewSet):
         # Session Bookings (Standard Booking model)
         session_bookings_today = Booking.objects.filter(date=today).exclude(status='CANCELLED').count()
         total_session_bookings = Booking.objects.exclude(status='CANCELLED').count()
-        session_revenue = Booking.objects.exclude(status='CANCELLED').aggregate(Sum('amount'))['amount__sum'] or 0
+        session_revenue = Booking.objects.exclude(status='CANCELLED').aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
 
         # Party Bookings (New PartyBooking model)
         party_bookings_today = PartyBooking.objects.filter(date=today).exclude(status='CANCELLED').count()
         total_party_bookings = PartyBooking.objects.exclude(status='CANCELLED').count()
-        party_revenue = PartyBooking.objects.exclude(status='CANCELLED').aggregate(Sum('amount'))['amount__sum'] or 0
+        party_revenue = PartyBooking.objects.exclude(status='CANCELLED').aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
 
         # Aggregated Stats
         bookings_today = session_bookings_today + party_bookings_today
@@ -222,8 +222,8 @@ class DashboardViewSet(viewsets.ViewSet):
         monthly_revenue = []
         for i in range(6, -1, -1):
             d = today - timedelta(days=i)
-            day_session_revenue = Booking.objects.filter(date=d).exclude(status='CANCELLED').aggregate(Sum('amount'))['amount__sum'] or 0
-            day_party_revenue = PartyBooking.objects.filter(date=d).exclude(status='CANCELLED').aggregate(Sum('amount'))['amount__sum'] or 0
+            day_session_revenue = Booking.objects.filter(date=d).exclude(status='CANCELLED').aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
+            day_party_revenue = PartyBooking.objects.filter(date=d).exclude(status='CANCELLED').aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
             
             monthly_revenue.append({
                 "name": d.strftime('%a'),
@@ -262,14 +262,14 @@ class DashboardViewSet(viewsets.ViewSet):
             latest_message_preview = f"{latest_message.name}: {latest_message.message[:50]}..." if len(latest_message.message) > 50 else f"{latest_message.name}: {latest_message.message}"
         
         # Today's Revenue
-        today_session_revenue = Booking.objects.filter(date=today).exclude(status='CANCELLED').aggregate(Sum('amount'))['amount__sum'] or 0
-        today_party_revenue = PartyBooking.objects.filter(date=today).exclude(status='CANCELLED').aggregate(Sum('amount'))['amount__sum'] or 0
+        today_session_revenue = Booking.objects.filter(date=today).exclude(status='CANCELLED').aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
+        today_party_revenue = PartyBooking.objects.filter(date=today).exclude(status='CANCELLED').aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
         today_revenue = today_session_revenue + today_party_revenue
         
         # Yesterday's Revenue for comparison
         yesterday = today - timedelta(days=1)
-        yesterday_session_revenue = Booking.objects.filter(date=yesterday).exclude(status='CANCELLED').aggregate(Sum('amount'))['amount__sum'] or 0
-        yesterday_party_revenue = PartyBooking.objects.filter(date=yesterday).exclude(status='CANCELLED').aggregate(Sum('amount'))['amount__sum'] or 0
+        yesterday_session_revenue = Booking.objects.filter(date=yesterday).exclude(status='CANCELLED').aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
+        yesterday_party_revenue = PartyBooking.objects.filter(date=yesterday).exclude(status='CANCELLED').aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
         yesterday_revenue = yesterday_session_revenue + yesterday_party_revenue
         
         # Booking Trend (This week vs Last week)
@@ -401,7 +401,8 @@ class DashboardViewSet(viewsets.ViewSet):
                             'spectators': 0,  # Not tracked for party bookings
                             'amount': float(booking.amount) if booking.amount else 0,
                             'booking_status': booking.status,
-                            'payment_status': 'PENDING',  # Not tracked separately for party bookings
+                            'payment_status': booking.payment_status,
+                            'paid_amount': float(booking.paid_amount) if booking.paid_amount else 0,
                             'waiver_status': 'SIGNED' if booking.waiver_signed else 'PENDING',
                             'created_at': booking.created_at.isoformat() if booking.created_at else None,
                             'birthday_child_name': booking.birthday_child_name,
