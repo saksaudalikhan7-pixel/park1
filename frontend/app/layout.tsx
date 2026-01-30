@@ -31,6 +31,7 @@ export default function RootLayout({
                     <GlobalAlert />
                     {children}
                 </UIProvider>
+                <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
             </body>
         </html>
     );

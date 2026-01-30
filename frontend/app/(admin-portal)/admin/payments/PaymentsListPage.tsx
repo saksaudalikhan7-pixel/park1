@@ -240,6 +240,9 @@ export default function PaymentsListPage() {
                                         Provider
                                     </th>
                                     <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                        Reference
+                                    </th>
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
                                         Amount
                                     </th>
                                     <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
@@ -297,6 +300,13 @@ export default function PaymentsListPage() {
                                                 {payment.provider}
                                             </span>
                                         </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-500">
+                                            {payment.payment_id ? (
+                                                <span className="text-slate-700 font-bold" title="Payment ID">{payment.payment_id}</span>
+                                            ) : (
+                                                <span className="text-slate-400 text-xs" title="Order ID">{payment.order_id.substring(0, 15)}...</span>
+                                            )}
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-bold">
                                             <span className={payment.amount < 0 ? "text-red-600" : "text-green-600"}>
                                                 {payment.amount < 0 ? "-" : ""}₹{Math.abs(payment.amount).toLocaleString('en-IN')}
@@ -304,10 +314,10 @@ export default function PaymentsListPage() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold ${payment.status === "SUCCESS" ? "bg-green-100 text-green-700 border border-green-200" :
-                                                    payment.status === "FAILED" ? "bg-red-100 text-red-700 border border-red-200" :
-                                                        payment.status === "CREATED" ? "bg-blue-100 text-blue-700 border border-blue-200" :
-                                                            payment.status === "REFUNDED" ? "bg-orange-100 text-orange-700 border border-orange-200" :
-                                                                "bg-slate-100 text-slate-700 border border-slate-200"
+                                                payment.status === "FAILED" ? "bg-red-100 text-red-700 border border-red-200" :
+                                                    payment.status === "CREATED" ? "bg-blue-100 text-blue-700 border border-blue-200" :
+                                                        payment.status === "REFUNDED" ? "bg-orange-100 text-orange-700 border border-orange-200" :
+                                                            "bg-slate-100 text-slate-700 border border-slate-200"
                                                 }`}>
                                                 {getStatusIcon(payment.status)}
                                                 {payment.status}

@@ -59,10 +59,13 @@ export function PaymentStep({
             const { order_id, provider, mock } = orderResult;
 
             // Step 2: Handle payment based on provider
-            if (provider === "MOCK" || mock) {
+            // Step 2: Handle payment based on provider
+            if (provider === "MOCK") {
                 // Mock gateway - auto-verify
                 setPaymentStatus("verifying");
-                await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate processing
+
+                // Simulate processing for user experience in dev mode
+                await new Promise(resolve => setTimeout(resolve, 1500));
 
                 const verifyResult = await verifyPayment({
                     order_id: order_id,
@@ -77,6 +80,12 @@ export function PaymentStep({
                     throw new Error(verifyResult.error || "Payment verification failed");
                 }
             } else if (provider === "RAZORPAY") {
+                // Check if Razorpay script is loaded
+                // @ts-ignore
+                if (!window.Razorpay) {
+                    throw new Error("Razorpay SDK failed to load. Please refresh the page.");
+                }
+
                 // Razorpay gateway - open Razorpay checkout
                 // @ts-ignore
                 const options = {
