@@ -34,7 +34,7 @@ def get_env_list(name, default=''):
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key-fallback')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True  # TEMPORARY: Re-enabled to debug 500 error
+DEBUG = get_env_bool('DEBUG', False)  # Default to False for security
 
 # Azure App Service will set WEBSITE_HOSTNAME
 ALLOWED_HOSTS = get_env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1')
@@ -125,7 +125,7 @@ if DB_ENGINE == 'django.db.backends.postgresql':
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.getenv('DB_NAME', 'ninjapark_db'),
             'USER': os.getenv('DB_USER', 'postgres'),
-            'PASSWORD': os.getenv('DB_PASSWORD', 'admin@786'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),  # No fallback - fail fast if not set
             'HOST': os.getenv('DB_HOST', 'localhost'),
             'PORT': os.getenv('DB_PORT', '5432'),
             'OPTIONS': {
@@ -200,8 +200,10 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # Reduced from 7 days to 30 minutes
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Reduced from 30 days to 7 days
+    'ROTATE_REFRESH_TOKENS': True,  # Rotate refresh tokens on use
+    'BLACKLIST_AFTER_ROTATION': True,  # Blacklist old tokens
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
     'AUTH_HEADER_TYPES': ('Bearer',),
@@ -287,15 +289,61 @@ EMAIL_MAX_RETRIES = int(os.getenv('EMAIL_MAX_RETRIES', '3'))
 EMAIL_RETRY_DELAY_MINUTES = int(os.getenv('EMAIL_RETRY_DELAY_MINUTES', '1'))
 
 # Logging
+# Logging Configuration
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
         'console': {
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': 'django_security.log',
+            'formatter': 'verbose',
         },
     },
     'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django.security': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',  # Log security warnings
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console', 'file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'apps.payments': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'apps.bookings': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
         'apps.emails': {
             'handlers': ['console'],
             'level': 'INFO',
@@ -317,4 +365,38 @@ RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', '')
 # Payment Settings
 ALLOW_PARTIAL_PAYMENTS = True  # Allow partial payments (50% deposit)
 MINIMUM_DEPOSIT_PERCENTAGE = 50  # Not used when ALLOW_PARTIAL_PAYMENTS = False
+
+# ====================================================
+# SECURITY HEADERS
+# ====================================================
+
+# XSS Protection
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Clickjacking Protection
+X_FRAME_OPTIONS = 'DENY'
+
+# HTTPS Enforcement (only in production)
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+# Cookie Security
+SESSION_COOKIE_SECURE = not DEBUG  # HTTPS only in production
+CSRF_COOKIE_SECURE = not DEBUG  # HTTPS only in production
+CSRF_COOKIE_HTTPONLY = True  # Prevent JavaScript access
+SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access
+SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
+CSRF_COOKIE_SAMESITE = 'Lax'  # CSRF protection
+
+# File Upload Security
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB (reduced from 500 MB)
+FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB (reduced from 500 MB)
+
+# Database Connection Pooling
+if DB_ENGINE == 'django.db.backends.postgresql':
+    DATABASES['default']['CONN_MAX_AGE'] = 600  # 10 minutes
 

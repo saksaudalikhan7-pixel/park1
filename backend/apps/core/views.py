@@ -69,7 +69,7 @@ class GlobalSettingsViewSet(viewsets.ModelViewSet):
     serializer_class = GlobalSettingsSerializer
     
     def get_permissions(self):
-        if self.action in ['list', 'retrieve', 'fix_db_schema']:
+        if self.action in ['list', 'retrieve']:
             return [permissions.AllowAny()]
         return [permissions.IsAdminUser()]
 
@@ -116,7 +116,7 @@ class LogoViewSet(viewsets.ModelViewSet):
 class NotificationViewSet(viewsets.ModelViewSet):
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
-    permission_classes = [permissions.AllowAny]  # TODO: Change to IsAdminUser in production
+    permission_classes = [permissions.IsAdminUser]  # Only admins can modify global settings
     
     @action(detail=False, methods=['get'])
     def unread(self, request):

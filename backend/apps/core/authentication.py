@@ -4,10 +4,10 @@ from rest_framework import exceptions
 
 
 class JWTCookieAuthentication(JWTAuthentication):
-    """
+    \"\"\"
     Custom JWT authentication class that reads the token from cookies
     instead of the Authorization header.
-    """
+    \"\"\"
     
     def authenticate(self, request):
         # First try to get token from cookie
@@ -27,14 +27,11 @@ class JWTCookieAuthentication(JWTAuthentication):
         return self.get_user(validated_token), validated_token
     
     def enforce_csrf(self, request):
-        """
+        \"\"\"
         Enforce CSRF validation for cookie-based authentication.
-        """
+        \"\"\"
         check = CSRFCheck(request)
-        # For now, we'll skip CSRF for API requests
-        # In production, you should enable this properly
         reason = check.process_view(request, None, (), {})
         if reason:
-            # CSRF failed, but we'll allow it for now
-            # raise exceptions.PermissionDenied('CSRF Failed: %s' % reason)
-            pass
+            # CSRF validation failed - reject the request
+            raise exceptions.PermissionDenied(f'CSRF Failed: {reason}')

@@ -33,9 +33,9 @@ class InvitationTemplateViewSet(viewsets.ModelViewSet):
 class BookingInvitationViewSet(viewsets.ModelViewSet):
     queryset = BookingInvitation.objects.all()
     serializer_class = BookingInvitationSerializer
-    permission_classes = [permissions.AllowAny] # TODO: Secure this more in production
+    permission_classes = [permissions.IsAuthenticated]  # Default to authenticated only
 
-    @action(detail=False, methods=['get'], url_path='public/(?P<uuid>[^/.]+)')
+    @action(detail=False, methods=['get'], url_path='public/(?P<uuid>[^/.]+)', permission_classes=[permissions.AllowAny])
     def public_view(self, request, uuid=None):
         try:
             invitation = BookingInvitation.objects.get(uuid=uuid)

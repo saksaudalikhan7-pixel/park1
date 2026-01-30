@@ -180,9 +180,7 @@ class ContactMessageViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
-            return [permissions.AllowAny()]
-        return [IsStaffUser()]  # Allow managers to manage activities
+        return [IsStaffUser()]  # Always require staff access for contact messages
     
     @action(detail=True, methods=['post'])
     def mark_read(self, request, pk=None):

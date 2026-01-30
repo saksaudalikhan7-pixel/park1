@@ -50,8 +50,10 @@ class RazorpayGateway(BasePaymentGateway):
         # Initialize Razorpay client
         try:
             import razorpay
+            from razorpay.errors import SignatureVerificationError
             self.client = razorpay.Client(auth=(self.key_id, self.key_secret))
             logger.info("RazorpayGateway initialized successfully")
+
         except ImportError:
             raise ImportError(
                 "Razorpay SDK not installed. "
@@ -171,10 +173,14 @@ class RazorpayGateway(BasePaymentGateway):
                 'razorpay_payment_id': razorpay_payment_id,
                 'razorpay_signature': razorpay_signature,
             })
+        except SignatureVerificationError:
+            logger.error(f"Razorpay signature verification failed for order {razorpay_order_id}")
+            payment.mark_failed("Signature verification failed: Invalid signature")
+            return (False, '', {'error': 'Invalid payment signature'})
         except Exception as e:
-            logger.error(f"Razorpay signature verification failed: {str(e)}")
-            payment.mark_failed(f"Signature verification failed: {str(e)}")
-            return (False, '', {'error': 'Signature verification failed'})
+            logger.error(f"Razorpay signature verification error: {str(e)}")
+            payment.mark_failed(f"Verification error: {str(e)}")
+            return (False, '', {'error': 'Payment verification failed'})
         
         # Fetch payment details from Razorpay
         try:

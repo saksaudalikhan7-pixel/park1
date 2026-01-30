@@ -16,6 +16,8 @@ from django.db import transaction
 import json
 
 from django.db.models import Sum, Count, Max, Q
+from django.utils.decorators import method_decorator
+from django_ratelimit.decorators import ratelimit
 
 class CustomerViewSet(viewsets.ModelViewSet):
     queryset = Customer.objects.all()
@@ -100,6 +102,7 @@ class BookingViewSet(viewsets.ModelViewSet):
             return [permissions.AllowAny()]
         return [IsStaffUser()]  # Allow employees to access bookings
     
+    @method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True))
     def create(self, request, *args, **kwargs):
         """Override create to trigger confirmation email"""
         from django.conf import settings
@@ -128,22 +131,6 @@ class BookingViewSet(viewsets.ModelViewSet):
         if response.status_code == 201:
             booking_id = response.data.get('id')
             logger.info(f"Booking {booking_id} created successfully")
-            
-            # NOTE: Email confirmation is now sent AFTER payment verification
-            # See apps/payments/services.py - PaymentService.verify_and_complete_payment()
-            # This ensures customers only receive confirmation after successful payment
-            
-            # Trigger confirmation email if enabled (DISABLED - moved to payment verification)
-            # if getattr(settings, 'EMAIL_BOOKING_ENABLED', False):
-            #     try:
-            #         from apps.emails.tasks import send_booking_confirmation_email
-            #         logger.info(f"EMAIL_BOOKING_ENABLED=True, triggering email for booking {booking_id}")
-            #         send_booking_confirmation_email(booking_id)
-            #         logger.info(f"Email queued for booking {booking_id}")
-            #     except Exception as e:
-            #         logger.error(f"Failed to queue email for booking {booking_id}: {str(e)}", exc_info=True)
-            # else:
-            #     logger.warning(f"EMAIL_BOOKING_ENABLED=False, skipping email")
         
         return response
 
@@ -163,14 +150,16 @@ class BookingViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
             
-        # Check for bookings with same details created in last 5 minutes
-        five_minutes_ago = timezone.now() - timezone.timedelta(minutes=5)
+        # Check for duplicate bookings within the last 24 hours to prevent double submission
+        duplicate_check_window = timezone.now() - timezone.timedelta(hours=24)
         
         exists = Booking.objects.filter(
             email=email,
             date=date,
             time=time,
-            created_at__gte=five_minutes_ago
+            created_at__gte=duplicate_check_window
+        ).exists()
+        
         ).exists()
         
         return Response({'exists': exists})
@@ -495,6 +484,15 @@ def waiver_list_view(request):
             data = request.data
             ip_address = request.META.get('REMOTE_ADDR')
             
+            # Input Validation (Security Audit Fix)
+            required_fields = ['name', 'dob', 'participant_type']
+            for field in required_fields:
+                if not data.get(field):
+                    return Response(
+                        {'error': f'Missing required field: {field}'}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
             # Create waiver
             waiver = Waiver.objects.create(
                 name=data.get('name'),
@@ -546,9 +544,9 @@ def waiver_detail_view(request, id):
         waiver = Waiver.objects.get(pk=id)
         
         if request.method == 'PATCH':
-            # Check for admin permissions strictly for updates
-            if not request.user.is_staff and not request.user.is_superuser:
-               return Response({'detail': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+            # Require staff authentication for updates
+            if not (request.user and request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)):
+               return Response({'detail': 'Staff authentication required'}, status=status.HTTP_403_FORBIDDEN)
 
             if 'is_verified' in request.data:
                 waiver.is_verified = request.data['is_verified']

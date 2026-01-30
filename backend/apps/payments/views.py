@@ -16,11 +16,13 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .services import payment_service
+from django_ratelimit.decorators import ratelimit
 
 logger = logging.getLogger(__name__)
 
 
 @api_view(['POST'])
+@ratelimit(key='ip', rate='10/m', method='POST')  # Max 10 payment orders per minute per IP
 @permission_classes([AllowAny])  # Frontend needs to create orders
 def create_payment_order(request):
     """
@@ -100,6 +102,7 @@ def create_payment_order(request):
 
 
 @api_view(['POST'])
+@ratelimit(key='ip', rate='10/m', method='POST')  # Max 10 verifications per minute per IP
 @permission_classes([AllowAny])  # Frontend needs to verify payments
 def verify_payment(request):
     """
