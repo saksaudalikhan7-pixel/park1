@@ -30,11 +30,13 @@ def get_env_list(name, default=''):
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key-fallback')
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_env_bool('DEBUG', False)  # Default to False for security
+
+# SECURITY WARNING: keep the secret key used in production secret!
+if not DEBUG and not os.getenv('SECRET_KEY'):
+    raise ValueError("SECRET_KEY environment variable must be set in production!")
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key-fallback')
 
 # Azure App Service will set WEBSITE_HOSTNAME
 ALLOWED_HOSTS = get_env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1')
@@ -342,8 +344,6 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
-    },
-}
         'apps.emails': {
             'handlers': ['console'],
             'level': 'INFO',

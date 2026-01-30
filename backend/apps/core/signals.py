@@ -47,3 +47,22 @@ try:
 except ImportError:
     # ContactMessage model doesn't exist yet
     pass
+
+# Security Logging Signals (Audit Finding #14)
+from django.contrib.auth.signals import user_logged_in, user_login_failed
+import logging
+
+logger = logging.getLogger('django.security')
+
+@receiver(user_logged_in)
+def log_user_login(sender, request, user, **kwargs):
+    """Log successful logins"""
+    ip = request.META.get('REMOTE_ADDR')
+    logger.info(f"Security Event: Successful login for user {user.email} (ID: {user.id}) from IP {ip}")
+
+@receiver(user_login_failed)
+def log_login_failed(sender, credentials, request, **kwargs):
+    """Log failed login attempts"""
+    ip = request.META.get('REMOTE_ADDR') if request else 'Unknown'
+    email = credentials.get('email') or credentials.get('username') or 'Unknown'
+    logger.warning(f"Security Event: Failed login attempt for {email} from IP {ip}")

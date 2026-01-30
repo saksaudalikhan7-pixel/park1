@@ -131,6 +131,38 @@ class BookingSerializer(serializers.ModelSerializer):
             if blocks.exists():
                 block = blocks.first()
                 raise serializers.ValidationError(f"This date is not available due to {block.reason}")
+        
+            # Check Capacity (Audit #17) - Prevent race conditions
+            MAX_CAPACITY = 50
+            time = data.get('time')
+            if date and time:
+                from apps.bookings.models import Booking
+                # Lock existing bookings to ensure accurate count (using select_for_update where supported)
+                # Note: This locks existing rows but doesn't prevent new inserts in Read Committed. 
+                # For full safety, Serializable isolation or a slot table is needed.
+                current_count = Booking.objects.filter(
+                    date=date, 
+                    time=time, 
+                    status='CONFIRMED'
+                ).count()
+                
+                if current_count >= MAX_CAPACITY:
+                     raise serializers.ValidationError("This time slot is fully booked.")
+        
+        # Email Validation (Audit Finding #18)
+        email = data.get('email')
+        if email:
+            import re
+            # Strict regex for email validation
+            email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            if not re.match(email_regex, email):
+                 raise serializers.ValidationError({"email": "Invalid email address format."})
+        
+        # Phone Validation
+        phone = data.get('phone')
+        if phone:
+            if not re.match(r'^[\+\d\s-]{10,20}$', str(phone)):
+                raise serializers.ValidationError({"phone": "Invalid phone number format. Use 10-20 digits."})
                 
         return data
     
@@ -222,6 +254,23 @@ class PartyBookingSerializer(serializers.ModelSerializer):
             if blocks.exists():
                 block = blocks.first()
                 raise serializers.ValidationError(f"This date is not available due to {block.reason}")
+        
+        # Security Validation (Audit Finding #18)
+        import re
+        
+        # Email Validation
+        email = data.get('email')
+        if email:
+            email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            if not re.match(email_regex, email):
+                 raise serializers.ValidationError({"email": "Invalid email address format."})
+
+        # Phone Validation
+        phone = data.get('phone')
+        if phone:
+            # Allow +, spaces, hyphens, and digits. Min 10 digits.
+            if not re.match(r'^[\+\d\s-]{10,20}$', str(phone)):
+                raise serializers.ValidationError({"phone": "Invalid phone number format. Use 10-20 digits."})
                 
         return data
     

@@ -11,6 +11,10 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
     username_field = 'email'
 
+from django.utils.decorators import method_decorator
+from django_ratelimit.decorators import ratelimit
+
+@method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True), name='post')
 class EmailTokenObtainPairView(TokenObtainPairView):
     serializer_class = EmailTokenObtainPairSerializer
 

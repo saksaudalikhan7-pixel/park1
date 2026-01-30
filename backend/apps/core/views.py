@@ -386,8 +386,9 @@ class DashboardViewSet(viewsets.ViewSet):
                                 'phone': booking.customer.phone if booking.customer else booking.phone,
                             } if booking.customer or booking.name else None
                         })
+                        })
                     except Exception as e:
-                        print(f"Error serializing session booking {booking.id}: {e}")
+                        logger.error(f"Error serializing session booking {booking.id}: {e}")
             
             # Fetch party bookings
             if booking_type != 'session':
@@ -431,7 +432,7 @@ class DashboardViewSet(viewsets.ViewSet):
                             } if booking.customer or booking.name else None
                         })
                     except Exception as e:
-                        print(f"Error serializing party booking {booking.id}: {e}")
+                        logger.error(f"Error serializing party booking {booking.id}: {e}")
             
             # Sort by created_at (most recent first)
             all_bookings_data.sort(key=lambda x: x['created_at'] or '', reverse=True)
@@ -441,5 +442,5 @@ class DashboardViewSet(viewsets.ViewSet):
                 'results': all_bookings_data
             })
         except Exception as e:
-            print(f"Error in all_bookings: {e}")
-            return Response({'error': str(e)}, status=500)
+            logger.error(f"Error in all_bookings: {e}", exc_info=True)
+            return Response({'error': 'Internal server error'}, status=500)

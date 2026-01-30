@@ -85,13 +85,8 @@ class BookingViewSet(viewsets.ModelViewSet):
             queryset = queryset.order_by(ordering)
         else:
             queryset = queryset.order_by('-created_at') # Default to newest first
-        
-        # DEBUG: Print queryset info
-        print(f"[DEBUG] BookingViewSet.get_queryset()")
-        print(f"[DEBUG] Query params: {dict(self.request.query_params)}")
-        print(f"[DEBUG] Queryset count: {queryset.count()}")
-        if queryset.count() > 0:
-            print(f"[DEBUG] First booking: ID={queryset.first().id}, Name={queryset.first().name}")
+            
+        return queryset
             
         return queryset
     
@@ -113,7 +108,9 @@ class BookingViewSet(viewsets.ModelViewSet):
         
         # Call parent create method
         try:
-            response = super().create(request, *args, **kwargs)
+            from django.db import transaction
+            with transaction.atomic():
+                response = super().create(request, *args, **kwargs)
         except Exception as e:
             import traceback
             error_msg = str(e)
@@ -121,10 +118,10 @@ class BookingViewSet(viewsets.ModelViewSet):
             logger.error(traceback.format_exc())
             return Response(
                 {
-                    "detail": f"Server Error: {error_msg}",
-                    "traceback": traceback.format_exc().split('\n')
+                    "detail": "An error occurred while creating the booking. Please try again or contact support.",
+                    #"traceback": traceback.format_exc().split('\n') # SECURE: Do not leak traceback to client
                 },
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
         # Get the created booking from response
@@ -261,22 +258,24 @@ class WaiverViewSet(viewsets.ModelViewSet):
     
     def partial_update(self, request, *args, **kwargs):
         """Handle PATCH requests for updating waiver fields like minors"""
-        print(f"DEBUG: partial_update called with data: {request.data}")
+        import logging
+        logger = logging.getLogger(__name__)
+        # logger.debug(f"partial_update called with data: {request.data}")
+        
         instance = self.get_object()
         
         # Update only the fields provided in the request
         if 'minors' in request.data:
-            print(f"DEBUG: Updating minors to: {request.data['minors']}")
+            # logger.debug(f"Updating minors to: {request.data['minors']}")
             instance.minors = request.data['minors']
         if 'adults' in request.data:
-            print(f"DEBUG: Updating adults to: {request.data['adults']}")
+            # logger.debug(f"Updating adults to: {request.data['adults']}")
             instance.adults = request.data['adults']
         if 'is_verified' in request.data:
-            print(f"DEBUG: Updating is_verified to: {request.data['is_verified']}")
+            logger.info(f"Waiver {instance.id} verification status updated to: {request.data['is_verified']}")
             instance.is_verified = request.data['is_verified']
             
         instance.save()
-        print(f"DEBUG: Waiver saved successfully")
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
         

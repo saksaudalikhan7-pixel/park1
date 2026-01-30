@@ -155,13 +155,13 @@ class RazorpayGateway(BasePaymentGateway):
         if not all([razorpay_order_id, razorpay_payment_id, razorpay_signature]):
             raise ValueError("Missing required Razorpay verification parameters")
         
-        # Get payment record
+        # Get payment record with lock to prevent race conditions (Audit #13)
         try:
-            payment = Payment.objects.get(order_id=razorpay_order_id)
+            payment = Payment.objects.select_for_update().get(order_id=razorpay_order_id)
         except Payment.DoesNotExist:
             raise ValueError(f"Payment with order_id {razorpay_order_id} not found")
         
-        # Check if already processed
+        # Check if already processed (Idempotency)
         if payment.status == 'SUCCESS':
             logger.warning(f"Payment {razorpay_order_id} already processed")
             return (True, payment.payment_id, {'message': 'Payment already processed'})
@@ -185,6 +185,18 @@ class RazorpayGateway(BasePaymentGateway):
         # Fetch payment details from Razorpay
         try:
             razorpay_payment = self.client.payment.fetch(razorpay_payment_id)
+            
+            # Security Check: Verify amount matches (Audit Finding #19)
+            # Razorpay returns amount in paise (100 paise = 1 INR)
+            fetched_amount_paise = int(razorpay_payment.get('amount', 0))
+            expected_amount_paise = int(payment.amount * 100)
+            
+            # Allow small variance (optional, but strict is better for now)
+            if fetched_amount_paise != expected_amount_paise:
+               logger.critical(f"Payment amount mismatch! Expected: {expected_amount_paise}, Got: {fetched_amount_paise}")
+               payment.mark_failed(f"Amount mismatch: Expected {payment.amount}, Paid {fetched_amount_paise / 100}")
+               return (False, '', {'error': 'Payment amount mismatch'})
+               
         except Exception as e:
             logger.error(f"Failed to fetch Razorpay payment: {str(e)}")
             payment.mark_failed(f"Failed to fetch payment details: {str(e)}")
