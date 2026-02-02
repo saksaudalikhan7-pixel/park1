@@ -638,3 +638,57 @@ class PricingCarouselImage(models.Model):
 
     def __str__(self):
         return self.title or f"Image {self.id}"
+
+
+class SessionInformationPage(models.Model):
+    """
+    CMS-managed content for Session Information & Rules displayed on booking page.
+    Only one active record should exist at a time.
+    """
+    title = models.CharField(
+        max_length=255,
+        default="Ninja Inflatable Park Session Booking",
+        help_text="Main page title"
+    )
+    subtitle = models.CharField(
+        max_length=255,
+        default="Booking Available from Thursday's to Sunday's",
+        help_text="Subtitle/tagline",
+        blank=True
+    )
+    session_information_title = models.CharField(
+        max_length=255,
+        default="Session Information",
+        help_text="Title for session information section"
+    )
+    session_information = models.TextField(
+        help_text="Session information content (supports markdown/HTML)"
+    )
+    session_rules_title = models.CharField(
+        max_length=255,
+        default="Session Rules",
+        help_text="Title for session rules section"
+    )
+    session_rules = models.TextField(
+        help_text="Session rules content (supports markdown/HTML)"
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Only one record should be active at a time"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-updated_at']
+        verbose_name = "Session Information Page"
+        verbose_name_plural = "Session Information Pages"
+    
+    def __str__(self):
+        return f"{self.title} ({'Active' if self.is_active else 'Inactive'})"
+    
+    def save(self, *args, **kwargs):
+        # Ensure only one active record
+        if self.is_active:
+            SessionInformationPage.objects.filter(is_active=True).exclude(pk=self.pk).update(is_active=False)
+        super().save(*args, **kwargs)

@@ -3,7 +3,8 @@ from .models import (
     Banner, Activity, Faq, SocialLink, GalleryItem,
     StatCard, InstagramReel, MenuSection, GroupPackage, GuidelineCategory, LegalDocument,
     PageSection, PricingPlan, ContactInfo, PartyPackage, TimelineItem, ValueItem, FacilityItem,
-    Page, ContactMessage, FreeEntry, SessionBookingConfig, PartyBookingConfig, PricingCarouselImage
+    Page, ContactMessage, FreeEntry, SessionBookingConfig, PartyBookingConfig, PricingCarouselImage,
+    SessionInformationPage
 )
 
 
@@ -133,3 +134,20 @@ class PricingCarouselImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = PricingCarouselImage
         fields = '__all__'
+
+class SessionInformationPageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SessionInformationPage
+        fields = [
+            'id',
+            'title',
+            'subtitle',
+            'session_information_title',
+            'session_information',
+            'session_rules_title',
+            'session_rules',
+            'is_active',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']

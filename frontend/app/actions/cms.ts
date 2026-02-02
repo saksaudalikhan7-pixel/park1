@@ -95,3 +95,42 @@ export async function deleteFreeEntry(id: number) {
         throw error;
     }
 }
+
+// Session Information Actions
+
+export async function getSessionInformation() {
+    try {
+        const res = await fetchAPI("/cms/session-information/active/");
+        return res;
+    } catch (error) {
+        console.error("Failed to fetch session information:", error);
+        return null;
+    }
+}
+
+export async function updateSessionInformation(id: number, data: any) {
+    try {
+        await putAPI(`/cms/session-information/${id}/`, data);
+        revalidatePath("/book");
+        revalidatePath("/session-booking/information");
+        revalidatePath("/admin/cms/session-information");
+        return { success: true };
+    } catch (error: any) {
+        console.error("Update Session Information Error:", error);
+        throw new Error(error.message || "Failed to update session information");
+    }
+}
+
+export async function createSessionInformation(data: any) {
+    try {
+        const result = await postAPI("/cms/session-information/", data);
+        revalidatePath("/book");
+        revalidatePath("/session-booking/information");
+        revalidatePath("/admin/cms/session-information");
+        return { success: true, data: result };
+    } catch (error: any) {
+        console.error("Create Session Information Error:", error);
+        throw new Error(error.message || "Failed to create session information");
+    }
+}
+

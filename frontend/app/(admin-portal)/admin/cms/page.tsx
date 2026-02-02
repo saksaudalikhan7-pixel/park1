@@ -44,6 +44,7 @@ export default async function CmsDashboard() {
         // Wizards
         { name: 'Session Booking', href: '/admin/cms/session-booking', icon: FileText, description: 'Session wizard steps' },
         { name: 'Party Booking', href: '/admin/cms/party-booking', icon: Calendar, description: 'Party wizard steps' },
+        { name: 'Session Information', href: '/admin/cms/session-information', icon: FileText, description: 'Session info & rules' },
 
         // Moved from Pages
         { name: 'Facilities Page', href: '/admin/cms/facilities', icon: Layout, description: 'Facilities page content' },

@@ -1,6 +1,7 @@
 import { BookingWizard } from "../../../components/BookingWizard";
 import { createBooking } from "../../actions/createBooking";
 import { getPageSections } from "../../actions/page-sections";
+import { SessionInformation } from "../../../components/SessionInformation";
 
 export default async function BookingPage() {
     const cmsContent = await getPageSections('booking-session');
@@ -19,8 +20,12 @@ export default async function BookingPage() {
                     </p>
                 </div>
 
+                {/* Session Information & Rules */}
+                <SessionInformation />
+
                 <BookingWizard onSubmit={createBooking} cmsContent={cmsContent} />
             </div>
         </main>
     );
 }
+

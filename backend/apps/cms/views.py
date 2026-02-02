@@ -9,7 +9,8 @@ from .models import (
     Banner, Activity, Faq, SocialLink, GalleryItem,
     StatCard, InstagramReel, MenuSection, GroupPackage, GuidelineCategory, LegalDocument,
     PageSection, PricingPlan, ContactInfo, PartyPackage, TimelineItem, ValueItem, FacilityItem,
-    Page, ContactMessage, FreeEntry, SessionBookingConfig, PartyBookingConfig, PricingCarouselImage
+    Page, ContactMessage, FreeEntry, SessionBookingConfig, PartyBookingConfig, PricingCarouselImage,
+    SessionInformationPage
 )
 from .serializers import (
     BannerSerializer, ActivitySerializer, FaqSerializer, 
@@ -19,7 +20,7 @@ from .serializers import (
     PageSectionSerializer, PricingPlanSerializer, ContactInfoSerializer, PartyPackageSerializer,
     TimelineItemSerializer, ValueItemSerializer, FacilityItemSerializer,
     PageSerializer, ContactMessageSerializer, FreeEntrySerializer, SessionBookingConfigSerializer, PartyBookingConfigSerializer,
-    PricingCarouselImageSerializer
+    PricingCarouselImageSerializer, SessionInformationPageSerializer
 )
 
 class BaseCmsViewSet(viewsets.ModelViewSet):
@@ -522,3 +523,38 @@ class PricingCarouselImageViewSet(BaseCmsViewSet):
     filterset_fields = ['active']
     ordering_fields = ['order', 'created_at']
     ordering = ['order']
+
+class SessionInformationPageViewSet(BaseCmsViewSet):
+    """
+    ViewSet for Session Information Page CMS.
+    
+    Public endpoint (GET) for frontend.
+    Admin-only for create/update/delete.
+    """
+    queryset = SessionInformationPage.objects.all()
+    serializer_class = SessionInformationPageSerializer
+    
+    def get_permissions(self):
+        """Public read, admin write"""
+        if self.action in ['list', 'retrieve', 'active']:
+            return [permissions.AllowAny()]
+        return [IsContentManagerOrAdmin()]
+    
+    @action(detail=False, methods=['get'], permission_classes=[permissions.AllowAny])
+    def active(self, request):
+        """Get the currently active session information page"""
+        try:
+            page = SessionInformationPage.objects.filter(is_active=True).first()
+            if not page:
+                return Response({
+                    'error': 'No active session information page found',
+                    'fallback': True
+                }, status=status.HTTP_404_NOT_FOUND)
+            
+            serializer = self.get_serializer(page)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({
+                'error': str(e),
+                'fallback': True
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

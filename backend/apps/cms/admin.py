@@ -3,7 +3,7 @@ from .models import (
     Banner, Activity, Faq, SocialLink, GalleryItem,
     StatCard, InstagramReel, MenuSection, GroupPackage, GuidelineCategory, LegalDocument,
     PageSection, PricingPlan, ContactInfo, PartyPackage, TimelineItem, ValueItem, FacilityItem,
-    Page, AttractionVideoSection
+    Page, AttractionVideoSection, SessionInformationPage
 )
 
 @admin.register(Banner)
@@ -262,6 +262,29 @@ class AttractionVideoSectionAdmin(admin.ModelAdmin):
         }),
         ('Metadata', {
             'fields': ('created_at',),
+            'classes': ('collapse',)
+        }),
+    )
+
+@admin.register(SessionInformationPage)
+class SessionInformationPageAdmin(admin.ModelAdmin):
+    list_display = ['title', 'is_active', 'updated_at', 'created_at']
+    list_filter = ['is_active', 'created_at']
+    search_fields = ['title', 'subtitle']
+    readonly_fields = ['created_at', 'updated_at']
+    
+    fieldsets = (
+        ('Page Settings', {
+            'fields': ('title', 'subtitle', 'is_active')
+        }),
+        ('Session Information', {
+            'fields': ('session_information_title', 'session_information')
+        }),
+        ('Session Rules', {
+            'fields': ('session_rules_title', 'session_rules')
+        }),
+        ('Metadata', {
+            'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
     )
