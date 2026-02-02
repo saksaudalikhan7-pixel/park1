@@ -178,8 +178,8 @@ export function isValidBookingDate(date: string): boolean {
 // Get available time slots for a given date
 export function getAvailableTimeSlots(date: string): string[] {
     const allSlots = [
-        "10:00", "11:00", "12:00", "13:00", "14:00",
-        "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"
+        "13:00", "14:00", "15:00", "16:00", "17:00",
+        "18:00", "19:00", "20:00", "21:00", "22:00"
     ];
     const selectedDate = new Date(date);
     const today = new Date();

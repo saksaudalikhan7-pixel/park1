@@ -581,9 +581,12 @@ export async function deleteBookingBlock(id: string) {
         method: "DELETE"
     });
 
-    if (res && res.ok) {
-        revalidatePath("/admin/booking-blocks");
+    if (!res || !res.ok) {
+        throw new Error("Failed to delete booking block");
     }
+
+    revalidatePath("/admin/booking-blocks");
+    return { success: true };
 }
 
 // --- Arrival Status Actions ---

@@ -47,6 +47,7 @@ if 'WEBSITE_HOSTNAME' in os.environ:
 
 CSRF_TRUSTED_ORIGINS = [
     'https://ninjainflablepark-gbhwbbdna5hjgvf9.centralindia-01.azurewebsites.net',
+    'https://ninjapark-frontend.azurewebsites.net',
 ]
 
 
@@ -235,7 +236,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5000",
     "https://ninjapark-frontend.azurewebsites.net",  # Azure frontend
 ]
-CSRF_TRUSTED_ORIGINS = get_env_list('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:3001,http://localhost:5000')
+CSRF_TRUSTED_ORIGINS.extend(get_env_list('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:3001,http://localhost:5000'))
 
 # Add Azure App Service domains to CSRF_TRUSTED_ORIGINS
 if 'WEBSITE_HOSTNAME' in os.environ:
