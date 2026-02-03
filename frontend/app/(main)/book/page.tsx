@@ -20,10 +20,11 @@ export default async function BookingPage() {
                     </p>
                 </div>
 
+                {/* Booking Wizard */}
+                <BookingWizard onSubmit={createBooking} cmsContent={cmsContent} />
+
                 {/* Session Information & Rules */}
                 <SessionInformation />
-
-                <BookingWizard onSubmit={createBooking} cmsContent={cmsContent} />
             </div>
         </main>
     );

@@ -61,7 +61,7 @@ export default function ContactContent({ settings, hero, form, defaultConfig }: 
     const email = settings?.contact_email || defaultConfig?.contact?.email || "info@ninjapark.com";
     const address = settings?.address || defaultConfig?.contact?.address || "Ninja Inflatable Park, Layarda Hoshalli, Bangalore 560083";
     const mapUrl = settings?.map_url || defaultConfig?.contact?.mapUrl || "https://goo.gl/maps/xyz";
-    const openingHours = typeof settings?.opening_hours === 'string' ? settings.opening_hours : "12:00 PM - 10:00 PM";
+    const openingHours = typeof settings?.opening_hours === 'string' ? settings.opening_hours : "1:00 PM - 10:00 PM";
 
     const contactInfo = [
         // ... existing contactInfo array ...

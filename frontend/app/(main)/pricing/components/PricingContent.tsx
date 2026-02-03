@@ -246,7 +246,7 @@ export default function PricingContent({ plans, settings, info, hero, carouselIm
                                 <ul className="space-y-3 text-white/80">
                                     <li className="flex justify-between">
                                         <span>Monday - Sunday</span>
-                                        <span className="font-bold text-white">{typeof settings?.opening_hours === 'string' ? settings.opening_hours : "12:00 PM - 10:00 PM"}</span>
+                                        <span className="font-bold text-white">{typeof settings?.opening_hours === 'string' ? settings.opening_hours : "1:00 PM - 10:00 PM"}</span>
                                     </li>
                                 </ul>
                             </div>

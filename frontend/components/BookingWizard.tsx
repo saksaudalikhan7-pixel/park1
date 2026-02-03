@@ -191,12 +191,26 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
         const kidPrice = config?.kid_price || 500;
         const adultPrice = config?.adult_price || 899;
         const spectatorPrice = config?.spectator_price || 150;
+        const socksPrice = config?.socks_price || 100; // ₹100 per person for socks
+        const extraHourPrice = config?.extra_hour_price || 500;
         const gstRate = config?.gst_rate || 18;
 
+        // Calculate base prices
         let subtotal = (formData.kids * kidPrice) + (formData.adults * adultPrice) + (formData.spectators * spectatorPrice);
 
+        // Add extra hour charge if applicable
+        if (formData.duration === "120") {
+            const extraHourCharge = (formData.kids + formData.adults) * extraHourPrice;
+            subtotal += extraHourCharge;
+        }
+
+        // Add socks charge for adults and kids (not spectators)
+        const totalParticipants = formData.adults + formData.kids;
+        const socksCharge = totalParticipants * socksPrice;
+        subtotal += socksCharge;
+
         const gst = subtotal * (gstRate / 100);
-        return { subtotal, gst, total: subtotal + gst };
+        return { subtotal, gst, total: subtotal + gst, socksCharge };
     };
 
     const applyVoucher = async () => {
@@ -853,25 +867,31 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                                             {formData.adults > 0 && (
                                                 <div className="flex justify-between">
                                                     <span>Ninja Warrior × {formData.adults}</span>
-                                                    <span className="font-medium">₹ {(formData.adults * 899).toLocaleString('en-IN')}</span>
+                                                    <span className="font-medium">₹ {(formData.adults * (config?.adult_price || 899)).toLocaleString('en-IN')}</span>
                                                 </div>
                                             )}
                                             {formData.kids > 0 && (
                                                 <div className="flex justify-between">
                                                     <span>Little Ninjas × {formData.kids}</span>
-                                                    <span className="font-medium">₹ {(formData.kids * 500).toLocaleString('en-IN')}</span>
+                                                    <span className="font-medium">₹ {(formData.kids * (config?.kid_price || 500)).toLocaleString('en-IN')}</span>
                                                 </div>
                                             )}
                                             {formData.spectators > 0 && (
                                                 <div className="flex justify-between">
                                                     <span>Spectators × {formData.spectators}</span>
-                                                    <span className="font-medium">₹ {(formData.spectators * 150).toLocaleString('en-IN')}</span>
+                                                    <span className="font-medium">₹ {(formData.spectators * (config?.spectator_price || 150)).toLocaleString('en-IN')}</span>
+                                                </div>
+                                            )}
+                                            {(formData.adults + formData.kids) > 0 && (
+                                                <div className="flex justify-between">
+                                                    <span>Grip Socks × {formData.adults + formData.kids}</span>
+                                                    <span className="font-medium">₹ {Math.round(totals.socksCharge || 0).toLocaleString('en-IN')}</span>
                                                 </div>
                                             )}
                                             {formData.duration === "120" && (
                                                 <div className="flex justify-between text-primary">
                                                     <span>Extra Hour × {formData.adults + formData.kids}</span>
-                                                    <span className="font-medium">₹ {((formData.adults + formData.kids) * 500).toLocaleString('en-IN')}</span>
+                                                    <span className="font-medium">₹ {((formData.adults + formData.kids) * (config?.extra_hour_price || 500)).toLocaleString('en-IN')}</span>
                                                 </div>
                                             )}
                                         </div>
