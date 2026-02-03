@@ -31,8 +31,8 @@ echo "Running shop app migrations (for vouchers)..."
 python manage.py showmigrations shop || echo "Could not show shop migrations"
 python manage.py migrate shop --noinput || echo "Shop migration FAILED but continuing..."
 
-echo "Creating RBAC users via management command..."
-python manage.py create_rbac_users || echo "WARNING: User creation command failed"
+# echo "Creating RBAC users via management command..."
+# python manage.py create_rbac_users || echo "WARNING: User creation command failed"
 
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
