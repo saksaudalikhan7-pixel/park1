@@ -266,7 +266,7 @@ export default async function AdminDashboard() {
                                             ₹{booking.amount}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <StatusBadge status={booking.status} />
+                                            <StatusBadge status={booking.status === 'CANCELLED' ? 'CANCELLED' : (booking.payment_status || 'PENDING')} />
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <Link href={booking.type === 'PARTY' ? `/admin/party-bookings/${booking.id}` : `/admin/bookings/${booking.id}`} className="text-slate-400 hover:text-blue-600 transition-all duration-200 inline-block hover:translate-x-1">
@@ -314,16 +314,19 @@ function StatCard({ title, value, icon, trend, trendUp, color, alert }: { title:
 function StatusBadge({ status }: { status: string }) {
     const styles: Record<string, string> = {
         CONFIRMED: "bg-emerald-100 text-emerald-700 border-emerald-300",
+        PAID: "bg-emerald-100 text-emerald-700 border-emerald-300",
+        PARTIAL: "bg-orange-100 text-orange-700 border-orange-300",
         PENDING: "bg-amber-100 text-amber-700 border-amber-300",
         CANCELLED: "bg-red-100 text-red-700 border-red-300",
         COMPLETED: "bg-blue-100 text-blue-700 border-blue-300",
+        FAILED: "bg-red-100 text-red-700 border-red-300",
     };
 
     const defaultStyle = "bg-slate-100 text-slate-700 border-slate-300";
 
     return (
         <span className={`px-3 py-1.5 rounded-full text-xs font-bold border shadow-sm ${styles[status] || defaultStyle} inline-flex items-center gap-1.5`}>
-            <span className={`w-2 h-2 rounded-full ${status === 'CONFIRMED' ? 'bg-emerald-500' : status === 'PENDING' ? 'bg-amber-500' : 'bg-slate-400'}`} />
+            <span className={`w-2 h-2 rounded-full ${['PAID', 'CONFIRMED'].includes(status) ? 'bg-emerald-500' : ['PENDING', 'PARTIAL'].includes(status) ? 'bg-amber-500' : 'bg-red-500'}`} />
             {status}
         </span>
     );

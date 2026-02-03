@@ -21,6 +21,9 @@ export function StatusBadge({ status, type = "booking" }: StatusBadgeProps) {
                 return "bg-green-100 text-green-700 border-green-200";
             case "PENDING":
                 return "bg-yellow-100 text-yellow-700 border-yellow-200";
+            case "PARTIAL":
+            case "PARTIALLY_PAID":
+                return "bg-purple-100 text-purple-700 border-purple-200";
             case "CANCELLED":
             case "FAILED":
             case "REFUNDED":

@@ -211,6 +211,7 @@ class DashboardViewSet(viewsets.ViewSet):
             'date': b.date.isoformat() if b.date else None,
             'time': str(b.time) if b.time else None,
             'status': b.booking_status,
+            'payment_status': b.payment_status,
             'created_at': b.created_at.isoformat()
         } for b in recent_sessions]
         
@@ -224,6 +225,7 @@ class DashboardViewSet(viewsets.ViewSet):
             'date': b.date.isoformat() if b.date else None,
             'time': str(b.time) if b.time else None,
             'status': b.status,
+            'payment_status': b.payment_status,
             'created_at': b.created_at.isoformat()
         } for b in recent_parties]
         

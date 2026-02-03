@@ -206,7 +206,6 @@ class PartyBookingSerializer(serializers.ModelSerializer):
     duration = serializers.SerializerMethodField()
     spectators = serializers.SerializerMethodField()
     qr_code = serializers.SerializerMethodField()
-    payment_status = serializers.SerializerMethodField()
     waiver_status = serializers.SerializerMethodField()
     booking_status = serializers.SerializerMethodField()
 

@@ -48,22 +48,22 @@ export default function BookingDetailPage({ params }: { params: { id: string } }
         window.print();
     };
 
-    const handleUpdateStatus = async (status: string) => {
+    const handleUpdate = async (data: any) => {
         try {
             const response = await fetch(`/api/bookings/${params.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ booking_status: status }),
+                body: JSON.stringify(data),
                 cache: 'no-store',
             });
             if (response.ok) {
                 // Reload booking data
-                const data = await response.json();
-                setBooking(data);
+                const updatedData = await response.json();
+                setBooking(updatedData);
             }
         } catch (error) {
-            console.error('Error updating status:', error);
+            console.error('Error updating booking:', error);
         }
     };
 
@@ -292,29 +292,60 @@ export default function BookingDetailPage({ params }: { params: { id: string } }
                 {/* Sidebar Actions */}
                 <div className="space-y-6">
                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                        <h2 className="text-lg font-bold text-slate-900 mb-4">Status</h2>
-                        <div className="mb-6">
-                            <span className={`inline-block px-4 py-2 rounded-full text-sm font-bold 
-                ${booking.booking_status === 'CONFIRMED' ? 'bg-green-100 text-green-700' :
-                                    booking.booking_status === 'PENDING' ? 'bg-orange-100 text-orange-700' :
-                                        'bg-red-100 text-red-700'}`}>
-                                {booking.booking_status || 'PENDING'}
-                            </span>
+                        <h2 className="text-lg font-bold text-slate-900 mb-4">Status & Actions</h2>
+
+                        <div className="space-y-4 mb-6">
+                            <div>
+                                <label className="text-xs text-slate-400 uppercase font-bold block mb-1">Payment Status</label>
+                                <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold 
+                                    ${booking.payment_status === 'PAID' ? 'bg-green-100 text-green-700' :
+                                        booking.payment_status === 'PARTIAL' ? 'bg-orange-100 text-orange-700' :
+                                            'bg-red-100 text-red-700'}`}>
+                                    {booking.payment_status || 'PENDING'}
+                                </span>
+                            </div>
+
+                            <div>
+                                <label className="text-xs text-slate-400 uppercase font-bold block mb-1">Booking Status</label>
+                                <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold 
+                                    ${booking.booking_status === 'CONFIRMED' ? 'bg-blue-100 text-blue-700' :
+                                        booking.booking_status === 'PENDING' ? 'bg-orange-100 text-orange-700' :
+                                            'bg-red-100 text-red-700'}`}>
+                                    {booking.booking_status || 'PENDING'}
+                                </span>
+                            </div>
                         </div>
 
-                        <div className="space-y-3">
-                            <button
-                                onClick={() => handleUpdateStatus('CONFIRMED')}
-                                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-                            >
-                                <Check size={18} /> Approve Booking
-                            </button>
-                            <button
-                                onClick={() => handleUpdateStatus('CANCELLED')}
-                                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors font-medium"
-                            >
-                                <X size={18} /> Cancel Booking
-                            </button>
+                        <div className="space-y-3 pt-4 border-t border-slate-100">
+                            {/* Mark as Paid Action */}
+                            {booking.payment_status !== 'PAID' && (
+                                <button
+                                    onClick={() => handleUpdate({ payment_status: 'PAID' })}
+                                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+                                >
+                                    <CheckCircle size={18} /> Mark as Paid
+                                </button>
+                            )}
+
+                            {/* Booking Confirmation Action */}
+                            {booking.booking_status !== 'CONFIRMED' && (
+                                <button
+                                    onClick={() => handleUpdate({ booking_status: 'CONFIRMED' })}
+                                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                                >
+                                    <Check size={18} /> Confirm Booking
+                                </button>
+                            )}
+
+                            {/* Cancel Action */}
+                            {booking.booking_status !== 'CANCELLED' && (
+                                <button
+                                    onClick={() => handleUpdate({ booking_status: 'CANCELLED' })}
+                                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors font-medium"
+                                >
+                                    <X size={18} /> Cancel Booking
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
