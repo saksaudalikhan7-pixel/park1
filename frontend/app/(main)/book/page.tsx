@@ -12,7 +12,7 @@ export default async function BookingPage() {
                 <div className="text-center mb-12">
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-black mb-4">
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
-                            Book Your Session
+                            Book Your Session & Information
                         </span>
                     </h1>
                     <p className="text-lg text-white/70">
