@@ -48,6 +48,9 @@ if 'WEBSITE_HOSTNAME' in os.environ:
 CSRF_TRUSTED_ORIGINS = [
     'https://ninjainflablepark-gbhwbbdna5hjgvf9.centralindia-01.azurewebsites.net',
     'https://ninjapark-frontend.azurewebsites.net',
+    'https://www.ninjainflatablepark.com',
+    'https://ninjainflatablepark.com',
+    'https://api.ninjainflatablepark.com',
 ]
 
 
@@ -241,6 +244,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://127.0.0.1:5000",
     "https://ninjapark-frontend.azurewebsites.net",  # Azure frontend
+    "https://www.ninjainflatablepark.com",  # Custom domain
+    "https://ninjainflatablepark.com",  # Root domain
 ]
 CSRF_TRUSTED_ORIGINS.extend(get_env_list('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:3001,http://localhost:5000'))
 
