@@ -181,7 +181,13 @@ class ContactMessageViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
     def get_permissions(self):
-        return [IsStaffUser()]  # Always require staff access for contact messages
+        """
+        Allow anonymous users to create contact messages (public contact form),
+        but require staff authentication to view/edit/delete messages.
+        """
+        if self.action == 'create':
+            return []  # Allow anonymous users to submit contact form
+        return [IsStaffUser()]  # Require staff for viewing/editing
     
     @action(detail=True, methods=['post'])
     def mark_read(self, request, pk=None):
