@@ -74,6 +74,21 @@ const nextConfig = {
                 destination: '/parties',
                 permanent: true,
             },
+            {
+                source: '/information/attractions',
+                destination: '/attractions',
+                permanent: true,
+            },
+            {
+                source: '/information/activities',
+                destination: '/attractions',
+                permanent: true,
+            },
+            {
+                source: '/activities',
+                destination: '/attractions',
+                permanent: true,
+            },
             // Catch-all for other /information/ pages to Home or FAQ? 
             // Better to be specific to avoid loop, but let's add a safe fallback if needed.
             // For now, these cover the user's list. 
