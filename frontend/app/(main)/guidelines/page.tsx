@@ -3,7 +3,12 @@ import { getPageSections } from '@/app/actions/page-sections';
 import { getGuidelineCategories } from '@/app/actions/guideline-categories';
 import { getLegalDocuments } from '@/app/actions/legal-documents';
 import GuidelinesContent from "./components/GuidelinesContent";
+import { getMetadata } from "@/seo/seo.config";
 
+export const metadata = getMetadata(
+    "Safety Guidelines",
+    "Safety first! Read our park rules, safety guidelines, and waiver information to ensure a fun and safe experience for everyone."
+);
 
 export default async function GuidelinesPage() {
     // Fetch all data in parallel

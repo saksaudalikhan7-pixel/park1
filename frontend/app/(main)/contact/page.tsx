@@ -5,6 +5,12 @@ import { siteConfig } from "@repo/config";
 
 
 import { getPageSections } from "../../actions/page-sections";
+import { getMetadata } from "@/seo/seo.config";
+
+export const metadata = getMetadata(
+    "Contact Us",
+    "Get in touch with Ninja Inflatable Park. Find our location, phone number, email, and operating hours. We're here to help!"
+);
 
 export default async function ContactPage() {
     const [settings, sections] = await Promise.all([

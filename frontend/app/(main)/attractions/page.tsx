@@ -6,6 +6,12 @@ import { getPageSections } from "../../actions/page-sections";
 
 
 import { getAttractionVideo } from "../../actions/attraction-video";
+import { getMetadata } from "@/seo/seo.config";
+
+export const metadata = getMetadata(
+    "Attractions",
+    "Explore our thrilling attractions! From obstacle courses to giant slides, Ninja Inflatable Park offers fun for all ages in Bangalore."
+);
 
 export default async function AttractionsPage() {
     const [

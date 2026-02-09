@@ -2,7 +2,12 @@ import { ScrollReveal, SectionDivider } from "@repo/ui";
 import { Coffee, Car, Shield, Wifi, ShoppingBag, Utensils, Users, Baby, Lock, Zap } from "lucide-react";
 import { getFacilityItems } from "@/app/actions/facility-items";
 import { getMediaUrl } from "@/lib/media-utils";
+import { getMetadata } from "@/seo/seo.config";
 
+export const metadata = getMetadata(
+    "Facilities",
+    "Enjoy world-class facilities at Ninja Inflatable Park, including our Ninja Cafe, party rooms, ample parking, and comfortable seating areas."
+);
 
 export default async function FacilitiesPage() {
     const facilities = await getFacilityItems() as any[];

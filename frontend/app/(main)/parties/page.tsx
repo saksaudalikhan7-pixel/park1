@@ -5,7 +5,12 @@ import { getMenuSections } from "../../actions/menu-sections";
 import { getPageSections } from "../../actions/page-sections";
 import { getSettings } from "../../actions/settings";
 import { getGalleryItems } from "../../actions/gallery";
+import { getMetadata } from "@/seo/seo.config";
 
+export const metadata = getMetadata(
+    "Birthday Parties",
+    "Celebrate your birthday at Ninja Inflatable Park! Our party packages include private rooms, food, and unlimited fun for kids of all ages."
+);
 
 export default async function Parties() {
     // Fetch data

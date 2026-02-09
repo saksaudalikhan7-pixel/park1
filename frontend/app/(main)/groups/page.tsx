@@ -3,7 +3,12 @@ import { getPageSections } from '@/app/actions/page-sections';
 import { getGroupPackages } from '@/app/actions/group-packages';
 import { getGroupBenefits } from '@/app/actions/group-benefits';
 import GroupsContent from './components/GroupsContent';
+import { getMetadata } from "@/seo/seo.config";
 
+export const metadata = getMetadata(
+    "Group Bookings",
+    "Plan your next school trip, corporate event, or big gathering at Ninja Inflatable Park. Special rates and packages available for large groups."
+);
 
 export default async function GroupsPage() {
     // Fetch all data in parallel

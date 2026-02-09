@@ -5,6 +5,12 @@ import { getSettings } from "../../actions/settings";
 
 
 import { getPublicPageSections, getPublicPricingCarouselImages } from "@/lib/public-api";
+import { getMetadata } from "@/seo/seo.config";
+
+export const metadata = getMetadata(
+    "Pricing & Packages",
+    "Check out our affordable ticket prices and packages. From Little Ninjas to Ninja Warriors, we have options for everyone."
+);
 
 export default async function Pricing() {
     const [
