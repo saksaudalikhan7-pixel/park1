@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { resetUserPassword, generateSecurePassword } from "@/app/actions/users";
+import { resetUserPassword } from "@/app/actions/users";
+import { generateSecurePassword } from "@/lib/password-utils";
 import { X, RefreshCw, Copy, Check, Eye, EyeOff } from "lucide-react";
 
 interface ResetPasswordModalProps {
