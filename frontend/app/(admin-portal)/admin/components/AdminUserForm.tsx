@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createAdminUser, updateAdminUser, deleteAdminUser } from "@/app/actions/users";
-import { Save, Trash2, ArrowLeft, Loader2 } from "lucide-react";
+import { Save, Trash2, ArrowLeft, Loader2, Key, ShieldAlert } from "lucide-react";
 import Link from "next/link";
+import ResetPasswordModal from "../users/components/ResetPasswordModal";
+import DeleteRoleModal from "../users/components/DeleteRoleModal";
 
 interface Role {
     id: string;
@@ -24,12 +26,26 @@ interface AdminUserFormProps {
     user?: AdminUser;
     roles: Role[];
     isNew?: boolean;
+    currentUserRole?: string;
 }
 
-export function AdminUserForm({ user, roles, isNew = false }: AdminUserFormProps) {
+export function AdminUserForm({ user, roles, isNew = false, currentUserRole }: AdminUserFormProps) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showResetModal, setShowResetModal] = useState(false);
+    const [showDeleteRoleModal, setShowDeleteRoleModal] = useState(false);
+
+    const isSuperAdmin = currentUserRole === 'ADMIN';
+
+    const handleResetSuccess = () => {
+        router.refresh();
+    };
+
+    const handleRoleDeleteSuccess = () => {
+        router.refresh();
+        router.push("/admin/users");
+    };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -52,7 +68,7 @@ export function AdminUserForm({ user, roles, isNew = false }: AdminUserFormProps
                     name: data.name,
                     email: data.email,
                     password: data.password,
-                    roleId: data.roleId
+                    role: data.roleId
                 });
             } else {
                 if (!user) return;
@@ -60,7 +76,7 @@ export function AdminUserForm({ user, roles, isNew = false }: AdminUserFormProps
                     name: data.name,
                     email: data.email,
                     role: data.roleId, // Map roleId to role for backend
-                    isActive: data.isActive,
+                    is_active: data.isActive,
                     password: data.password || undefined // Only send if provided
                 });
             }
@@ -88,118 +104,161 @@ export function AdminUserForm({ user, roles, isNew = false }: AdminUserFormProps
     };
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-2xl">
-            {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-                    {error}
-                </div>
-            )}
+        <>
+            <form onSubmit={handleSubmit} className="max-w-2xl">
+                {error && (
+                    <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                        {error}
+                    </div>
+                )}
 
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="p-6 border-b border-slate-200">
-                    <h2 className="text-lg font-bold text-slate-900">User Details</h2>
-                </div>
-
-                <div className="p-6 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-                            <input
-                                name="name"
-                                type="text"
-                                defaultValue={user?.name}
-                                required
-                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-slate-900"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
-                            <input
-                                name="email"
-                                type="email"
-                                defaultValue={user?.email}
-                                required
-                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-slate-900"
-                            />
-                        </div>
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div className="p-6 border-b border-slate-200 flex justify-between items-center">
+                        <h2 className="text-lg font-bold text-slate-900">User Details</h2>
+                        {isSuperAdmin && !isNew && (
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowResetModal(true)}
+                                    className="flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-medium text-sm px-3 py-1.5 rounded-lg hover:bg-emerald-50 transition-colors"
+                                >
+                                    <Key size={16} />
+                                    Reset Password
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowDeleteRoleModal(true)}
+                                    className="flex items-center gap-2 text-amber-600 hover:text-amber-700 font-medium text-sm px-3 py-1.5 rounded-lg hover:bg-amber-50 transition-colors"
+                                >
+                                    <ShieldAlert size={16} />
+                                    Remove Role
+                                </button>
+                            </div>
+                        )}
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Role</label>
-                        <select
-                            name="roleId"
-                            defaultValue={user?.roleId || ""}
-                            required
-                            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-slate-900"
-                        >
-                            <option value="" disabled>Select a role</option>
-                            {roles.map(role => (
-                                <option key={role.id} value={role.id}>
-                                    {role.name} - {role.description}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    <div className="p-6 space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+                                <input
+                                    name="name"
+                                    type="text"
+                                    defaultValue={user?.name}
+                                    required
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-slate-900"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+                                <input
+                                    name="email"
+                                    type="email"
+                                    defaultValue={user?.email}
+                                    required
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-slate-900"
+                                />
+                            </div>
+                        </div>
 
-                    {isNew && (
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                            <input
-                                name="password"
-                                type="password"
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Role</label>
+                            <select
+                                name="roleId"
+                                defaultValue={user?.roleId || ""}
                                 required
                                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-slate-900"
-                            />
-                            <p className="text-xs text-slate-500 mt-1">Must be at least 8 characters</p>
+                            >
+                                <option value="" disabled>Select a role</option>
+                                {roles.map(role => (
+                                    <option key={role.id} value={role.id}>
+                                        {role.name} - {role.description}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
-                    )}
 
-                    {!isNew && (
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                name="isActive"
-                                id="isActive"
-                                defaultChecked={user?.isActive}
-                                className="w-4 h-4 text-primary border-slate-300 rounded focus:ring-primary"
-                            />
-                            <label htmlFor="isActive" className="text-sm font-medium text-slate-700">
-                                Active Account
-                            </label>
+                        {!isNew && (
+                            <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Password Management</label>
+                                <p className="text-xs text-slate-500 mb-2">Passwords are securely encrypted and cannot be viewed. Use the "Reset Password" button above to generate a new one.</p>
+                            </div>
+                        )}
+
+                        {isNew && (
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                                <input
+                                    name="password"
+                                    type="password"
+                                    required
+                                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-slate-900"
+                                />
+                                <p className="text-xs text-slate-500 mt-1">Must be at least 8 characters</p>
+                            </div>
+                        )}
+
+                        {!isNew && (
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    name="isActive"
+                                    id="isActive"
+                                    defaultChecked={user?.isActive}
+                                    className="w-4 h-4 text-primary border-slate-300 rounded focus:ring-primary"
+                                />
+                                <label htmlFor="isActive" className="text-sm font-medium text-slate-700">
+                                    Active Account
+                                </label>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="p-6 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+                        {!isNew && (
+                            <button
+                                type="button"
+                                onClick={handleDelete}
+                                disabled={loading}
+                                className="flex items-center gap-2 text-red-600 hover:text-red-700 font-medium text-sm px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
+                            >
+                                <Trash2 size={18} />
+                                Delete User
+                            </button>
+                        )}
+                        <div className="flex gap-3 ml-auto">
+                            <Link
+                                href="/admin/users"
+                                className="px-4 py-2 text-slate-700 font-medium hover:bg-slate-200 rounded-lg transition-colors"
+                            >
+                                Cancel
+                            </Link>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="flex items-center gap-2 bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
+                            >
+                                {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                                {isNew ? "Create User" : "Save Changes"}
+                            </button>
                         </div>
-                    )}
-                </div>
-
-                <div className="p-6 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
-                    {!isNew && (
-                        <button
-                            type="button"
-                            onClick={handleDelete}
-                            disabled={loading}
-                            className="flex items-center gap-2 text-red-600 hover:text-red-700 font-medium text-sm px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
-                        >
-                            <Trash2 size={18} />
-                            Delete User
-                        </button>
-                    )}
-                    <div className="flex gap-3 ml-auto">
-                        <Link
-                            href="/admin/users"
-                            className="px-4 py-2 text-slate-700 font-medium hover:bg-slate-200 rounded-lg transition-colors"
-                        >
-                            Cancel
-                        </Link>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="flex items-center gap-2 bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
-                        >
-                            {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                            {isNew ? "Create User" : "Save Changes"}
-                        </button>
                     </div>
                 </div>
-            </div>
-        </form>
+            </form>
+
+            <ResetPasswordModal
+                user={user as any}
+                isOpen={showResetModal}
+                onClose={() => setShowResetModal(false)}
+                onSuccess={handleResetSuccess}
+            />
+
+            <DeleteRoleModal
+                user={user as any}
+                isOpen={showDeleteRoleModal}
+                onClose={() => setShowDeleteRoleModal(false)}
+                onSuccess={handleRoleDeleteSuccess}
+            />
+        </>
     );
 }

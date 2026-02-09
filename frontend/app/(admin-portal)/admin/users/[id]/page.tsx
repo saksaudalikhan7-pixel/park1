@@ -30,7 +30,11 @@ export default async function EditUserPage({ params }: { params: { id: string } 
                 <p className="text-slate-500 mt-1">Manage user details and permissions</p>
             </div>
 
-            <AdminUserForm user={user} roles={roles} />
+            <AdminUserForm
+                user={user}
+                roles={roles}
+                currentUserRole={session.user.role}
+            />
         </div>
     );
 }
