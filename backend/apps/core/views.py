@@ -64,6 +64,67 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(users, many=True)
         return Response(serializer.data)
 
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def reset_password(self, request, pk=None):
+        """Reset user password - Super Admin only"""
+        # Check if requester is ADMIN (super admin)
+        if request.user.role != 'ADMIN':
+            return Response(
+                {"detail": "Only super admins can reset passwords"},
+                status=403
+            )
+        
+        user = self.get_object()
+        new_password = request.data.get('new_password')
+        
+        if not new_password:
+            return Response(
+                {"detail": "new_password is required"},
+                status=400
+            )
+        
+        # Validate password length
+        if len(new_password) < 8:
+            return Response(
+                {"detail": "Password must be at least 8 characters long"},
+                status=400
+            )
+        
+        user.set_password(new_password)
+        user.save()
+        
+        return Response({
+            "detail": "Password reset successfully",
+            "new_password": new_password  # Return for display (one-time only)
+        })
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def remove_role(self, request, pk=None):
+        """Remove role from user - Super Admin only"""
+        if request.user.role != 'ADMIN':
+            return Response(
+                {"detail": "Only super admins can remove roles"},
+                status=403
+            )
+        
+        user = self.get_object()
+        
+        # Prevent removing role from yourself
+        if user.id == request.user.id:
+            return Response(
+                {"detail": "You cannot remove your own role"},
+                status=400
+            )
+        
+        # Set to default EMPLOYEE role instead of None
+        user.role = 'EMPLOYEE'
+        user.save()
+        
+        return Response({
+            "detail": "Role removed successfully. User set to EMPLOYEE role.",
+            "new_role": "EMPLOYEE"
+        })
+
 class GlobalSettingsViewSet(viewsets.ModelViewSet):
     queryset = GlobalSettings.objects.all()
     serializer_class = GlobalSettingsSerializer
