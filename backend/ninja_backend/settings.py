@@ -422,24 +422,24 @@ if DB_ENGINE == 'django.db.backends.postgresql':
 # ====================================================
 
 # Use Redis if available (Production), otherwise fallback to local memory (Dev)
-// REDIS_URL = os.getenv('REDIS_URL', '')
-// if REDIS_URL:
-//     CACHES = {
-//         "default": {
-//             "BACKEND": "django_redis.cache.RedisCache",
-//             "LOCATION": REDIS_URL,
-//             "OPTIONS": {
-//                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
-//                 # Use connection pooling
-//                 "CONNECTION_POOL_KWARGS": {"max_connections": 100},
-//             }
-//         }
-//     }
-// else:
-    CACHES = {
-        "default": {
-            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-            "LOCATION": "unique-snowflake",
-        }
+# REDIS_URL = os.getenv('REDIS_URL', '')
+# if REDIS_URL:
+#     CACHES = {
+#         "default": {
+#             "BACKEND": "django_redis.cache.RedisCache",
+#             "LOCATION": REDIS_URL,
+#             "OPTIONS": {
+#                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#                 # Use connection pooling
+#                 "CONNECTION_POOL_KWARGS": {"max_connections": 100},
+#             }
+#         }
+#     }
+# else:
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
     }
+}
 
