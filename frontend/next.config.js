@@ -37,8 +37,18 @@ const nextConfig = {
                 permanent: true,
             },
             {
+                source: '/contact-us',
+                destination: '/contact',
+                permanent: true,
+            },
+            {
                 source: '/information/about-us',
                 destination: '/about',
+                permanent: true,
+            },
+            {
+                source: '/information/facilities',
+                destination: '/facilities',
                 permanent: true,
             },
             // FAQs & Help
@@ -47,9 +57,34 @@ const nextConfig = {
                 destination: '/faq',
                 permanent: true,
             },
-            // Terms & Guidelines
+            {
+                source: '/information/faqs',
+                destination: '/faq',
+                permanent: true,
+            },
+            // Terms, Privacy & Safety
             {
                 source: '/information/terms',
+                destination: '/terms',
+                permanent: true,
+            },
+            {
+                source: '/information/privacy-policy',
+                destination: '/privacy',
+                permanent: true,
+            },
+            {
+                source: '/information/cookies',
+                destination: '/privacy',
+                permanent: true,
+            },
+            {
+                source: '/information/your-rights',
+                destination: '/privacy',
+                permanent: true,
+            },
+            {
+                source: '/information/disclaimer',
                 destination: '/waiver-terms',
                 permanent: true,
             },
@@ -60,13 +95,18 @@ const nextConfig = {
             },
             {
                 source: '/information/security',
-                destination: '/guidelines', // Security content is covered in guidelines/FAQ
+                destination: '/safety',
                 permanent: true,
             },
-            // Booking Info
+            // Booking Flows
             {
-                source: '/information/session-booking', // Deduced from "Session Booking" title
-                destination: '/faq', // Content matches FAQ "How long is a session?"
+                source: '/step-1',
+                destination: '/book',
+                permanent: true,
+            },
+            {
+                source: '/information/session-booking',
+                destination: '/pricing', // Or /book
                 permanent: true,
             },
             {
@@ -74,6 +114,13 @@ const nextConfig = {
                 destination: '/parties',
                 permanent: true,
             },
+            // General Information Catch-all
+            {
+                source: '/information',
+                destination: '/faq',
+                permanent: true,
+            },
+            // Legacy Attractions
             {
                 source: '/information/attractions',
                 destination: '/attractions',
@@ -89,9 +136,14 @@ const nextConfig = {
                 destination: '/attractions',
                 permanent: true,
             },
-            // Catch-all for other /information/ pages to Home or FAQ? 
-            // Better to be specific to avoid loop, but let's add a safe fallback if needed.
-            // For now, these cover the user's list. 
+            {
+                source: '/waiver',
+                destination: '/waiver', // Self-referential but safe if external link points here. 
+                // Wait, if /waiver exists, no redirect needed unless source is different.
+                // User listed /waiver. If it 404s, maybe it was .php or something? 
+                // Assuming /waiver is correct.
+                permanent: true,
+            },
         ];
     },
 };
