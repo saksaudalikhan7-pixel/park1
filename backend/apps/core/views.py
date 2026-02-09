@@ -14,6 +14,10 @@ from apps.shop.models import Voucher
 from apps.cms.models import Activity, Faq, Banner
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
