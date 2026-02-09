@@ -133,6 +133,12 @@ class GlobalSettingsViewSet(viewsets.ModelViewSet):
     queryset = GlobalSettings.objects.all()
     serializer_class = GlobalSettingsSerializer
     
+    def get_authenticators(self):
+        # Disable authentication for read actions to allow public access even with invalid/expired tokens
+        if self.action in ['list', 'retrieve']:
+            return []
+        return super().get_authenticators()
+
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             return [permissions.AllowAny()]
@@ -154,6 +160,12 @@ class LogoViewSet(viewsets.ModelViewSet):
     serializer_class = LogoSerializer
     # Trigger deployment for missing endpoints
     
+    def get_authenticators(self):
+        # Disable authentication for read actions to allow public access even with invalid/expired tokens
+        if self.action in ['list', 'retrieve', 'active']:
+            return []
+        return super().get_authenticators()
+
     def get_permissions(self):
         if self.action in ['list', 'retrieve', 'active']:
             return [permissions.AllowAny()]

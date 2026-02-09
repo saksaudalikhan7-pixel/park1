@@ -24,6 +24,12 @@ from .serializers import (
 )
 
 class BaseCmsViewSet(viewsets.ModelViewSet):
+    def get_authenticators(self):
+        # Disable authentication for read actions to allow public access even with invalid/expired tokens
+        if self.action in ['list', 'retrieve']:
+            return []
+        return super().get_authenticators()
+
     def get_permissions(self):
         # Allow public read access, require CONTENT_MANAGER or ADMIN for write operations
         if self.action in ['list', 'retrieve']:

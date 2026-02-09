@@ -31,8 +31,8 @@ class SimpleBookingSerializer(serializers.ModelSerializer):
                   'payment_status', 'waiver_status', 'type', 'created_at', 'updated_at']
 
 class WaiverSerializer(serializers.ModelSerializer):
-    # booking_details = SimpleBookingSerializer(source='booking', read_only=True)  # Temporarily disabled
-    # party_booking_details = serializers.SerializerMethodField()  # Temporarily disabled
+    booking_details = SimpleBookingSerializer(source='booking', read_only=True)
+    party_booking_details = serializers.SerializerMethodField()
     booking_type = serializers.SerializerMethodField(read_only=True)
     booking_reference = serializers.SerializerMethodField(read_only=True)
     arrived = serializers.SerializerMethodField(read_only=True)
@@ -94,7 +94,7 @@ class BookingSerializer(serializers.ModelSerializer):
     # voucher_details = VoucherSerializer(source='voucher', read_only=True)
     transactions = TransactionSerializer(many=True, read_only=True)
     waiver_status = serializers.SerializerMethodField()
-    # waivers = WaiverSerializer(many=True, read_only=True)  # Temporarily disabled due to IPAddressField error
+    waivers = WaiverSerializer(many=True, read_only=True)
 
     class Meta:
         model = Booking
@@ -103,7 +103,7 @@ class BookingSerializer(serializers.ModelSerializer):
                   'voucher_code', 'status', 'booking_status', 'payment_status', 'waiver_status',
                   'type', 'qr_code', 'customer', 'customer_details', 'voucher', 'transactions',
                   'arrived', 'arrived_at',  # Arrival tracking
-                  # 'waivers',  # Temporarily removed
+                  'waivers',
                   'created_at', 'updated_at']
         read_only_fields = ['booking_reference']
 

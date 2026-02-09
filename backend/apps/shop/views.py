@@ -11,6 +11,12 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     
+    def get_authenticators(self):
+        # Disable authentication for read actions to allow public access even with invalid/expired tokens
+        if self.action in ['list', 'retrieve']:
+            return []
+        return super().get_authenticators()
+
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             return [permissions.AllowAny()]
@@ -20,6 +26,12 @@ class VoucherViewSet(viewsets.ModelViewSet):
     queryset = Voucher.objects.all()
     serializer_class = VoucherSerializer
     
+    def get_authenticators(self):
+        # Disable authentication for read and validate actions to allow public access even with invalid/expired tokens
+        if self.action in ['list', 'validate']:
+            return []
+        return super().get_authenticators()
+
     def get_permissions(self):
         # Allow public access for list and validate
         if self.action in ['list', 'validate']:

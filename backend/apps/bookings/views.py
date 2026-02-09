@@ -1,7 +1,7 @@
-from rest_framework import viewsets, permissions
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from apps.core.authentication import SilentJWTCookieAuthentication, SilentJWTAuthentication
+from rest_framework.authentication import SessionAuthentication
 from .models import Customer, Booking, Waiver, Transaction, BookingBlock, PartyBooking, SessionBookingHistory, PartyBookingHistory
 from .serializers import CustomerSerializer, BookingSerializer, WaiverSerializer, TransactionSerializer, BookingBlockSerializer, PartyBookingSerializer, SessionBookingHistorySerializer, PartyBookingHistorySerializer
 from .permissions import IsStaffUser, IsSuperAdminOnly
@@ -90,10 +90,16 @@ class BookingViewSet(viewsets.ModelViewSet):
             
         return queryset
     
+    def get_authenticators(self):
+        # Disable authentication for create and ticket actions to allow public access even with invalid/expired tokens
+        if self.action in ['create', 'ticket', 'check_duplicate']:
+            return []
+        return super().get_authenticators()
+
     def get_permissions(self):
         # Allow public access ONLY for create and ticket retrieval
         # List and retrieve require staff authentication to protect customer data
-        if self.action in ['create', 'ticket']:
+        if self.action in ['create', 'ticket', 'check_duplicate']:
             return [permissions.AllowAny()]
         return [IsStaffUser()]  # Allow employees to access bookings
     
@@ -249,6 +255,12 @@ class WaiverViewSet(viewsets.ModelViewSet):
             
         return queryset
     
+    def get_authenticators(self):
+        # Disable authentication for create action to allow public access even with invalid/expired tokens
+        if self.action == 'create':
+            return []
+        return super().get_authenticators()
+
     def get_permissions(self):
         # Allow public access for create (when customers sign waivers)
         # Require staff authentication for list/retrieve/update
@@ -419,6 +431,7 @@ class WaiverViewSet(viewsets.ModelViewSet):
 
 # Custom function-based view for waiver listing (bypasses serializer bug)
 @api_view(['GET', 'POST'])
+@authentication_classes([SilentJWTCookieAuthentication, SilentJWTAuthentication, SessionAuthentication])
 @permission_classes([permissions.AllowAny])  # We'll check permissions inside
 def waiver_list_view(request):
     """Custom view to list/create waivers without using ModelSerializer"""
@@ -536,6 +549,7 @@ def waiver_list_view(request):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PATCH'])
+@authentication_classes([SilentJWTCookieAuthentication, SilentJWTAuthentication, SessionAuthentication])
 @permission_classes([permissions.AllowAny])
 def waiver_detail_view(request, id):
     """Custom view to get waiver details with booking and participant information"""
@@ -637,6 +651,10 @@ class PublicBookingBlockViewSet(viewsets.ReadOnlyModelViewSet):
     """
     serializer_class = BookingBlockSerializer
     permission_classes = [permissions.AllowAny]
+
+    def get_authenticators(self):
+        # Disable authentication for read actions to allow public access even with invalid/expired tokens
+        return []
     
     def get_queryset(self):
         blocking_types = ['BLOCKED_DATE', 'CLOSED', 'MAINTENANCE', 'PRIVATE_EVENT', 'OTHER']
@@ -652,7 +670,11 @@ class PublicSiteAlertViewSet(viewsets.ReadOnlyModelViewSet):
     """
     serializer_class = BookingBlockSerializer
     permission_classes = [permissions.AllowAny]
-    
+
+    def get_authenticators(self):
+        # Disable authentication for read actions to allow public access even with invalid/expired tokens
+        return []
+
     def get_queryset(self):
         from datetime import datetime, time
         
@@ -677,6 +699,7 @@ class PublicSiteAlertViewSet(viewsets.ReadOnlyModelViewSet):
 
 # Custom function-based view for party booking creation (bypasses serializer bug)
 @api_view(['POST', 'GET'])
+@authentication_classes([SilentJWTCookieAuthentication, SilentJWTAuthentication, SessionAuthentication])
 @permission_classes([permissions.AllowAny])
 def create_party_booking_view(request):
     """Custom view to create party bookings without using ModelSerializer"""
@@ -770,6 +793,12 @@ def create_party_booking_view(request):
 class PartyBookingViewSet(viewsets.ModelViewSet):
     queryset = PartyBooking.objects.all()
     serializer_class = PartyBookingSerializer
+    
+    def get_authenticators(self):
+        # Disable authentication for creation to allow public access even with invalid/expired tokens
+        if self.action == 'create':
+            return []
+        return super().get_authenticators()
     
     def get_queryset(self):
         queryset = PartyBooking.objects.all()

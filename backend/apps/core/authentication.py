@@ -35,3 +35,27 @@ class JWTCookieAuthentication(JWTAuthentication):
         if reason:
             # CSRF validation failed - reject the request
             raise exceptions.PermissionDenied(f'CSRF Failed: {reason}')
+
+class SilentJWTCookieAuthentication(JWTCookieAuthentication):
+    """
+    Same as JWTCookieAuthentication but returns None instead of raising
+    AuthenticationFailed/PermissionDenied if authentication fails.
+    Used for public endpoints that might also have staff-only features.
+    """
+    def authenticate(self, request):
+        try:
+            return super().authenticate(request)
+        except (exceptions.AuthenticationFailed, exceptions.PermissionDenied):
+            return None
+
+class SilentJWTAuthentication(JWTAuthentication):
+    """
+    Same as JWTAuthentication but returns None instead of raising
+    AuthenticationFailed if authentication fails.
+    """
+    def authenticate(self, request):
+        try:
+            return super().authenticate(request)
+        except (exceptions.AuthenticationFailed, exceptions.PermissionDenied):
+            return None
+
