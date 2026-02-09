@@ -106,11 +106,31 @@ const nextConfig = {
             },
             {
                 source: '/information/session-booking',
-                destination: '/pricing', // Or /book
+                destination: '/pricing',
+                permanent: true,
+            },
+            {
+                source: '/session-booking/information',
+                destination: '/pricing',
+                permanent: true,
+            },
+            {
+                source: '/session-booking',
+                destination: '/pricing',
                 permanent: true,
             },
             {
                 source: '/information/party-booking',
+                destination: '/parties',
+                permanent: true,
+            },
+            {
+                source: '/party-booking/information',
+                destination: '/parties',
+                permanent: true,
+            },
+            {
+                source: '/party-booking',
                 destination: '/parties',
                 permanent: true,
             },
@@ -136,12 +156,10 @@ const nextConfig = {
                 destination: '/attractions',
                 permanent: true,
             },
+            // Legacy Waiver Links
             {
-                source: '/waiver',
-                destination: '/waiver', // Self-referential but safe if external link points here. 
-                // Wait, if /waiver exists, no redirect needed unless source is different.
-                // User listed /waiver. If it 404s, maybe it was .php or something? 
-                // Assuming /waiver is correct.
+                source: '/information/waiver',
+                destination: '/waiver',
                 permanent: true,
             },
         ];
