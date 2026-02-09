@@ -238,16 +238,22 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
 }
 
+# CORS Configuration
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:5000",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5000",
     "https://ninjapark-frontend.azurewebsites.net",  # Azure frontend
     "https://www.ninjainflatablepark.com",  # Custom domain
     "https://ninjainflatablepark.com",  # Root domain
 ]
-CSRF_TRUSTED_ORIGINS.extend(get_env_list('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:3001,http://localhost:5000'))
+
+if DEBUG:
+    CORS_ALLOWED_ORIGINS.extend([
+        "http://localhost:3000",
+        "http://localhost:5000",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5000",
+    ])
+
+CSRF_TRUSTED_ORIGINS.extend(get_env_list('CORS_ALLOWED_ORIGINS', ''))
 
 # Add Azure App Service domains to CSRF_TRUSTED_ORIGINS
 if 'WEBSITE_HOSTNAME' in os.environ:
@@ -284,11 +290,6 @@ else:
 # ====================================================
 # EMAIL SYSTEM CONFIGURATION (Azure Communication Services)
 # ====================================================
-
-# Feature Flags (ALL DISABLED BY DEFAULT)
-EMAIL_ENABLED = os.getenv('EMAIL_ENABLED', 'False').lower() == 'true'
-EMAIL_BOOKING_ENABLED = os.getenv('EMAIL_BOOKING_ENABLED', 'False').lower() == 'true'
-EMAIL_DEBUG_MODE = os.getenv('EMAIL_DEBUG_MODE', 'True').lower() == 'true'
 
 # Azure Communication Services Credentials
 AZURE_COMMUNICATION_CONNECTION_STRING = os.getenv('AZURE_COMMUNICATION_CONNECTION_STRING', '')
@@ -408,10 +409,37 @@ SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
 CSRF_COOKIE_SAMESITE = 'Lax'  # CSRF protection
 
 # File Upload Security
-DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB (reduced from 500 MB)
-FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB (reduced from 500 MB)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * 1024 * 1024  # 100 MB (reduced from 500 MB)
+FILE_UPLOAD_MAX_MEMORY_SIZE = 100 * 1024 * 1024  # 100 MB (reduced from 500 MB)
 
 # Database Connection Pooling
 if DB_ENGINE == 'django.db.backends.postgresql':
     DATABASES['default']['CONN_MAX_AGE'] = 600  # 10 minutes
+
+
+# ====================================================
+# CACHING CONFIGURATION
+# ====================================================
+
+# Use Redis if available (Production), otherwise fallback to local memory (Dev)
+// REDIS_URL = os.getenv('REDIS_URL', '')
+// if REDIS_URL:
+//     CACHES = {
+//         "default": {
+//             "BACKEND": "django_redis.cache.RedisCache",
+//             "LOCATION": REDIS_URL,
+//             "OPTIONS": {
+//                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
+//                 # Use connection pooling
+//                 "CONNECTION_POOL_KWARGS": {"max_connections": 100},
+//             }
+//         }
+//     }
+// else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-snowflake",
+        }
+    }
 

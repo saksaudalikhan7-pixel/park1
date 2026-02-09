@@ -83,12 +83,12 @@ export const SEO_CONFIG = {
   siteName: "Ninja Inflatable Park",
   title: "Ninja Inflatable Park | India's Biggest Inflatable Park in Bangalore",
   description: "Experience the ultimate fun at Ninja Inflatable Park, India's biggest inflatable park in Bangalore! Perfect for kids' birthday parties, family entertainment, weekend activities, and adventure. Book your slot now!",
-  baseUrl: "https://ninjapark-frontend.azurewebsites.net",
+  baseUrl: "https://www.ninjainflatablepark.com",
   keywords: SEO_KEYWORDS,
   openGraph: {
     type: "website",
     locale: "en_IE",
-    url: "https://ninjapark-frontend.azurewebsites.net/",
+    url: "https://www.ninjainflatablepark.com/",
     siteName: "Ninja Inflatable Park",
     images: [
       {

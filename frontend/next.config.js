@@ -23,6 +23,25 @@ const nextConfig = {
             },
         ],
     },
+    async redirects() {
+        return [
+            {
+                source: '/information/our-prices',
+                destination: '/pricing',
+                permanent: true,
+            },
+            {
+                source: '/information/contact-us',
+                destination: '/contact',
+                permanent: true,
+            },
+            {
+                source: '/information/about-us',
+                destination: '/about',
+                permanent: true,
+            },
+        ];
+    },
 };
 
 module.exports = nextConfig;

@@ -278,7 +278,7 @@ class UploadView(APIView):
     parser_classes = (MultiPartParser, FormParser)
     
     # Configuration
-    MAX_FILE_SIZE = 500 * 1024 * 1024  # 500MB
+    MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
     # Trigger deployment for consistency check
     ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp', 'mp4', 'mov', 'webm'}
     ALLOWED_MIME_TYPES = {

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ScrollReveal, SectionDivider, BouncyButton } from "@repo/ui";
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, Clock, Send, MessageCircle } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, Send, MessageCircle, Loader2 } from "lucide-react";
 
 interface ContactContentProps {
     settings?: any;
@@ -222,7 +222,10 @@ export default function ContactContent({ settings, hero, form, defaultConfig }: 
                                         <BouncyButton type="submit" variant="primary" className="w-full" size="lg" disabled={isSubmitting}>
                                             <div className="flex items-center justify-center">
                                                 {isSubmitting ? (
-                                                    <span>Sending...</span>
+                                                    <>
+                                                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                                                        <span>Sending...</span>
+                                                    </>
                                                 ) : (
                                                     <>
                                                         <Send className="w-5 h-5 mr-2" />
