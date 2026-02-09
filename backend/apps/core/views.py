@@ -135,7 +135,7 @@ class GlobalSettingsViewSet(viewsets.ModelViewSet):
     
     def get_authenticators(self):
         # Disable authentication for read actions to allow public access even with invalid/expired tokens
-        if self.action in ['list', 'retrieve']:
+        if getattr(self, 'action', None) in ['list', 'retrieve']:
             return []
         return super().get_authenticators()
 
@@ -162,7 +162,7 @@ class LogoViewSet(viewsets.ModelViewSet):
     
     def get_authenticators(self):
         # Disable authentication for read actions to allow public access even with invalid/expired tokens
-        if self.action in ['list', 'retrieve', 'active']:
+        if getattr(self, 'action', None) in ['list', 'retrieve', 'active']:
             return []
         return super().get_authenticators()
 
