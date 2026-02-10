@@ -9,11 +9,16 @@ import { transformCmsItem } from "../lib/transformers";
 export async function getPageSections(page: string) {
     // Public access allowed
     if (!page) return []; // Fail safe or throw error
-    const endpoint = `/cms/page-sections/?page=${page}`;
-    const res = await fetchAPI(endpoint);
-    if (!res || !res.ok) return [];
-    const data = await res.json();
-    return data.map(transformCmsItem);
+    try {
+        const endpoint = `/cms/page-sections/?page=${page}`;
+        const res = await fetchAPI(endpoint);
+        if (!res || !res.ok) return [];
+        const data = await res.json();
+        return data.map(transformCmsItem);
+    } catch (error) {
+        console.error(`Error fetching page sections for ${page}:`, error);
+        return [];
+    }
 }
 
 export async function getPageSection(id: string) {
