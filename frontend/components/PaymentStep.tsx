@@ -143,6 +143,8 @@ export function PaymentStep({
                 setError("Booking not found. Please go back and try again.");
             } else if (errorMessage.includes("Decimal")) {
                 setError("Payment calculation error. Please contact support.");
+            } else if (errorMessage.includes("exceeds remaining balance") || errorMessage.includes("insufficient")) {
+                setError("Payment failed. Please use a Credit/Debit Card, UPI, or Net Banking instead of wallets.");
             } else {
                 setError(errorMessage);
             }

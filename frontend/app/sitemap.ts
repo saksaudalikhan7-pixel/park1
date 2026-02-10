@@ -18,7 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         '/safety',
         '/terms',
         '/tickets',
-        '/waiver',
+        '/kiosk/waiver',
         '/waiver-terms',
     ].map((route) => ({
         url: `${SEO_CONFIG.baseUrl}${route}`,

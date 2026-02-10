@@ -159,7 +159,12 @@ const nextConfig = {
             // Legacy Waiver Links
             {
                 source: '/information/waiver',
-                destination: '/waiver',
+                destination: '/kiosk/waiver',
+                permanent: true,
+            },
+            {
+                source: '/waiver',
+                destination: '/kiosk/waiver',
                 permanent: true,
             },
         ];
