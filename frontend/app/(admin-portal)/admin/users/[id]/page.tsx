@@ -33,7 +33,7 @@ export default async function EditUserPage({ params }: { params: { id: string } 
             <AdminUserForm
                 user={user}
                 roles={roles}
-                currentUserRole={session.user.role}
+                currentUserRole={session.role}
             />
         </div>
     );

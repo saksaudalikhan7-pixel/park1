@@ -18,7 +18,7 @@ export default async function UsersPage() {
             users={users}
             stats={stats}
             recentActivity={recentActivity}
-            currentUserRole={session.user.role}
+            currentUserRole={session.role}
         />
     );
 }
