@@ -117,7 +117,7 @@ export default function PartyContent({ packages, menus, hero, settings, terms, c
                                         </div>
 
                                         <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
-                                            <Link href="/party-booking" className="w-full">
+                                            <Link href="/party-booking?v=2" className="w-full">
                                                 <BouncyButton size="md" variant="primary" className="w-full" as="div">
                                                     <PartyPopper className="w-4 h-4 mr-2" />
                                                     Book Now
@@ -248,7 +248,7 @@ export default function PartyContent({ packages, menus, hero, settings, terms, c
                             Book now and make it unforgettable!
                         </p>
                         <div className="flex justify-center">
-                            <Link href="/party-booking">
+                            <Link href="/party-booking?v=2">
                                 <BouncyButton size="lg" variant="accent" as="div">
                                     <PartyPopper className="w-5 h-5 mr-2" />
                                     Book Your Party
