@@ -1,4 +1,5 @@
 import { getBanner } from "../../../../actions/banners";
+export const dynamic = 'force-dynamic';
 import { BannerForm } from "../../components/BannerForm";
 import { notFound } from "next/navigation";
 

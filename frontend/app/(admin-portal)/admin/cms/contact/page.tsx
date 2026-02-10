@@ -1,4 +1,5 @@
 import React from 'react';
+export const dynamic = 'force-dynamic';
 import { getSettings } from '@/app/actions/settings';
 import { CMSBackLink } from '@/components/admin/cms/CMSBackLink';
 import Link from 'next/link';
