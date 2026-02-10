@@ -5,25 +5,42 @@ import { requirePermission } from "../lib/admin-auth";
 import { revalidatePath } from "next/cache";
 
 export async function getAdminUsers(): Promise<any[]> {
-    await requirePermission('users', 'read');
-    const res = await fetchAPI("/core/users/");
-    if (!res || !res.ok) return [];
-    const users = await res.json();
-    return users.map((u: any) => ({
-        id: u.id,
-        name: u.name,
-        email: u.email,
-        profilePic: u.profile_pic,
-        role: { name: u.role, id: u.role }, // Map string role to object for UI compatibility
-        isActive: u.is_active,
-        lastLoginAt: u.last_login
-    }));
+    try {
+        await requirePermission('users', 'read');
+        const res = await fetchAPI("/core/users/");
+        if (!res || !res.ok) return [];
+        const users = await res.json();
+        return users.map((u: any) => ({
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            profilePic: u.profile_pic,
+            role: { name: u.role, id: u.role }, // Map string role to object for UI compatibility
+            isActive: u.is_active,
+            lastLoginAt: u.last_login
+        }));
+    } catch (error) {
+        console.error("getAdminUsers failed:", error);
+        return [];
+    }
 }
 
 export async function getUserStats(): Promise<any> {
-    await requirePermission('users', 'read');
-    const res = await fetchAPI("/core/users/stats/");
-    if (!res || !res.ok) {
+    try {
+        await requirePermission('users', 'read');
+        const res = await fetchAPI("/core/users/stats/");
+        if (!res || !res.ok) {
+            return {
+                totalUsers: 0,
+                activeUsers: 0,
+                inactiveUsers: 0,
+                recentLogins: 0,
+                roleDistribution: []
+            };
+        }
+        return res.json();
+    } catch (error) {
+        console.error("getUserStats failed:", error);
         return {
             totalUsers: 0,
             activeUsers: 0,
@@ -32,22 +49,26 @@ export async function getUserStats(): Promise<any> {
             roleDistribution: []
         };
     }
-    return res.json();
 }
 
 export async function getRecentActivity(limit: number = 5): Promise<any[]> {
-    await requirePermission('users', 'read');
-    const res = await fetchAPI(`/core/users/recent_activity/?limit=${limit}`);
-    if (!res || !res.ok) return [];
+    try {
+        await requirePermission('users', 'read');
+        const res = await fetchAPI(`/core/users/recent_activity/?limit=${limit}`);
+        if (!res || !res.ok) return [];
 
-    const users = await res.json();
-    // Transform if necessary, or return as is (assumes user object structure)
-    return users.map((u: any) => ({
-        id: u.id,
-        name: u.first_name ? `${u.first_name} ${u.last_name}` : u.username, // Adjust based on serializer
-        role: u.role,
-        lastLoginAt: u.last_login
-    }));
+        const users = await res.json();
+        // Transform if necessary, or return as is (assumes user object structure)
+        return users.map((u: any) => ({
+            id: u.id,
+            name: u.first_name ? `${u.first_name} ${u.last_name}` : u.username, // Adjust based on serializer
+            role: u.role,
+            lastLoginAt: u.last_login
+        }));
+    } catch (error) {
+        console.error("getRecentActivity failed:", error);
+        return [];
+    }
 }
 
 export async function getUser(id: string) {
