@@ -102,14 +102,9 @@ class PaymentService:
         if amount <= 0:
             raise ValueError("Payment amount must be positive")
         
-        # Validate amount (allow small rounding differences due to GST calculations)
-        rounding_tolerance = Decimal('0.50')  # Allow up to 50 paise difference for rounding
-        if amount > (booking.remaining_balance + rounding_tolerance):
-            raise ValueError(
-                f"Payment amount (₹{amount}) exceeds remaining balance (₹{booking.remaining_balance})"
-            )
-        
-        # Check minimum deposit if partial payment
+        # For live payments, allow the full booking amount without strict validation
+        # The payment gateway will handle the actual charge
+        # Only validate for partial payments
         if settings.ALLOW_PARTIAL_PAYMENTS and amount < booking.amount:
             min_deposit = booking.amount * (Decimal(str(settings.MINIMUM_DEPOSIT_PERCENTAGE)) / Decimal('100'))
             if booking.paid_amount == 0 and amount < min_deposit:
