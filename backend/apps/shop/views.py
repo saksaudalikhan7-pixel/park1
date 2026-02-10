@@ -13,7 +13,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     
     def get_authenticators(self):
         # Disable authentication for read actions to allow public access even with invalid/expired tokens
-        if self.action in ['list', 'retrieve']:
+        if getattr(self, 'action', None) in ['list', 'retrieve']:
             return []
         return super().get_authenticators()
 
@@ -28,7 +28,7 @@ class VoucherViewSet(viewsets.ModelViewSet):
     
     def get_authenticators(self):
         # Disable authentication for read and validate actions to allow public access even with invalid/expired tokens
-        if self.action in ['list', 'validate']:
+        if getattr(self, 'action', None) in ['list', 'validate']:
             return []
         return super().get_authenticators()
 

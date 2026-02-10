@@ -94,7 +94,7 @@ class BookingViewSet(viewsets.ModelViewSet):
     
     def get_authenticators(self):
         # Disable authentication for create and ticket actions to allow public access even with invalid/expired tokens
-        if self.action in ['create', 'ticket', 'check_duplicate']:
+        if getattr(self, 'action', None) in ['create', 'ticket', 'check_duplicate']:
             return []
         return super().get_authenticators()
 
@@ -259,7 +259,7 @@ class WaiverViewSet(viewsets.ModelViewSet):
     
     def get_authenticators(self):
         # Disable authentication for create action to allow public access even with invalid/expired tokens
-        if self.action == 'create':
+        if getattr(self, 'action', None) == 'create':
             return []
         return super().get_authenticators()
 
@@ -798,7 +798,7 @@ class PartyBookingViewSet(viewsets.ModelViewSet):
     
     def get_authenticators(self):
         # Disable authentication for creation to allow public access even with invalid/expired tokens
-        if self.action == 'create':
+        if getattr(self, 'action', None) == 'create':
             return []
         return super().get_authenticators()
     
