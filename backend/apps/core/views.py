@@ -135,11 +135,15 @@ class GlobalSettingsViewSet(viewsets.ModelViewSet):
     
     def get_authenticators(self):
         # Disable authentication for read actions to allow public access even with invalid/expired tokens
+        if getattr(self, 'request', None) and self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return []
         if getattr(self, 'action', None) in ['list', 'retrieve']:
             return []
         return super().get_authenticators()
 
     def get_permissions(self):
+        if getattr(self, 'request', None) and self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [permissions.AllowAny()]
         if getattr(self, 'action', None) in ['list', 'retrieve']:
             return [permissions.AllowAny()]
         return [permissions.IsAdminUser()]
@@ -162,11 +166,15 @@ class LogoViewSet(viewsets.ModelViewSet):
     
     def get_authenticators(self):
         # Disable authentication for read actions to allow public access even with invalid/expired tokens
+        if getattr(self, 'request', None) and self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return []
         if getattr(self, 'action', None) in ['list', 'retrieve', 'active']:
             return []
         return super().get_authenticators()
 
     def get_permissions(self):
+        if getattr(self, 'request', None) and self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [permissions.AllowAny()]
         if getattr(self, 'action', None) in ['list', 'retrieve', 'active']:
             return [permissions.AllowAny()]
         return [permissions.IsAdminUser()]

@@ -129,11 +129,11 @@ const nextConfig = {
                 destination: '/parties',
                 permanent: true,
             },
-            {
-                source: '/party-booking',
-                destination: '/parties',
-                permanent: true,
-            },
+            // {
+            //     source: '/party-booking',
+            //     destination: '/parties',
+            //     permanent: true,
+            // },
             // General Information Catch-all
             {
                 source: '/information',
