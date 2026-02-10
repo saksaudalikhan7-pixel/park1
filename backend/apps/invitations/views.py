@@ -10,7 +10,7 @@ class InvitationTemplateViewSet(viewsets.ModelViewSet):
     serializer_class = InvitationTemplateSerializer
     
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if getattr(self, 'action', None) in ['list', 'retrieve']:
             return [permissions.AllowAny()]
         return [permissions.IsAdminUser()]
 

@@ -191,7 +191,7 @@ class ContactMessageViewSet(viewsets.ModelViewSet):
         Allow anonymous users to create contact messages (public contact form),
         but require staff authentication to view/edit/delete messages.
         """
-        if self.action == 'create':
+        if getattr(self, 'action', None) == 'create':
             return []  # Allow anonymous users to submit contact form
         return [IsStaffUser()]  # Require staff for viewing/editing
     
