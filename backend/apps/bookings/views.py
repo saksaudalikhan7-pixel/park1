@@ -101,7 +101,9 @@ class BookingViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         # Allow public access ONLY for create and ticket retrieval
         # List and retrieve require staff authentication to protect customer data
-        if self.action in ['create', 'ticket', 'check_duplicate']:
+        # Allow public access ONLY for create and ticket retrieval
+        # List and retrieve require staff authentication to protect customer data
+        if getattr(self, 'action', None) in ['create', 'ticket', 'check_duplicate']:
             return [permissions.AllowAny()]
         return [IsStaffUser()]  # Allow employees to access bookings
     
@@ -266,7 +268,9 @@ class WaiverViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         # Allow public access for create (when customers sign waivers)
         # Require staff authentication for list/retrieve/update
-        if self.action == 'create':
+        # Allow public access for create (when customers sign waivers)
+        # Require staff authentication for list/retrieve/update
+        if getattr(self, 'action', None) == 'create':
             return [permissions.AllowAny()]
         return [IsStaffUser()]  # Allow employees to access waivers
     

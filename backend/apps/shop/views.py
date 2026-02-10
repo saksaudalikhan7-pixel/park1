@@ -18,7 +18,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         return super().get_authenticators()
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if getattr(self, 'action', None) in ['list', 'retrieve']:
             return [permissions.AllowAny()]
         return [permissions.IsAdminUser()]
 
@@ -34,7 +34,7 @@ class VoucherViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         # Allow public access for list and validate
-        if self.action in ['list', 'validate']:
+        if getattr(self, 'action', None) in ['list', 'validate']:
             return [permissions.AllowAny()]
         return [permissions.IsAdminUser()]
     

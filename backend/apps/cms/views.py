@@ -32,7 +32,7 @@ class BaseCmsViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         # Allow public read access, require CONTENT_MANAGER or ADMIN for write operations
-        if self.action in ['list', 'retrieve']:
+        if getattr(self, 'action', None) in ['list', 'retrieve']:
             return [permissions.AllowAny()]
         return [IsContentManagerOrAdmin()]  # Allow CONTENT_MANAGER and ADMIN to manage CMS content
 

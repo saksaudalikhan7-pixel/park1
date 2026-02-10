@@ -140,7 +140,7 @@ class GlobalSettingsViewSet(viewsets.ModelViewSet):
         return super().get_authenticators()
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if getattr(self, 'action', None) in ['list', 'retrieve']:
             return [permissions.AllowAny()]
         return [permissions.IsAdminUser()]
 
@@ -167,7 +167,7 @@ class LogoViewSet(viewsets.ModelViewSet):
         return super().get_authenticators()
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve', 'active']:
+        if getattr(self, 'action', None) in ['list', 'retrieve', 'active']:
             return [permissions.AllowAny()]
         return [permissions.IsAdminUser()]
     
