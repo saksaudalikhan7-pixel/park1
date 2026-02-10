@@ -56,8 +56,16 @@ export async function createVoucher(data: {
     });
 
     if (!res || !res.ok) {
-        const error = await res.json();
-        throw new Error(error.detail || "Failed to create voucher");
+        let errorMessage = "Failed to create voucher";
+        try {
+            const error = await res.json();
+            errorMessage = error.detail || error.message || errorMessage;
+        } catch (e) {
+            const text = await res.text().catch(() => null);
+            console.error("Non-JSON error response:", text);
+            errorMessage = text ? `Error: ${text.substring(0, 100)}...` : errorMessage;
+        }
+        throw new Error(errorMessage);
     }
 
     revalidatePath("/admin/vouchers");
@@ -94,8 +102,16 @@ export async function updateVoucher(id: string, data: {
     });
 
     if (!res || !res.ok) {
-        const error = await res.json();
-        throw new Error(error.detail || "Failed to update voucher");
+        let errorMessage = "Failed to update voucher";
+        try {
+            const error = await res.json();
+            errorMessage = error.detail || error.message || errorMessage;
+        } catch (e) {
+            const text = await res.text().catch(() => null);
+            console.error("Non-JSON error response:", text);
+            errorMessage = text ? `Error: ${text.substring(0, 100)}...` : errorMessage;
+        }
+        throw new Error(errorMessage);
     }
 
     revalidatePath("/admin/vouchers");
@@ -110,7 +126,14 @@ export async function deleteVoucher(id: string) {
     });
 
     if (!res || !res.ok) {
-        throw new Error("Failed to delete voucher");
+        let errorMessage = "Failed to delete voucher";
+        try {
+            const error = await res.text();
+            errorMessage = error ? `Error: ${error.substring(0, 100)}...` : errorMessage;
+        } catch (e) {
+            console.error("Error reading delete response:", e);
+        }
+        throw new Error(errorMessage);
     }
 
     revalidatePath("/admin/vouchers");
