@@ -59,13 +59,9 @@ export function PaymentStep({
             const { order_id, provider, mock } = orderResult;
 
             // Step 2: Handle payment based on provider
-            // Step 2: Handle payment based on provider
             if (provider === "MOCK") {
                 // Mock gateway - auto-verify
                 setPaymentStatus("verifying");
-
-                // Simulate processing for user experience in dev mode
-                await new Promise(resolve => setTimeout(resolve, 1500));
 
                 const verifyResult = await verifyPayment({
                     order_id: order_id,
@@ -96,21 +92,27 @@ export function PaymentStep({
                     description: `${bookingType === "session" ? "Session" : "Party"} Booking`,
                     order_id: order_id,
                     handler: async function (response: any) {
-                        setPaymentStatus("verifying");
+                        try {
+                            setPaymentStatus("verifying");
 
-                        const verifyResult = await verifyPayment({
-                            order_id: response.razorpay_order_id,
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_signature: response.razorpay_signature,
-                        });
+                            const verifyResult = await verifyPayment({
+                                order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                            });
 
-                        if (verifyResult.success) {
-                            setPaymentStatus("success");
-                            setTimeout(() => {
-                                onSuccess();
-                            }, 1000);
-                        } else {
-                            throw new Error(verifyResult.error || "Payment verification failed");
+                            if (verifyResult.success) {
+                                setPaymentStatus("success");
+                                setTimeout(() => {
+                                    onSuccess();
+                                }, 1000);
+                            } else {
+                                throw new Error(verifyResult.error || "Payment verification failed");
+                            }
+                        } catch (err: any) {
+                            setPaymentStatus("failed");
+                            setError(err.message || "Payment verification failed");
+                            setIsProcessing(false);
                         }
                     },
                     prefill: {
