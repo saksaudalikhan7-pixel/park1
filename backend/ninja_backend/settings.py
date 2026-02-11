@@ -376,6 +376,7 @@ PAYMENT_MODE = os.getenv('PAYMENT_MODE', 'mock')
 # Razorpay Credentials (only needed when PAYMENT_MODE='razorpay')
 RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', '')
 RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', '')
+RAZORPAY_WEBHOOK_SECRET = os.getenv('RAZORPAY_WEBHOOK_SECRET', '')
 
 # Payment Settings
 ALLOW_PARTIAL_PAYMENTS = True  # Allow partial payments (50% deposit)
