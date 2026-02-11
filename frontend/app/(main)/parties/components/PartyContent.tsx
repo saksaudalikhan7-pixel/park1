@@ -63,7 +63,7 @@ export default function PartyContent({ packages, menus, hero, settings, terms, c
                             {heroSubtitle}
                         </p>
                         <p className="text-sm text-secondary font-bold">
-                            Available: {settings?.party_availability || "Thursday - Sunday"}
+                            Available: {settings?.party_availability || "Tuesday - Sunday"}
                         </p>
                     </ScrollReveal>
                 </div>
