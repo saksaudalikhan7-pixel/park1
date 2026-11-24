@@ -24,6 +24,12 @@ from django.db import transaction
 from .base import BasePaymentGateway
 from apps.payments.models import Payment
 
+try:
+    from razorpay.errors import SignatureVerificationError
+except ImportError:  # SDK missing: __init__ raises a clear error anyway
+    class SignatureVerificationError(Exception):
+        pass
+
 logger = logging.getLogger(__name__)
 
 
@@ -50,7 +56,6 @@ class RazorpayGateway(BasePaymentGateway):
         # Initialize Razorpay client
         try:
             import razorpay
-            from razorpay.errors import SignatureVerificationError
             self.client = razorpay.Client(auth=(self.key_id, self.key_secret))
             logger.info("RazorpayGateway initialized successfully")
 

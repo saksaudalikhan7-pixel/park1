@@ -240,158 +240,143 @@ class DashboardViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'])
     def stats(self, request):
-        today = timezone.now().date()
+        """
+        Dashboard analytics. Every figure uses the same definitions:
+          - a "booking" counts only when it is paid (PAID or PARTIAL) and not cancelled
+            (unpaid = customer never completed payment, those are not real bookings)
+          - "revenue" is real money received through Razorpay (successful payments,
+            minus refunds); test payments from the mock gateway are excluded
+          - all dates are in park local time (Asia/Kolkata)
+        """
+        from apps.payments.models import Payment
+
+        PAID = ['PAID', 'PARTIAL']
+        today = timezone.localdate()
+        yesterday = today - timedelta(days=1)
         first_day_of_month = today.replace(day=1)
 
-        # Session Bookings (Standard Booking model)
-        # Count only bookings with actual payments (PAID or PARTIAL)
-        session_bookings_today = Booking.objects.filter(
-            date=today,
-            payment_status__in=['PAID', 'PARTIAL']
-        ).exclude(status='CANCELLED').count()
-        
-        total_session_bookings = Booking.objects.filter(
-            payment_status__in=['PAID', 'PARTIAL']
-        ).exclude(status='CANCELLED').count()
-        
-        session_revenue = Booking.objects.exclude(status='CANCELLED').aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
+        paid_sessions = Booking.objects.filter(payment_status__in=PAID).exclude(booking_status='CANCELLED')
+        paid_parties = PartyBooking.objects.filter(payment_status__in=PAID).exclude(status='CANCELLED')
 
-        # Party Bookings (New PartyBooking model)
-        party_bookings_today = PartyBooking.objects.filter(
-            date=today,
-            payment_status__in=['PAID', 'PARTIAL']
-        ).exclude(status='CANCELLED').count()
-        
-        total_party_bookings = PartyBooking.objects.filter(
-            payment_status__in=['PAID', 'PARTIAL']
-        ).exclude(status='CANCELLED').count()
-        
-        party_revenue = PartyBooking.objects.exclude(status='CANCELLED').aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
-
-        # Aggregated Stats
-        bookings_today = session_bookings_today + party_bookings_today
+        # ----- bookings -----
+        total_session_bookings = paid_sessions.count()
+        total_party_bookings = paid_parties.count()
         total_bookings = total_session_bookings + total_party_bookings
-        total_revenue = session_revenue + party_revenue
 
-        # Waivers
-        pending_waivers = Booking.objects.filter(waiver_status='PENDING').exclude(status='CANCELLED').count()
-        pending_party_waivers = PartyBooking.objects.filter(waiver_signed=False).exclude(status='CANCELLED').count()
-        total_pending_waivers = pending_waivers + pending_party_waivers
+        # Paid bookings whose visit is today (used for staff planning)
+        bookings_today = paid_sessions.filter(date=today).count() + paid_parties.filter(date=today).count()
 
-        total_waivers = Waiver.objects.count()
-        signed_waivers = total_waivers 
+        # ----- revenue (money actually received) -----
+        # A fully refunded payment is marked REFUNDED and its refund is a separate
+        # negative SUCCESS row, so: received (positive SUCCESS/REFUNDED) + refunds (negative)
+        received = Payment.objects.filter(status__in=['SUCCESS', 'REFUNDED'], amount__gt=0).exclude(provider='MOCK')
+        refunds = Payment.objects.filter(status='SUCCESS', amount__lt=0).exclude(provider='MOCK')
 
-        # Recent Bookings (Combine and Sort)
-        recent_sessions = Booking.objects.select_related('customer').order_by('-created_at')[:5]
-        recent_parties = PartyBooking.objects.select_related('customer').order_by('-created_at')[:5]
-        
-        # Manually construct data instead of using serializers
-        recent_sessions_data = [{
-            'id': b.id,
-            'uuid': str(b.uuid),
-            'name': b.name,
-            'email': b.email,
-            'type': 'SESSION',
-            'amount': b.amount,
-            'date': b.date.isoformat() if b.date else None,
-            'time': str(b.time) if b.time else None,
-            'status': b.booking_status,
-            'payment_status': b.payment_status,
-            'created_at': b.created_at.isoformat()
-        } for b in recent_sessions]
-        
-        recent_parties_data = [{
-            'id': b.id,
-            'uuid': str(b.uuid),
-            'name': b.name,
-            'email': b.email,
-            'type': 'PARTY',
-            'amount': b.amount,
-            'date': b.date.isoformat() if b.date else None,
-            'time': str(b.time) if b.time else None,
-            'status': b.status,
-            'payment_status': b.payment_status,
-            'created_at': b.created_at.isoformat()
-        } for b in recent_parties]
-        
-        all_recent = sorted(
-            recent_sessions_data + recent_parties_data, 
-            key=lambda x: x.get('created_at', ''), 
-            reverse=True
-        )[:5]
+        def net_amount(received_qs, refunds_qs):
+            gross = received_qs.aggregate(t=Sum('amount'))['t'] or 0
+            refunded = refunds_qs.aggregate(t=Sum('amount'))['t'] or 0  # negative
+            return float(gross + refunded)
 
-        # Revenue Chart (last 7 days)
+        def money_on(day):
+            """Net money received on one local date."""
+            return net_amount(received.filter(created_at__date=day), refunds.filter(created_at__date=day))
+
+        total_revenue = net_amount(received, refunds)
+        today_revenue = money_on(today)
+        yesterday_revenue = money_on(yesterday)
+        payments_today = received.filter(created_at__date=today).count()
+
+        # Revenue chart (money received per day, last 7 days)
         monthly_revenue = []
         for i in range(6, -1, -1):
             d = today - timedelta(days=i)
-            day_session_revenue = Booking.objects.filter(date=d).exclude(status='CANCELLED').aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
-            day_party_revenue = PartyBooking.objects.filter(date=d).exclude(status='CANCELLED').aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
-            
             monthly_revenue.append({
                 "name": d.strftime('%a'),
-                "total": float(day_session_revenue + day_party_revenue)  # Convert Decimal to float
+                "date": d.isoformat(),
+                "total": money_on(d),
             })
 
-        # Customers
-        total_customers = Customer.objects.count()
-        new_customers_month = Customer.objects.filter(created_at__gte=first_day_of_month).count()
-        repeat_customers = Customer.objects.annotate(booking_count=Count('bookings')).filter(booking_count__gt=1).count()
+        avg_booking_value = round(total_revenue / total_bookings) if total_bookings else 0
 
-        # Vouchers
-        active_vouchers = Voucher.objects.filter(is_active=True).count()
-        total_voucher_redemptions = Voucher.objects.aggregate(Sum('used_count'))['used_count__sum'] or 0
+        # ----- booking trend: paid bookings made in the last 7 days vs the 7 before -----
+        week_ago = today - timedelta(days=7)
+        two_weeks_ago = today - timedelta(days=14)
 
-        # Content
+        def paid_created_between(start, end):
+            return (paid_sessions.filter(created_at__date__gt=start, created_at__date__lte=end).count()
+                    + paid_parties.filter(created_at__date__gt=start, created_at__date__lte=end).count())
+
+        this_week_bookings = paid_created_between(week_ago, today)
+        last_week_bookings = paid_created_between(two_weeks_ago, week_ago)
+        booking_growth = 0
+        if last_week_bookings > 0:
+            booking_growth = round(((this_week_bookings - last_week_bookings) / last_week_bookings) * 100, 1)
+        elif this_week_bookings > 0:
+            booking_growth = 100
+
+        # ----- waivers (paid, non-cancelled bookings) -----
+        signed_q = Q(waiver_status='SIGNED') | Q(waivers__isnull=False)
+        signed_sessions = paid_sessions.filter(signed_q).distinct().count()
+        signed_parties = paid_parties.filter(waiver_signed=True).count()
+        signed_waivers = signed_sessions + signed_parties
+        waiver_completion_rate = round(signed_waivers / total_bookings * 100) if total_bookings else 100
+        # Upcoming paid visits that still need a waiver
+        unsigned_upcoming_sessions = paid_sessions.filter(date__gte=today).exclude(
+            id__in=paid_sessions.filter(signed_q).values('id')).count()
+        total_pending_waivers = (
+            unsigned_upcoming_sessions
+            + paid_parties.filter(date__gte=today, waiver_signed=False).count()
+        )
+        total_waivers = Waiver.objects.count()
+
+        # ----- customers (people with at least one paid booking) -----
+        session_customer_ids = list(paid_sessions.exclude(customer__isnull=True).values_list('customer_id', flat=True))
+        party_customer_ids = list(paid_parties.exclude(customer__isnull=True).values_list('customer_id', flat=True))
+        paid_counts = {}
+        for cid in session_customer_ids + party_customer_ids:
+            paid_counts[cid] = paid_counts.get(cid, 0) + 1
+        total_customers = len(paid_counts)
+        new_customers_month = Customer.objects.filter(
+            id__in=list(paid_counts.keys()), created_at__date__gte=first_day_of_month).count()
+        repeat_customers = sum(1 for n in paid_counts.values() if n > 1)
+
+        # ----- vouchers -----
+        now = timezone.now()
+        active_vouchers = Voucher.objects.filter(is_active=True).filter(
+            Q(expiry_date__isnull=True) | Q(expiry_date__gte=now)).count()
+        total_voucher_redemptions = paid_sessions.filter(voucher__isnull=False).count()
+
+        # ----- content -----
         total_activities = Activity.objects.filter(active=True).count()
         total_faqs = Faq.objects.filter(active=True).count()
         total_banners = Banner.objects.filter(active=True).count()
 
-        # Avg Booking Value
-        avg_booking_value = 0
-        if total_bookings > 0:
-            avg_booking_value = total_revenue / total_bookings
+        # ----- recent bookings (all, shown with their payment status) -----
+        recent_sessions = Booking.objects.select_related('customer').order_by('-created_at')[:5]
+        recent_parties = PartyBooking.objects.select_related('customer').order_by('-created_at')[:5]
+        recent_sessions_data = [{
+            'id': b.id, 'uuid': str(b.uuid), 'name': b.name, 'email': b.email, 'type': 'SESSION',
+            'amount': b.amount, 'date': b.date.isoformat() if b.date else None,
+            'time': str(b.time) if b.time else None, 'status': b.booking_status,
+            'payment_status': b.payment_status, 'created_at': b.created_at.isoformat()
+        } for b in recent_sessions]
+        recent_parties_data = [{
+            'id': b.id, 'uuid': str(b.uuid), 'name': b.name, 'email': b.email, 'type': 'PARTY',
+            'amount': b.amount, 'date': b.date.isoformat() if b.date else None,
+            'time': str(b.time) if b.time else None, 'status': b.status,
+            'payment_status': b.payment_status, 'created_at': b.created_at.isoformat()
+        } for b in recent_parties]
+        all_recent = sorted(recent_sessions_data + recent_parties_data,
+                            key=lambda x: x.get('created_at', ''), reverse=True)[:5]
 
-        waiver_completion_rate = 100 if total_waivers == 0 else int((signed_waivers / total_waivers) * 100)
-
-        # NEW METRICS FOR DASHBOARD REDESIGN
-        
-        # Unread Contact Messages
+        # ----- messages -----
         from apps.cms.models import ContactMessage
         unread_messages = ContactMessage.objects.filter(is_read=False).count()
         latest_message = ContactMessage.objects.filter(is_read=False).order_by('-created_at').first()
         latest_message_preview = None
         if latest_message:
-            latest_message_preview = f"{latest_message.name}: {latest_message.message[:50]}..." if len(latest_message.message) > 50 else f"{latest_message.name}: {latest_message.message}"
-        
-        # Today's Revenue
-        today_session_revenue = Booking.objects.filter(date=today).exclude(status='CANCELLED').aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
-        today_party_revenue = PartyBooking.objects.filter(date=today).exclude(status='CANCELLED').aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
-        today_revenue = today_session_revenue + today_party_revenue
-        
-        # Yesterday's Revenue for comparison
-        yesterday = today - timedelta(days=1)
-        yesterday_session_revenue = Booking.objects.filter(date=yesterday).exclude(status='CANCELLED').aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
-        yesterday_party_revenue = PartyBooking.objects.filter(date=yesterday).exclude(status='CANCELLED').aggregate(Sum('paid_amount'))['paid_amount__sum'] or 0
-        yesterday_revenue = yesterday_session_revenue + yesterday_party_revenue
-        
-        # Booking Trend (This week vs Last week)
-        week_ago = today - timedelta(days=7)
-        two_weeks_ago = today - timedelta(days=14)
-        
-        this_week_session = Booking.objects.filter(created_at__gte=week_ago).exclude(status='CANCELLED').count()
-        this_week_party = PartyBooking.objects.filter(created_at__gte=week_ago).exclude(status='CANCELLED').count()
-        this_week_bookings = this_week_session + this_week_party
-        
-        last_week_session = Booking.objects.filter(created_at__gte=two_weeks_ago, created_at__lt=week_ago).exclude(status='CANCELLED').count()
-        last_week_party = PartyBooking.objects.filter(created_at__gte=two_weeks_ago, created_at__lt=week_ago).exclude(status='CANCELLED').count()
-        last_week_bookings = last_week_session + last_week_party
-        
-        # Calculate growth percentage
-        booking_growth = 0
-        if last_week_bookings > 0:
-            booking_growth = round(((this_week_bookings - last_week_bookings) / last_week_bookings) * 100, 1)
-        elif this_week_bookings > 0:
-            booking_growth = 100  # 100% growth if we had 0 last week
+            text = latest_message.message or ''
+            latest_message_preview = f"{latest_message.name}: {text[:50]}..." if len(text) > 50 else f"{latest_message.name}: {text}"
 
         return Response({
             "bookingsToday": bookings_today,
@@ -410,20 +395,20 @@ class DashboardViewSet(viewsets.ViewSet):
             "totalActivities": total_activities,
             "totalFaqs": total_faqs,
             "totalBanners": total_banners,
-            "avgBookingValue": round(avg_booking_value),
+            "avgBookingValue": avg_booking_value,
             "waiverCompletionRate": waiver_completion_rate,
             "totalWaivers": total_waivers,
             "signedWaivers": signed_waivers,
-            # New metrics
             "unreadMessages": unread_messages,
             "latestMessagePreview": latest_message_preview,
-            "todayRevenue": float(today_revenue),
-            "yesterdayRevenue": float(yesterday_revenue),
+            "todayRevenue": today_revenue,
+            "yesterdayRevenue": yesterday_revenue,
+            "paymentsToday": payments_today,
             "thisWeekBookings": this_week_bookings,
             "lastWeekBookings": last_week_bookings,
             "bookingGrowth": booking_growth,
         })
-    
+
     @action(detail=False, methods=['get'])
     def all_bookings(self, request):
         """

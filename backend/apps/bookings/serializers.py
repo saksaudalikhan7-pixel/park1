@@ -1,3 +1,4 @@
+import re
 from rest_framework import serializers
 from .models import Customer, Booking, Waiver, Transaction, BookingBlock, PartyBooking, SessionBookingHistory, PartyBookingHistory
 # from apps.shop.serializers import VoucherSerializer
@@ -163,7 +164,63 @@ class BookingSerializer(serializers.ModelSerializer):
         if phone:
             if not re.match(r'^[\+\d\s-]{10,20}$', str(phone)):
                 raise serializers.ValidationError({"phone": "Invalid phone number format. Use 10-20 digits."})
-                
+
+        if self.instance is None:
+            # New bookings are created by the public website (no login), so a
+            # booking can never be created as already paid. Staff mark bookings
+            # paid afterwards from the admin portal (authenticated update).
+            data['payment_status'] = 'PENDING'
+            data = self._apply_voucher(data)
+
+        return data
+
+    def _apply_voucher(self, data):
+        """
+        Apply a voucher on the server. The voucher is looked up by code (never by
+        a client-supplied id) and the discount, subtotal and amount are
+        recalculated with the shared pricing engine, so the stored booking always
+        matches what the customer sees and pays.
+        """
+        from datetime import datetime as dt
+        from apps.shop.models import Voucher
+        from apps.shop.pricing import VoucherError, build_session_quote, find_voucher
+
+        data.pop('voucher', None)  # never trust a voucher id sent by the client
+        code = (data.get('voucher_code') or '').strip()
+        if not code:
+            data['voucher_code'] = None
+            return data
+
+        voucher = find_voucher(code)
+        if voucher is None:
+            raise serializers.ValidationError({"voucher_code": "Invalid voucher code"})
+        # Lock the voucher row so concurrent bookings check the usage limit one at a
+        # time (only possible inside a transaction; BookingViewSet.create uses one)
+        from django.db import transaction
+        if transaction.get_connection().in_atomic_block:
+            voucher = Voucher.objects.select_for_update().get(pk=voucher.pk)
+
+        booking_datetime = None
+        if data.get('date') and data.get('time'):
+            booking_datetime = dt.combine(data['date'], data['time'])
+
+        try:
+            quote = build_session_quote(
+                adults=data.get('adults', 0),
+                kids=data.get('kids', 0),
+                spectators=data.get('spectators', 0),
+                duration=str(data.get('duration') or '60'),
+                voucher=voucher,
+                booking_datetime=booking_datetime,
+            )
+        except VoucherError as exc:
+            raise serializers.ValidationError({"voucher_code": str(exc)})
+
+        data['voucher'] = voucher
+        data['voucher_code'] = voucher.code
+        data['subtotal'] = quote['subtotal']
+        data['discount_amount'] = quote['discount']
+        data['amount'] = quote['payable']
         return data
     
     def create(self, validated_data):

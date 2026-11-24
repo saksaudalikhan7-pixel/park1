@@ -13,4 +13,5 @@ urlpatterns = [
     path('refund/', views.process_refund, name='process-refund'),
     path('booking/<int:booking_id>/<str:booking_type>/status/', views.get_booking_payment_status, name='booking-payment-status'),
     path('stats/', views.get_payment_stats, name='payment-stats'),
+    path('reconcile/', views.reconcile_payments, name='payment-reconcile'),  # read-only Razorpay check
 ]

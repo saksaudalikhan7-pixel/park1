@@ -11,7 +11,7 @@ Provides REST API endpoints for payment operations:
 import logging
 from decimal import Decimal, InvalidOperation
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -305,8 +305,8 @@ def get_payment_stats(request):
         from django.utils import timezone
         from datetime import timedelta
         
-        # Get all payments
-        all_payments = Payment.objects.all()
+        # Real payments only: the mock gateway was used for testing (no real money)
+        all_payments = Payment.objects.exclude(provider='MOCK')
         
         # Basic counts
         total_payments = all_payments.count()
@@ -318,8 +318,8 @@ def get_payment_stats(request):
         successful_payment_qs = all_payments.filter(status='SUCCESS', amount__gt=0)
         total_revenue = successful_payment_qs.aggregate(total=Sum('amount'))['total'] or 0
         
-        # Time-based revenue
-        now = timezone.now()
+        # Time-based revenue (park local time, Asia/Kolkata)
+        now = timezone.localtime()
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
         week_start = today_start - timedelta(days=today_start.weekday())
         month_start = today_start.replace(day=1)
@@ -485,3 +485,73 @@ def list_payments(request):
             {'error': f'Failed to list payments: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def reconcile_payments(request):
+    """
+    READ-ONLY check: ask Razorpay whether any order that we still have as
+    CREATED (customer opened checkout) or FAILED was actually paid.
+    Nothing is changed in the database.
+
+    GET /api/v1/payments/reconcile/?offset=0&limit=10
+
+    Small batches only: the server runs a single worker, so each call is kept
+    to a few seconds.
+    """
+    from .models import Payment
+
+    if payment_service.gateway.get_provider_name() != 'RAZORPAY':
+        return Response({'error': 'Razorpay is not the active gateway'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        offset = max(0, int(request.query_params.get('offset', 0)))
+        limit = min(10, max(1, int(request.query_params.get('limit', 10))))
+    except ValueError:
+        return Response({'error': 'offset/limit must be numbers'}, status=status.HTTP_400_BAD_REQUEST)
+
+    order_ids = [o.strip() for o in request.query_params.get('order_ids', '').split(',') if o.strip()]
+    if order_ids:
+        # Check specific orders (any status), e.g. to confirm a booking was really paid
+        qs = Payment.objects.filter(provider='RAZORPAY', order_id__in=order_ids[:10]).order_by('id')
+    else:
+        qs = Payment.objects.filter(provider='RAZORPAY', status__in=['CREATED', 'FAILED']).order_by('id')
+    total = qs.count()
+    batch = list(qs.select_related('booking', 'party_booking')[offset:offset + limit])
+
+    client = payment_service.gateway.client
+    missed, errors = [], []
+    for payment in batch:
+        try:
+            items = client.order.payments(payment.order_id).get('items', [])
+        except Exception as exc:  # keep going; report the problem
+            errors.append({'payment': payment.id, 'order_id': payment.order_id, 'error': str(exc)[:200]})
+            continue
+        paid = [i for i in items if i.get('status') in ('captured', 'authorized')]
+        if paid:
+            booking = payment.get_booking()
+            missed.append({
+                'payment': payment.id,
+                'order_id': payment.order_id,
+                'our_status': payment.status,
+                'amount': float(payment.amount),
+                'booking_id': booking.id if booking else None,
+                'booking_type': 'party' if payment.party_booking_id else 'session',
+                'booking_payment_status': getattr(booking, 'payment_status', None),
+                'razorpay_payments': [
+                    {'id': i.get('id'), 'status': i.get('status'), 'amount': (i.get('amount') or 0) / 100}
+                    for i in paid
+                ],
+            })
+
+    next_offset = offset + len(batch)
+    return Response({
+        'total_to_check': total,
+        'checked': f'{offset + 1}-{next_offset}' if batch else 'none',
+        'next_offset': next_offset if next_offset < total else None,
+        # For CREATED/FAILED orders (default mode) every entry here is a payment we missed
+        'mode': 'specific_orders' if order_ids else 'unfinished_orders',
+        'paid_on_razorpay': missed,
+        'errors': errors,
+    })

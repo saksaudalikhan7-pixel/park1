@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from apps.core.authentication import SilentJWTCookieAuthentication, SilentJWTAuthentication
 from rest_framework.authentication import SessionAuthentication
@@ -121,6 +122,10 @@ class BookingViewSet(viewsets.ModelViewSet):
             from django.db import transaction
             with transaction.atomic():
                 response = super().create(request, *args, **kwargs)
+        except DRFValidationError:
+            # Validation problems (blocked date, full slot, invalid voucher...) are
+            # returned as 400 with the real message instead of a generic 500.
+            raise
         except Exception as e:
             import traceback
             error_msg = str(e)

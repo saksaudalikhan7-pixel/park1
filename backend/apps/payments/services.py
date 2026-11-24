@@ -91,7 +91,14 @@ class PaymentService:
         """
         # Get booking
         booking = self.get_booking(booking_id, booking_type)
-        
+
+        # Never start a second charge for a booking that is already fully paid
+        # (this is how customers were charged twice for the same booking).
+        if booking.payment_status == 'PAID' or (
+            booking.paid_amount > 0 and booking.paid_amount >= booking.amount
+        ):
+            raise ValueError("This booking is already fully paid")
+
         # Calculate amount if not provided
         if amount is None:
             amount = booking.remaining_balance
