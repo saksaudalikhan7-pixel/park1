@@ -52,7 +52,7 @@ export default async function AdminDashboard() {
                 </div>
                 <div className="flex gap-3">
                     <div className="bg-white border border-slate-300 text-slate-700 text-sm rounded-lg px-3 py-2" suppressHydrationWarning>
-                        {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Kolkata' })}
                     </div>
                 </div>
             </div>
