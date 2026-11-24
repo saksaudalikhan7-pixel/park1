@@ -149,8 +149,8 @@ export function AdminSessionBookingForm() {
                             required
                             className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white text-slate-900"
                         >
+                            <option value="90">90 Minutes (standard)</option>
                             <option value="60">60 Minutes</option>
-                            <option value="90">90 Minutes</option>
                             <option value="120">120 Minutes</option>
                         </select>
                     </div>

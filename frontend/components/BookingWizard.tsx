@@ -44,7 +44,7 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
         defaultValues: {
             date: "",
             time: "",
-            duration: "60",
+            duration: "90", // standard session (same price as before)
             adults: 1,
             kids: 0,
             spectators: 0,
@@ -109,7 +109,7 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                     adult_description: "₹ 899 + GST per person",
                     kid_description: "₹ 500 + GST per person",
                     spectator_description: "₹ 150 + GST per person",
-                    duration_label: "60 Minutes",
+                    duration_label: "90 Minutes",
                     duration_description: "Standard Session"
                 });
             }
@@ -578,14 +578,14 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                                     <div className="grid grid-cols-1 gap-6 md:gap-8">
                                         <motion.button
                                             type="button"
-                                            onClick={() => setValue("duration", "60", { shouldValidate: true })}
+                                            onClick={() => setValue("duration", "90", { shouldValidate: true })}
                                             whileHover={{ scale: 1.02 }}
                                             whileTap={{ scale: 0.98 }}
-                                            className={`p-6 rounded-2xl border-2 font-bold text-lg transition-all relative overflow-hidden ${formData.duration === "60"
+                                            className={`p-6 rounded-2xl border-2 font-bold text-lg transition-all relative overflow-hidden ${formData.duration === "90"
                                                 ? "border-primary bg-primary/20 text-white shadow-neon-blue"
                                                 : "border-white/10 hover:border-primary/50 text-white/60 bg-surface-900"}`}
                                         >
-                                            {formData.duration === "60" && (
+                                            {formData.duration === "90" && (
                                                 <motion.div
                                                     layoutId="duration-indicator"
                                                     className="absolute top-2 right-2"
@@ -593,7 +593,7 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                                                     <Sparkles className="w-5 h-5 text-primary" />
                                                 </motion.div>
                                             )}
-                                            <div>{config?.duration_label || "60 Minutes"}</div>
+                                            <div>{config?.duration_label || "90 Minutes"}</div>
                                             <div className="text-sm font-normal text-white/40 mt-1">{config?.duration_description || "Standard Session"}</div>
                                         </motion.button>
                                     </div>

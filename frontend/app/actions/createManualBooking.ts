@@ -113,9 +113,7 @@ export async function createManualBooking(formData: any) {
         // I will assume 90 min = +250 per person? Or same as 120?
         // Let's assume standard pricing for now, or check if product supports it.
         // If duration is 90, maybe add 250?
-        if (data.duration === "90") {
-            subtotal += (data.kids + data.adults) * 250; // Guessing.
-        }
+        // 90 minutes is the standard session: no extra charge
 
         const gst = subtotal * 0.18;
         const totalAmount = subtotal + gst;
