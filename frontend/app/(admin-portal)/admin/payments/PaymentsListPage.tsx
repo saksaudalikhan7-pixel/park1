@@ -22,6 +22,7 @@ interface Payment {
     amount: number;
     currency: string;
     status: string;
+    notes?: string | null;
     created_at: string;
     customer_name: string;
     customer_email: string;
@@ -331,6 +332,19 @@ export default function PaymentsListPage() {
                                                 {getStatusIcon(payment.status)}
                                                 {payment.status}
                                             </span>
+                                            {payment.notes?.startsWith("DUPLICATE CHARGE") && (
+                                                <span
+                                                    title={payment.notes}
+                                                    className="mt-1 flex w-fit items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-orange-100 text-orange-700 border border-orange-200"
+                                                >
+                                                    Refund needed · {payment.payment_id}
+                                                </span>
+                                            )}
+                                            {payment.notes?.startsWith("Recovered from Razorpay") && (
+                                                <span title={payment.notes} className="mt-1 block text-[11px] text-slate-500">
+                                                    Recovered (incl. convenience fee)
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                                             {new Date(payment.created_at).toLocaleDateString('en-IN', {

@@ -28,7 +28,7 @@ export default function AllBookingsPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState("");
-    const [statusFilter, setStatusFilter] = useState("");
+    const [statusFilter, setStatusFilter] = useState("PAID"); // default: real (paid) bookings
     const [dateFilter, setDateFilter] = useState("all");
 
     useEffect(() => {

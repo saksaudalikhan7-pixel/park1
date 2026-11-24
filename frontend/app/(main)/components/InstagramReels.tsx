@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { Instagram } from 'lucide-react';
 import Link from 'next/link';
 import { getMediaUrl } from '@/lib/media-utils';
@@ -14,28 +15,62 @@ interface InstagramReel {
 
 import { InstagramEmbed } from 'react-social-media-embed';
 
-function ReelCard({ reel }: { reel: InstagramReel }) {
+function ReelCard({ reel, load }: { reel: InstagramReel; load: boolean }) {
     return (
         <div className="flex-shrink-0 w-[328px] snap-center">
             <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <InstagramEmbed
-                    url={reel.reel_url}
-                    width={328}
-                    height={580} // Standard reel portrait aspect ratio
-                    captioned={false}
-                />
+                {load ? (
+                    <InstagramEmbed
+                        url={reel.reel_url}
+                        width={328}
+                        height={580} // Standard reel portrait aspect ratio
+                        captioned={false}
+                    />
+                ) : (
+                    // Same size placeholder until the section is near the screen
+                    <div
+                        className="w-[328px] h-[580px] rounded-xl bg-white/5 border border-white/10 flex items-center justify-center animate-pulse"
+                        aria-hidden="true"
+                    >
+                        <Instagram className="w-10 h-10 text-white/20" />
+                    </div>
+                )}
             </div>
         </div>
     );
 }
 
 export default function InstagramReels({ reels = [] }: { reels?: InstagramReel[] }) {
+    // Instagram embeds are heavy (each loads Instagram's own page and scripts),
+    // so only load them when the visitor scrolls close to this section.
+    const sectionRef = useRef<HTMLElement | null>(null);
+    const [loadEmbeds, setLoadEmbeds] = useState(false);
+
+    useEffect(() => {
+        if (loadEmbeds || !sectionRef.current) return;
+        if (typeof IntersectionObserver === 'undefined') {
+            setLoadEmbeds(true);
+            return;
+        }
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries.some((e) => e.isIntersecting)) {
+                    setLoadEmbeds(true);
+                    observer.disconnect();
+                }
+            },
+            { rootMargin: '400px 0px' }
+        );
+        observer.observe(sectionRef.current);
+        return () => observer.disconnect();
+    }, [loadEmbeds]);
+
     if (!reels || reels.length === 0) {
         return null;
     }
 
     return (
-        <section className="py-12 bg-background relative z-10">
+        <section ref={sectionRef} className="py-12 bg-background relative z-10">
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-center gap-2 mb-8">
                     <Instagram className="w-6 h-6 text-pink-500" />
@@ -45,7 +80,7 @@ export default function InstagramReels({ reels = [] }: { reels?: InstagramReel[]
                 {/* Mobile: Horizontal Scroll | Desktop: Grid */}
                 <div className="flex md:grid md:grid-cols-4 gap-4 overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
                     {reels.map((reel) => (
-                        <ReelCard key={reel.id} reel={reel} />
+                        <ReelCard key={reel.id} reel={reel} load={loadEmbeds} />
                     ))}
                 </div>
 
