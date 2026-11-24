@@ -27,6 +27,7 @@ class PaymentSerializer(serializers.ModelSerializer):
             'amount',
             'currency',
             'status',
+            'notes',
             'created_at',
             'updated_at',
             # Custom fields
@@ -35,7 +36,7 @@ class PaymentSerializer(serializers.ModelSerializer):
             'booking_number',
             'booking_date',
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'notes', 'created_at', 'updated_at']
     
     def get_customer_name(self, obj):
         """Get customer name from booking."""

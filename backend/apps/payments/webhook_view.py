@@ -12,6 +12,7 @@ from rest_framework import status
 
 from .models import Payment
 from .services import PaymentService
+from .gateways.razorpay import amount_covers_order
 
 logger = logging.getLogger(__name__)
 payment_service = PaymentService()
@@ -84,9 +85,10 @@ def razorpay_webhook(request):
                     logger.info(f"Payment {razorpay_order_id} already marked SUCCESS. Skipping.")
                     return Response({'status': 'ok'})
 
-                # Security: the captured amount must match the order amount
+                # Security: the captured amount must cover the order amount.
+                # It can be higher when the customer pays Razorpay's convenience fee.
                 amount_paise = entity.get('amount')
-                if amount_paise != int(payment.amount * 100):
+                if not amount_covers_order(amount_paise, payment.amount):
                     logger.critical(f"Webhook Amount Mismatch! Expected: {payment.amount * 100}, Got: {amount_paise}")
                     payment.mark_failed("Webhook Amount Mismatch")
                     return Response({'status': 'ok'})

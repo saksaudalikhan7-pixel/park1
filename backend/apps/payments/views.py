@@ -555,3 +555,88 @@ def reconcile_payments(request):
         'paid_on_razorpay': missed,
         'errors': errors,
     })
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def reconcile_apply(request):
+    """
+    Repair payments that Razorpay captured but our system did not record
+    (e.g. rejected earlier because Razorpay added a convenience fee).
+
+    POST /api/v1/payments/reconcile/apply/
+    Body: {"order_ids": ["order_..", ...] (max 10), "dry_run": true|false}
+
+    For each order (oldest payment first), re-checked live with Razorpay:
+      - booking not yet covered by other successful payments → payment marked
+        SUCCESS and booking paid_amount / payment_status recalculated
+      - booking already paid by another payment → NOT counted as revenue; the
+        payment gets a "DUPLICATE CHARGE - refund" note with the Razorpay id
+    Never charges or refunds anything and sends no emails.
+    """
+    from django.db import transaction
+    from django.db.models import Sum
+    from .models import Payment
+    from .gateways.razorpay import amount_covers_order
+
+    if payment_service.gateway.get_provider_name() != 'RAZORPAY':
+        return Response({'error': 'Razorpay is not the active gateway'}, status=status.HTTP_400_BAD_REQUEST)
+
+    order_ids = request.data.get('order_ids') or []
+    if not isinstance(order_ids, list) or not order_ids or len(order_ids) > 10:
+        return Response({'error': 'order_ids must be a list of 1-10 order ids'}, status=status.HTTP_400_BAD_REQUEST)
+    dry_run = bool(request.data.get('dry_run', True))
+    client = payment_service.gateway.client
+
+    payments = list(Payment.objects.filter(provider='RAZORPAY', order_id__in=order_ids).order_by('id'))
+    results = []
+    for p in payments:
+        try:
+            items = client.order.payments(p.order_id).get('items', [])
+        except Exception as exc:
+            results.append({'order_id': p.order_id, 'result': 'error', 'detail': str(exc)[:200]})
+            continue
+        captured = [i for i in items if i.get('status') == 'captured' and amount_covers_order(i.get('amount'), p.amount)]
+
+        with transaction.atomic():
+            payment = Payment.objects.select_for_update().get(pk=p.pk)
+            booking = payment.get_booking()
+            entry = {'order_id': payment.order_id, 'payment': payment.id, 'amount': float(payment.amount),
+                     'booking_id': getattr(booking, 'id', None),
+                     'booking_type': 'party' if payment.party_booking_id else 'session'}
+            if payment.status == 'SUCCESS':
+                results.append({**entry, 'result': 'already_recorded'})
+                continue
+            if not captured or booking is None:
+                results.append({**entry, 'result': 'not_paid_on_razorpay'})
+                continue
+            rp = captured[0]
+            entry['razorpay_payment_id'] = rp.get('id')
+            entry['captured'] = (rp.get('amount') or 0) / 100
+
+            booking = type(booking).objects.select_for_update().get(pk=booking.pk)
+            other_paid = booking.payments.filter(status='SUCCESS').exclude(pk=payment.pk) \
+                .aggregate(t=Sum('amount'))['t'] or 0
+
+            if other_paid > 0 and other_paid >= booking.amount:
+                entry['result'] = 'duplicate_refund_needed'
+                if not dry_run:
+                    payment.payment_id = rp.get('id')
+                    payment.notes = (f"DUPLICATE CHARGE - refund in Razorpay: payment {rp.get('id')} "
+                                     f"captured ₹{entry['captured']} but booking was already paid by another payment.")
+                    payment.save(update_fields=['payment_id', 'notes', 'updated_at'])
+            else:
+                entry['result'] = 'recovered'
+                new_paid = other_paid + payment.amount
+                entry['booking_status_after'] = 'PAID' if new_paid >= booking.amount else 'PARTIAL'
+                if not dry_run:
+                    payment.mark_success(payment_id=rp.get('id'), provider_response=rp)
+                    payment.notes = (f"Recovered from Razorpay (captured ₹{entry['captured']} incl. convenience fee); "
+                                     f"was wrongly rejected earlier.")
+                    payment.save(update_fields=['notes', 'updated_at'])
+                    booking.paid_amount = new_paid
+                    booking.payment_status = entry['booking_status_after']
+                    booking.save()
+            results.append(entry)
+
+    return Response({'dry_run': dry_run, 'results': results})

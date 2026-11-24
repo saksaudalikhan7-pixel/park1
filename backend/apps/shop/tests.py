@@ -411,3 +411,95 @@ class ReconcileTests(TestCase):
         self.assertEqual(Payment.objects.filter(status='CREATED').count(), 2)
         b.refresh_from_db()
         self.assertEqual(b.payment_status, 'PENDING')
+
+
+class ConvenienceFeeTests(TestCase):
+    """Razorpay may capture order amount + convenience fee; that is a valid payment."""
+
+    def test_amount_covers_order(self):
+        from apps.payments.gateways.razorpay import amount_covers_order
+        self.assertTrue(amount_covers_order(471500, D('4715.00')))   # exact
+        self.assertTrue(amount_covers_order(481238, D('4715.00')))   # + 2.06% fee
+        self.assertFalse(amount_covers_order(471499, D('4715.00')))  # less than order
+        self.assertFalse(amount_covers_order(None, D('4715.00')))
+
+    def _gateway(self, captured_paise, order_id='order_fee'):
+        from unittest import mock
+        from apps.payments.gateways.razorpay import RazorpayGateway
+        gw = RazorpayGateway.__new__(RazorpayGateway)
+        gw.provider_name = 'RAZORPAY'
+        gw.client = mock.Mock()
+        gw.client.utility.verify_payment_signature.return_value = True
+        gw.client.payment.fetch.return_value = {'id': 'pay_fee', 'order_id': order_id,
+                                                'amount': captured_paise, 'status': 'captured'}
+        return gw
+
+    def _booking_and_payment(self):
+        from apps.payments.models import Payment
+        b = Booking.objects.create(name='A', email='a@example.com', phone='9876543210', date=date.today(),
+                                   time='12:00', duration=60, adults=4, amount=D('4715.00'))
+        p = Payment.objects.create(provider='RAZORPAY', order_id='order_fee', amount=D('4715.00'), booking=b)
+        return b, p
+
+    def test_verify_accepts_payment_with_fee(self):
+        b, p = self._booking_and_payment()
+        ok, pid, _ = self._gateway(481238).verify_payment(
+            {'razorpay_order_id': 'order_fee', 'razorpay_payment_id': 'pay_fee', 'razorpay_signature': 'sig'})
+        self.assertTrue(ok)
+        b.refresh_from_db(); p.refresh_from_db()
+        self.assertEqual(p.status, 'SUCCESS')
+        self.assertEqual(b.payment_status, 'PAID')
+        self.assertEqual(b.paid_amount, D('4715.00'))  # revenue = order amount, fee belongs to Razorpay
+
+    def test_verify_rejects_lower_amount(self):
+        b, p = self._booking_and_payment()
+        ok, _, _ = self._gateway(400000).verify_payment(
+            {'razorpay_order_id': 'order_fee', 'razorpay_payment_id': 'pay_fee', 'razorpay_signature': 'sig'})
+        self.assertFalse(ok)
+        b.refresh_from_db()
+        self.assertEqual(b.payment_status, 'PENDING')
+
+
+class ReconcileApplyTests(TestCase):
+    def test_recover_then_flag_duplicate(self):
+        from unittest import mock
+        from apps.payments.models import Payment
+        from apps.payments import views as pay_views
+        b = Booking.objects.create(name='A', email='a@example.com', phone='9876543210', date=date.today(),
+                                   time='12:00', duration=60, adults=4, amount=D('4244.00'))
+        p1 = Payment.objects.create(provider='RAZORPAY', order_id='order_1', amount=D('4244.00'),
+                                    status='FAILED', booking=b)
+        p2 = Payment.objects.create(provider='RAZORPAY', order_id='order_2', amount=D('4244.00'),
+                                    status='FAILED', booking=b)
+        p3 = Payment.objects.create(provider='RAZORPAY', order_id='order_3', amount=D('4244.00'),
+                                    status='CREATED', booking=b)  # customer closed checkout
+        fake_client = mock.Mock()
+        fake_client.order.payments.side_effect = lambda oid: {'items': {
+            'order_1': [{'id': 'pay_a', 'status': 'captured', 'amount': 433163}],
+            'order_2': [{'id': 'pay_b', 'status': 'captured', 'amount': 433163}],
+            'order_3': [],
+        }[oid]}
+        gw = mock.Mock(client=fake_client); gw.get_provider_name.return_value = 'RAZORPAY'
+        admin = get_user_model().objects.create_superuser('admin', 'admin@example.com', 'pw-123456')
+        client = APIClient(); client.force_authenticate(admin)
+        url = '/api/v1/payments/reconcile/apply/'
+        with mock.patch.object(pay_views.payment_service, 'gateway', gw):
+            dry = client.post(url, {'order_ids': ['order_1', 'order_2', 'order_3']}, format='json').json()
+            # dry run changes nothing
+            self.assertTrue(dry['dry_run'])
+            p1.refresh_from_db(); self.assertEqual(p1.status, 'FAILED')
+            res = client.post(url, {'order_ids': ['order_2', 'order_1', 'order_3'], 'dry_run': False},
+                              format='json').json()
+            again = client.post(url, {'order_ids': ['order_1'], 'dry_run': False}, format='json').json()
+        outcome = {r['order_id']: r['result'] for r in res['results']}
+        self.assertEqual(outcome, {'order_1': 'recovered', 'order_2': 'duplicate_refund_needed',
+                                   'order_3': 'not_paid_on_razorpay'})
+        self.assertEqual(again['results'][0]['result'], 'already_recorded')
+        b.refresh_from_db(); p1.refresh_from_db(); p2.refresh_from_db(); p3.refresh_from_db()
+        self.assertEqual((p1.status, p1.payment_id), ('SUCCESS', 'pay_a'))
+        self.assertEqual(p2.status, 'FAILED')
+        self.assertIn('DUPLICATE CHARGE', p2.notes)
+        self.assertIn('pay_b', p2.notes)
+        self.assertEqual(p3.status, 'CREATED')
+        self.assertEqual(b.payment_status, 'PAID')
+        self.assertEqual(b.paid_amount, D('4244.00'))  # duplicate not counted

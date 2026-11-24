@@ -33,6 +33,27 @@ except ImportError:  # SDK missing: __init__ raises a clear error anyway
 logger = logging.getLogger(__name__)
 
 
+def to_paise(amount) -> int:
+    """Rupees (Decimal) → paise (int), rounded the same way the order was created."""
+    return int(Decimal(str(amount)) * 100)
+
+
+def amount_covers_order(paid_paise, order_amount) -> bool:
+    """
+    True when a Razorpay payment covers our order amount.
+
+    Razorpay can add a convenience fee paid by the customer (fee-bearer mode),
+    so the captured amount may be HIGHER than the order amount (e.g. order
+    ₹4715.00, captured ₹4812.38). That is a valid, complete payment. Only a
+    lower amount is a real mismatch. (Earlier an exact match was required,
+    which rejected genuine payments and left bookings unpaid.)
+    """
+    try:
+        return int(paid_paise) >= to_paise(order_amount)
+    except (TypeError, ValueError):
+        return False
+
+
 class RazorpayGateway(BasePaymentGateway):
     """
     Razorpay payment gateway for production use.
@@ -191,17 +212,23 @@ class RazorpayGateway(BasePaymentGateway):
         try:
             razorpay_payment = self.client.payment.fetch(razorpay_payment_id)
             
-            # Security Check: Verify amount matches (Audit Finding #19)
-            # Razorpay returns amount in paise (100 paise = 1 INR)
+            # Security Check: the payment must belong to this order and cover its amount.
+            # Razorpay returns amount in paise (100 paise = 1 INR).
+            if razorpay_payment.get('order_id') and razorpay_payment.get('order_id') != razorpay_order_id:
+                logger.critical(f"Payment {razorpay_payment_id} belongs to another order {razorpay_payment.get('order_id')}")
+                payment.mark_failed("Payment does not belong to this order")
+                return (False, '', {'error': 'Payment does not match this order'})
+
             fetched_amount_paise = int(razorpay_payment.get('amount', 0))
-            expected_amount_paise = int(payment.amount * 100)
-            
-            # Allow small variance (optional, but strict is better for now)
-            if fetched_amount_paise != expected_amount_paise:
-               logger.critical(f"Payment amount mismatch! Expected: {expected_amount_paise}, Got: {fetched_amount_paise}")
-               payment.mark_failed(f"Amount mismatch: Expected {payment.amount}, Paid {fetched_amount_paise / 100}")
-               return (False, '', {'error': 'Payment amount mismatch'})
-               
+            if not amount_covers_order(fetched_amount_paise, payment.amount):
+                logger.critical(f"Payment amount too low! Expected: {payment.amount}, Got: {fetched_amount_paise / 100}")
+                payment.mark_failed(f"Amount mismatch: Expected {payment.amount}, Paid {fetched_amount_paise / 100}")
+                return (False, '', {'error': 'Payment amount mismatch'})
+            if fetched_amount_paise != to_paise(payment.amount):
+                # Customer paid Razorpay's convenience fee on top (fee-bearer mode)
+                logger.info(f"Payment {razorpay_payment_id} includes convenience fee: "
+                            f"order ₹{payment.amount}, captured ₹{fetched_amount_paise / 100}")
+
         except Exception as e:
             logger.error(f"Failed to fetch Razorpay payment: {str(e)}")
             payment.mark_failed(f"Failed to fetch payment details: {str(e)}")
