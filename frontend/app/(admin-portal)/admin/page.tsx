@@ -60,10 +60,10 @@ export default async function AdminDashboard() {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <StatCard
-                    title="Total Bookings"
+                    title="Paid Bookings"
                     value={stats.totalBookings.toString()}
                     icon={<CalendarCheck className="text-blue-600" />}
-                    trend="All Time"
+                    trend="All Time · paid only"
                     trendUp={true}
                     color="blue"
                 />
@@ -71,7 +71,7 @@ export default async function AdminDashboard() {
                     title="Avg Booking Value"
                     value={`₹${stats.avgBookingValue.toLocaleString()}`}
                     icon={<DollarSign className="text-emerald-600" />}
-                    trend="Per Booking"
+                    trend="Per paid booking"
                     trendUp={true}
                     color="emerald"
                 />
@@ -90,7 +90,7 @@ export default async function AdminDashboard() {
                     title="Waiver Completion"
                     value={`${stats.waiverCompletionRate}%`}
                     icon={<FileSignature className="text-amber-600" />}
-                    trend={stats.pendingWaivers > 0 ? "Action Needed" : "All Clear"}
+                    trend={stats.pendingWaivers > 0 ? `${stats.pendingWaivers} upcoming visit(s) need a waiver` : "All Clear"}
                     trendUp={stats.pendingWaivers === 0}
                     color="amber"
                     alert={stats.pendingWaivers > 0}
@@ -103,7 +103,7 @@ export default async function AdminDashboard() {
                     title="Today's Revenue"
                     value={`₹${stats.todayRevenue.toLocaleString()}`}
                     icon={<TrendingUp className="text-emerald-600" />}
-                    trend={`${stats.bookingsToday} bookings today`}
+                    trend={`${stats.paymentsToday ?? 0} payment(s) received today`}
                     trendUp={stats.todayRevenue >= stats.yesterdayRevenue}
                     color="emerald"
                 />
@@ -111,7 +111,7 @@ export default async function AdminDashboard() {
                     title="Booking Trend"
                     value={`${stats.bookingGrowth > 0 ? '+' : ''}${stats.bookingGrowth}%`}
                     icon={<Repeat className="text-indigo-600" />}
-                    trend={`${stats.thisWeekBookings} this week vs ${stats.lastWeekBookings} last week`}
+                    trend={`${stats.thisWeekBookings} paid in last 7 days vs ${stats.lastWeekBookings} the 7 before`}
                     trendUp={stats.bookingGrowth > 0}
                     color="indigo"
                 />
@@ -119,7 +119,7 @@ export default async function AdminDashboard() {
                     title="Total Revenue"
                     value={`₹${stats.totalRevenue.toLocaleString()}`}
                     icon={<DollarSign className="text-teal-600" />}
-                    trend="All Time"
+                    trend="All time · received via Razorpay, net of refunds"
                     trendUp={true}
                     color="teal"
                 />
@@ -139,7 +139,7 @@ export default async function AdminDashboard() {
 
                     {/* Customer Stats */}
                     <SummaryCard category="Customer Insights" icon={<Users size={16} />} items={[
-                        { label: "Total Customers", value: stats.totalCustomers },
+                        { label: "Paying Customers", value: stats.totalCustomers },
                         { label: "New This Month", value: stats.newCustomersMonth },
                         { label: "Repeat Customers", value: stats.repeatCustomers }
                     ]} />
@@ -155,7 +155,7 @@ export default async function AdminDashboard() {
                     {/* Promotions & System */}
                     <SummaryCard category="System Health" icon={<Ticket size={16} />} items={[
                         { label: "Active Vouchers", value: stats.activeVouchers },
-                        { label: "Redeemed", value: stats.redeemedVouchers },
+                        { label: "Vouchers Redeemed (paid)", value: stats.redeemedVouchers },
                         { label: "Waiver Completion", value: `${stats.waiverCompletionRate}%` }
                     ]} />
                 </div>
@@ -191,7 +191,7 @@ export default async function AdminDashboard() {
                                 <CalendarCheck size={18} className="text-blue-600" />
                             </div>
                             <div>
-                                <p className="text-sm font-bold text-blue-900">{stats.bookingsToday} Bookings Today</p>
+                                <p className="text-sm font-bold text-blue-900">{stats.bookingsToday} Paid Visits Today</p>
                                 <p className="text-xs text-blue-700 mt-1 leading-relaxed">Check staff availability for peak hours.</p>
                             </div>
                         </div>

@@ -10,6 +10,7 @@ import { Zap, Shield, Users, Trophy, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Stat, GalleryItem, Activity } from "../../../lib/api/types";
 import InstagramReels from "./InstagramReels";
+import PromotionsSlider, { type PromotionSlide } from "./PromotionsSlider";
 import { getMediaUrl } from "@/lib/media-utils";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -22,6 +23,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 interface HomeContentProps {
     stats: Stat[];
     gallery: GalleryItem[];
+    promotions?: PromotionSlide[];
     banners: any[];
     reels?: any[];
 
@@ -39,7 +41,7 @@ interface HomeContentProps {
     };
 }
 
-export default function HomeContent({ stats, gallery, banners, reels, settings, activities, hero, about }: HomeContentProps) {
+export default function HomeContent({ stats, gallery, promotions = [], banners, reels, settings, activities, hero, about }: HomeContentProps) {
     const aboutText = about?.content || settings?.aboutText || "Ninja Inflatable Park was born from a simple idea: create a space where people of all ages can unleash their inner ninja, challenge themselves, and have an absolute blast doing it.";
     const aboutTitle = about?.title || "India's Biggest Inflatable Park";
     const aboutImage = about?.image || "/park-slides-action.jpg";
@@ -53,6 +55,9 @@ export default function HomeContent({ stats, gallery, banners, reels, settings, 
                 subtitle={hero?.subtitle}
                 backgroundImage={hero?.image}
             />
+
+            {/* Offers & Promotions slider: only shown when the CMS has active promotion images */}
+            {promotions.length > 0 && <PromotionsSlider slides={promotions} />}
 
             {/* Stats Section */}
             <section className="relative pt-12 md:pt-20 pb-16 md:pb-32 px-4 bg-background-light">

@@ -5,6 +5,7 @@ import { HeroEditor } from '@/components/admin/cms/home/HeroEditor';
 import { AboutEditor } from '@/components/admin/cms/home/AboutEditor';
 import { GalleryManager } from '@/components/admin/cms/home/GalleryManager';
 import { ReelsManager } from '@/components/admin/cms/home/ReelsManager';
+import { PromotionsManager } from '@/components/admin/cms/home/PromotionsManager';
 import { CMSBackLink } from '@/components/admin/cms/CMSBackLink';
 
 export default async function HomeAdminPage() {
@@ -19,8 +20,10 @@ export default async function HomeAdminPage() {
     const heroSection = sections.find((s: any) => s.section_key === 'hero');
     const aboutSection = sections.find((s: any) => s.section_key === 'about');
 
-    // Filter out party carousel items from home gallery
-    const homeGalleryItems = gallery.filter((item: any) => item.category !== 'parties_carousel');
+    // Promotion slider images have their own manager; party carousel belongs to the parties page
+    const promotionItems = gallery.filter((item: any) => item.category === 'home_promotions');
+    const homeGalleryItems = gallery.filter((item: any) =>
+        item.category !== 'parties_carousel' && item.category !== 'home_promotions');
 
     return (
         <div className="space-y-8 max-w-5xl mx-auto pb-20">
@@ -33,6 +36,10 @@ export default async function HomeAdminPage() {
             <div className="grid gap-8">
                 <section>
                     <HeroEditor section={heroSection} pageSlug="home" />
+                </section>
+
+                <section>
+                    <PromotionsManager items={promotionItems} />
                 </section>
 
                 <section>

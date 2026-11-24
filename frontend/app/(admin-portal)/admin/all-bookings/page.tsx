@@ -88,9 +88,10 @@ export default function AllBookingsPage() {
         }
 
         // Status filter
+        // Status filter (matches the status badge shown in the table)
         if (statusFilter) {
             filtered = filtered.filter(booking =>
-                booking.booking_status?.toUpperCase() === statusFilter.toUpperCase()
+                displayStatus(booking) === statusFilter.toUpperCase()
             );
         }
 
@@ -157,10 +158,10 @@ export default function AllBookingsPage() {
                             className="px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         >
                             <option value="">All Statuses</option>
-                            <option value="CONFIRMED">Confirmed</option>
-                            <option value="PENDING">Pending</option>
+                            <option value="PAID">Paid</option>
+                            <option value="PARTIAL">Partially paid</option>
+                            <option value="PENDING">Unpaid (payment not completed)</option>
                             <option value="CANCELLED">Cancelled</option>
-                            <option value="COMPLETED">Completed</option>
                         </select>
                         <DateFilter value={dateFilter} onChange={setDateFilter} />
                     </div>
@@ -253,7 +254,7 @@ export default function AllBookingsPage() {
                                             <p className="text-sm font-bold text-slate-900 mt-1">{formatCurrency(booking.amount)}</p>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <StatusBadge status={booking.booking_status === 'CANCELLED' ? 'CANCELLED' : (booking.payment_status || 'PENDING')} />
+                                            <StatusBadge status={displayStatus(booking)} />
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <Link
@@ -282,6 +283,17 @@ export default function AllBookingsPage() {
     );
 }
 
+// Status shown in the table: cancelled bookings, otherwise the payment status
+function displayStatus(booking: any): string {
+    if (booking.booking_status?.toUpperCase() === 'CANCELLED') return 'CANCELLED';
+    return (booking.payment_status || 'PENDING').toUpperCase();
+}
+
+const STATUS_LABELS: Record<string, string> = {
+    PENDING: 'UNPAID',
+    PARTIAL: 'PARTIALLY PAID',
+};
+
 function StatusBadge({ status }: { status: string }) {
     const styles: Record<string, string> = {
         CONFIRMED: "bg-emerald-100 text-emerald-700 border-emerald-300",
@@ -298,7 +310,7 @@ function StatusBadge({ status }: { status: string }) {
     return (
         <span className={`px-2.5 py-1 rounded-full text-xs font-bold border shadow-sm ${styles[status] || defaultStyle} inline-flex items-center gap-1.5`}>
             <span className={`w-2 h-2 rounded-full ${['PAID', 'CONFIRMED'].includes(status) ? 'bg-emerald-500' : ['PENDING', 'PARTIAL'].includes(status) ? 'bg-amber-500' : 'bg-red-500'}`} />
-            {status}
+            {STATUS_LABELS[status] || status}
         </span>
     );
 }

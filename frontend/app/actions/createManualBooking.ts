@@ -38,6 +38,21 @@ function isValidPhone(phone: string): boolean {
     return phoneRegex.test(phone);
 }
 
+// Pull a readable message out of a DRF error response
+function firstErrorMessage(error: any): string | null {
+    if (!error) return null;
+    if (typeof error === "string") return error;
+    if (Array.isArray(error)) return firstErrorMessage(error[0]);
+    if (typeof error === "object") {
+        if (error.detail) return firstErrorMessage(error.detail);
+        for (const value of Object.values(error)) {
+            const message = firstErrorMessage(value);
+            if (message) return message;
+        }
+    }
+    return null;
+}
+
 export async function createManualBooking(formData: any) {
     try {
         // Server-side validation using Admin Zod schema
@@ -103,68 +118,12 @@ export async function createManualBooking(formData: any) {
         }
 
         const gst = subtotal * 0.18;
-        let totalAmount = subtotal + gst;
-        let discountAmount = 0;
-        let voucherId = null;
-
-        // Apply voucher if provided
-        if (data.voucherCode) {
-            // Re-validate voucher server-side
-            const voucherRes = await fetch(`${API_URL}/shop/vouchers/?code=${data.voucherCode}`, {
-                cache: "no-store"
-            });
-
-            if (!voucherRes.ok) {
-                return { success: false, error: "Invalid voucher code" };
-            }
-
-            const vouchers = await voucherRes.json();
-            const voucher = vouchers[0];
-
-            if (!voucher) {
-                return { success: false, error: "Invalid voucher code" };
-            }
-
-            if (!voucher.is_active) {
-                return { success: false, error: "This voucher is inactive" };
-            }
-
-            // Check expiry
-            if (voucher.expiry_date && new Date(voucher.expiry_date) < new Date()) {
-                return { success: false, error: "This voucher has expired" };
-            }
-
-            // Check usage limit
-            if (voucher.usage_limit && voucher.used_count >= voucher.usage_limit) {
-                return { success: false, error: "This voucher has reached its usage limit" };
-            }
-
-            // Check min order amount
-            if (voucher.min_order_amount && subtotal < parseFloat(voucher.min_order_amount)) {
-                return { success: false, error: `Minimum order of ₹${parseFloat(voucher.min_order_amount).toLocaleString()} required to use this voucher` };
-            }
-
-            // Calculate discount
-            if (voucher.discount_type === "PERCENTAGE") {
-                discountAmount = (subtotal * parseFloat(voucher.discount_value)) / 100;
-            } else {
-                discountAmount = parseFloat(voucher.discount_value);
-            }
-
-            discountAmount = Math.min(discountAmount, totalAmount);
-            // Ensure 2 decimal places
-            discountAmount = Number(discountAmount.toFixed(2));
-
-            totalAmount -= discountAmount;
-            voucherId = voucher.id;
-
-            // Increment usage count
-            await fetch(`${API_URL}/shop/vouchers/${voucher.id}/`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ used_count: voucher.used_count + 1 })
-            });
-        }
+        const totalAmount = subtotal + gst;
+        // Non-voucher price stays as calculated above (unchanged behaviour).
+        // If a voucher is given, the backend validates it and recalculates the
+        // subtotal, discount and amount itself when the booking is created.
+        const discountAmount = 0;
+        const voucherCode = data.voucherCode ? String(data.voucherCode).trim().toUpperCase() : "";
 
         // Generate unique booking number
         const bookingNumber = generateBookingNumber();
@@ -199,8 +158,7 @@ export async function createManualBooking(formData: any) {
             subtotal: Number(subtotal.toFixed(2)),
             amount: Number(totalAmount.toFixed(2)),
             discount_amount: Number(discountAmount.toFixed(2)),
-            voucher_code: data.voucherCode || null,
-            voucher: voucherId,
+            voucher_code: voucherCode || null,
             status: "CONFIRMED",
             booking_status: "CONFIRMED",
             // For manual bookings, we might assume payment is collected (CASH/POS) or Pending.
@@ -222,7 +180,7 @@ export async function createManualBooking(formData: any) {
                 const errorText = await bookingRes.text();
                 try {
                     const error = JSON.parse(errorText);
-                    errorMessage = error.detail || "Failed to create booking";
+                    errorMessage = firstErrorMessage(error) || "Failed to create booking";
                 } catch {
                     console.error("Non-JSON error response from booking API:", errorText.substring(0, 500));
                     errorMessage = `Server Error (${bookingRes.status}). Please try again later.`;

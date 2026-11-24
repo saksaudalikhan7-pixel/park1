@@ -37,6 +37,22 @@ function isValidPhone(phone: string): boolean {
     return phoneRegex.test(phone);
 }
 
+// Pull a readable message out of a DRF error response
+// ({detail: "..."}, {voucher_code: ["..."]}, {non_field_errors: ["..."]}, ["..."])
+function firstErrorMessage(error: any): string | null {
+    if (!error) return null;
+    if (typeof error === "string") return error;
+    if (Array.isArray(error)) return firstErrorMessage(error[0]);
+    if (typeof error === "object") {
+        if (error.detail) return firstErrorMessage(error.detail);
+        for (const value of Object.values(error)) {
+            const message = firstErrorMessage(value);
+            if (message) return message;
+        }
+    }
+    return null;
+}
+
 export async function createBooking(formData: any) {
     try {
         // Server-side validation using Zod schema
@@ -87,80 +103,38 @@ export async function createBooking(formData: any) {
             }
         }
 
-        // Calculate amount (server-side to prevent tampering)
-        const kidPrice = 500;
-        const adultPrice = 899;
-        const spectatorPrice = 150;
+        // Price is calculated by the backend pricing engine (CMS prices + grip
+        // socks + extra hour + voucher, GST after discount) so the saved booking
+        // amount is exactly what the customer saw and will pay.
+        const voucherCode = data.voucherCode ? String(data.voucherCode).trim().toUpperCase() : "";
+        const quoteRes = await fetch(`${API_URL}/shop/vouchers/quote/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                adults: data.adults,
+                kids: data.kids,
+                spectators: data.spectators,
+                duration: data.duration,
+                code: voucherCode || undefined,
+                booking_datetime: `${data.date}T${data.time}:00`,
+            }),
+            cache: "no-store"
+        });
 
-        let subtotal = (data.kids * kidPrice) + (data.adults * adultPrice) + (data.spectators * spectatorPrice);
-
-        if (data.duration === "120") {
-            subtotal += (data.kids + data.adults) * 500;
+        if (!quoteRes.ok) {
+            console.error("Quote request failed:", quoteRes.status);
+            return { success: false, error: "Could not calculate the booking price. Please try again." };
         }
 
-        const gst = subtotal * 0.18;
-        let totalAmount = subtotal + gst;
-        let discountAmount = 0;
-        let voucherId = null;
-
-        // Apply voucher if provided
-        if (data.voucherCode) {
-            // Re-validate voucher server-side
-            const voucherRes = await fetch(`${API_URL}/shop/vouchers/?code=${data.voucherCode}`, {
-                cache: "no-store"
-            });
-
-            if (!voucherRes.ok) {
-                return { success: false, error: "Invalid voucher code" };
-            }
-
-            const vouchers = await voucherRes.json();
-            const voucher = vouchers[0];
-
-            if (!voucher) {
-                return { success: false, error: "Invalid voucher code" };
-            }
-
-            if (!voucher.is_active) {
-                return { success: false, error: "This voucher is inactive" };
-            }
-
-            // Check expiry
-            if (voucher.expiry_date && new Date(voucher.expiry_date) < new Date()) {
-                return { success: false, error: "This voucher has expired" };
-            }
-
-            // Check usage limit
-            if (voucher.usage_limit && voucher.used_count >= voucher.usage_limit) {
-                return { success: false, error: "This voucher has reached its usage limit" };
-            }
-
-            // Check min order amount
-            if (voucher.min_order_amount && subtotal < parseFloat(voucher.min_order_amount)) {
-                return { success: false, error: `Minimum order of ₹${parseFloat(voucher.min_order_amount).toLocaleString()} required to use this voucher` };
-            }
-
-            // Calculate discount
-            if (voucher.discount_type === "PERCENTAGE") {
-                discountAmount = (subtotal * parseFloat(voucher.discount_value)) / 100;
-            } else {
-                discountAmount = parseFloat(voucher.discount_value);
-            }
-
-            discountAmount = Math.min(discountAmount, totalAmount);
-            // Ensure 2 decimal places
-            discountAmount = Number(discountAmount.toFixed(2));
-
-            totalAmount -= discountAmount;
-            voucherId = voucher.id;
-
-            // Increment usage count
-            await fetch(`${API_URL}/shop/vouchers/${voucher.id}/`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ used_count: voucher.used_count + 1 })
-            });
+        const quoteBody = await quoteRes.json();
+        if (!quoteBody.valid) {
+            return { success: false, error: quoteBody.error || "Invalid voucher code" };
         }
+
+        const quote = quoteBody.quote;
+        const subtotal = Number(quote.subtotal);
+        const discountAmount = Number(quote.discount);
+        const totalAmount = Number(quote.payable);
 
         // Generate unique booking number
         const bookingNumber = generateBookingNumber();
@@ -195,8 +169,8 @@ export async function createBooking(formData: any) {
             subtotal: Number(subtotal.toFixed(2)),
             amount: Number(totalAmount.toFixed(2)),
             discount_amount: Number(discountAmount.toFixed(2)),
-            voucher_code: data.voucherCode || null,
-            voucher: voucherId,
+            // The backend re-checks the voucher and recalculates the amount itself
+            voucher_code: voucherCode || null,
             status: "CONFIRMED",
             booking_status: "CONFIRMED",
             payment_status: "PENDING",
@@ -216,7 +190,7 @@ export async function createBooking(formData: any) {
                 const errorText = await bookingRes.text();
                 try {
                     const error = JSON.parse(errorText);
-                    errorMessage = error.detail || "Failed to create booking";
+                    errorMessage = firstErrorMessage(error) || "Failed to create booking";
                 } catch {
                     // If parsing fails, it's likely HTML or plain text (e.g. 500 error page)
                     console.error("Non-JSON error response from booking API:", errorText.substring(0, 500));
@@ -299,7 +273,8 @@ export async function createBooking(formData: any) {
             success: true,
             bookingId: String(booking.id), // Return numeric ID for payment processing
             bookingNumber: booking.booking_number || bookingNumber,
-            uuid: booking.uuid // Keep UUID for tickets/QR codes
+            uuid: booking.uuid, // Keep UUID for tickets/QR codes
+            amount: Number(booking.amount) // Saved amount = amount to charge
         };
     } catch (error) {
         console.error("Failed to create booking:", error);

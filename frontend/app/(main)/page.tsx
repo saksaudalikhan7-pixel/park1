@@ -58,9 +58,15 @@ export default async function Home() {
         { id: "safety", value: "100%", label: "Safe & Secure", icon: "Shield" },
     ];
 
-    // Transform gallery
+    // Promotions slider (Admin → Website Content → Home → Promotions)
+    const promotions = gallery
+        .filter((g: any) => g.active && g.category === 'home_promotions' && g.image_url)
+        .sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0) || a.id - b.id)
+        .map((g: any) => ({ id: g.id, src: g.image_url, title: g.title || '' }));
+
+    // Transform gallery (carousel / promotion images have their own sections)
     const galleryItems = gallery
-        .filter((g: any) => g.active && g.category !== 'parties_carousel')
+        .filter((g: any) => g.active && g.category !== 'parties_carousel' && g.category !== 'home_promotions')
         .slice(0, 8)
         .map((g: any) => ({
             id: g.id,
@@ -86,6 +92,7 @@ export default async function Home() {
         <HomeContent
             stats={stats}
             gallery={galleryItems}
+            promotions={promotions}
             banners={banners.filter((b: any) => b.active)}
             reels={reels.filter((r: any) => r.active)}
             settings={settings}

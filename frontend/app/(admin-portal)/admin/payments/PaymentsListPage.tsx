@@ -43,7 +43,9 @@ export default function PaymentsListPage() {
     const fetchPayments = async () => {
         setLoading(true);
         try {
-            const data = await getPayments();
+            // Load every payment (the API returns only 100 by default, which made
+            // the totals on this page smaller than the real figures)
+            const data = await getPayments({ limit: 10000 });
             console.log("Payments data:", data);
             setPayments(data.results || []);
         } catch (error) {
@@ -99,9 +101,11 @@ export default function PaymentsListPage() {
         total: payments.length,
         success: payments.filter((p) => p.status === "SUCCESS").length,
         failed: payments.filter((p) => p.status === "FAILED").length,
+        unfinished: payments.filter((p) => p.status === "CREATED").length,
         refunded: payments.filter((p) => p.amount < 0).length,
         totalAmount: payments
-            .filter((p) => p.status === "SUCCESS" && Number(p.amount) > 0)
+            // Real money only: MOCK payments were test transactions
+            .filter((p) => p.status === "SUCCESS" && Number(p.amount) > 0 && p.provider !== "MOCK")
             .reduce((sum, p) => sum + Number(p.amount), 0),
     };
 
@@ -131,6 +135,11 @@ export default function PaymentsListPage() {
                     <div>
                         <p className="text-slate-500 text-sm font-semibold">Total Payments</p>
                         <p className="text-2xl font-black text-slate-800 mt-1">{stats.total}</p>
+                        {stats.unfinished > 0 && (
+                            <p className="text-xs text-slate-500 mt-1" title="Customer opened Razorpay checkout but closed it without paying">
+                                {stats.unfinished} checkout not completed
+                            </p>
+                        )}
                     </div>
                     <div className="p-3 bg-slate-100 rounded-lg">
                         <CreditCard className="w-5 h-5 text-slate-600" />

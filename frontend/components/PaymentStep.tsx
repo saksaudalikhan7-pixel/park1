@@ -140,6 +140,17 @@ export function PaymentStep({
             console.error("Payment error:", err);
             const errorMessage = err.message || "Payment failed. Please try again.";
 
+            // Booking was already paid (e.g. customer pressed Pay again after a
+            // successful payment): never charge twice, just show it as completed.
+            if (errorMessage.includes("already fully paid")) {
+                setPaymentStatus("success");
+                setIsProcessing(false);
+                setTimeout(() => {
+                    onSuccess();
+                }, 1000);
+                return;
+            }
+
             // Check for specific errors
             if (errorMessage.includes("not found")) {
                 setError("Booking not found. Please go back and try again.");

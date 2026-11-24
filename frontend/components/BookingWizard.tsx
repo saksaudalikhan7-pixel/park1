@@ -9,12 +9,12 @@ import { bookingSchema, type BookingFormData, getAvailableTimeSlots, isTimeInPas
 import { useToast } from "./ToastProvider";
 import { WaiverForm } from "./WaiverForm";
 import { PaymentStep } from "./PaymentStep";
-import { validateVoucher } from "../app/actions/validateVoucher";
+import { validateVoucher, type VoucherQuote } from "../app/actions/validateVoucher";
 import { PageSection } from "../lib/cms/types";
 import { fetchBookingBlocks, isDateBlocked, BookingBlock } from "../lib/api/booking-blocks";
 
 interface BookingWizardProps {
-    onSubmit: (data: any) => Promise<{ success: boolean; bookingId?: string; bookingNumber?: string; uuid?: string; error?: string }>;
+    onSubmit: (data: any) => Promise<{ success: boolean; bookingId?: string; bookingNumber?: string; uuid?: string; amount?: number; error?: string }>;
     cmsContent?: PageSection[];
 }
 
@@ -32,6 +32,10 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
     const [discount, setDiscount] = useState(0);
     const [voucherMessage, setVoucherMessage] = useState("");
     const [appliedVoucher, setAppliedVoucher] = useState<string | null>(null);
+    const [voucherOk, setVoucherOk] = useState(false);
+    const [voucherQuote, setVoucherQuote] = useState<VoucherQuote | null>(null); // server price breakdown with voucher
+    const [isApplyingVoucher, setIsApplyingVoucher] = useState(false);
+    const [bookingAmount, setBookingAmount] = useState<number | null>(null); // amount saved on the booking (server)
     const [config, setConfig] = useState<any>(null); // Session booking configuration from CMS
 
     const methods = useForm<BookingFormData>({
@@ -213,9 +217,21 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
         return { subtotal, gst, total: subtotal + gst, socksCharge };
     };
 
-    const applyVoucher = async () => {
-        if (!voucher) return;
+    const clearVoucher = (message = "") => {
+        setDiscount(0);
+        setAppliedVoucher(null);
+        setVoucherQuote(null);
+        setVoucherOk(false);
+        setVoucherMessage(message);
+        setValue("voucherCode", "");
+        setValue("discountAmount", 0);
+    };
 
+    const applyVoucher = async () => {
+        if (!voucher.trim() || isApplyingVoucher) return;
+
+        setIsApplyingVoucher(true);
+        setVoucherOk(false);
         setVoucherMessage("Validating...");
         const totals = calculateTotal();
 
@@ -225,25 +241,47 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
             : undefined;
 
         try {
-            const result = await validateVoucher(voucher, totals.subtotal, bookingDateTime); // Pass booking datetime
+            const result = await validateVoucher(voucher, totals.subtotal, bookingDateTime, {
+                adults: formData.adults,
+                kids: formData.kids,
+                spectators: formData.spectators,
+                duration: formData.duration,
+            });
 
-            if (result.success && result.discount) {
+            if (result.success && result.discount && result.quote) {
                 setDiscount(result.discount);
                 setAppliedVoucher(result.code || voucher);
-                setVoucherMessage(`Success! Voucher applied: ₹${result.discount}`);
+                setVoucherQuote(result.quote);
+                setVoucherOk(true);
+                setVoucherMessage(`${result.offer || "Voucher"} applied — you save ₹${Math.round(result.discount).toLocaleString('en-IN')} (before GST)`);
                 setValue("voucherCode", result.code);
                 setValue("discountAmount", result.discount);
             } else {
-                setDiscount(0);
-                setAppliedVoucher(null);
-                setVoucherMessage(result.error || "Invalid voucher");
-                setValue("voucherCode", "");
-                setValue("discountAmount", 0);
+                clearVoucher(result.error || "Invalid voucher");
             }
         } catch (error) {
             console.error(error);
-            setVoucherMessage("Error validating voucher");
+            clearVoucher("Error validating voucher");
+        } finally {
+            setIsApplyingVoucher(false);
         }
+    };
+
+    // If guests, duration or slot change after a voucher was applied, the old
+    // discount is no longer correct: remove it and ask the customer to re-apply.
+    useEffect(() => {
+        if (appliedVoucher) {
+            clearVoucher("Your booking changed — please apply the voucher again.");
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [formData.adults, formData.kids, formData.spectators, formData.duration, formData.date, formData.time]);
+
+    // Amount the customer pays: the saved booking amount once the booking exists,
+    // otherwise the server quote (voucher applied) or the normal price.
+    const getPayableAmount = () => {
+        if (bookingAmount !== null) return Math.round(bookingAmount);
+        if (voucherQuote) return Math.round(voucherQuote.payable);
+        return Math.round(Math.max(0, calculateTotal().total - discount));
     };
 
     const handlePayment = async (data: BookingFormData) => {
@@ -272,6 +310,8 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                 setBookingUuid(result.uuid || result.bookingId);
                 setBookingNumber(result.bookingNumber || result.bookingId);
                 setCreatedBookingId(bookingIdNum);
+                // The server's saved amount is what must be charged
+                setBookingAmount(typeof result.amount === "number" && result.amount > 0 ? result.amount : null);
 
                 // Longer delay to ensure booking is fully committed to database
                 await new Promise(resolve => setTimeout(resolve, 1000));
@@ -389,7 +429,7 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                         </div>
                         <div className="col-span-2">
                             <span className="block text-xs text-white/50 uppercase font-bold mb-1">Amount Paid</span>
-                            <span className="font-bold text-primary text-2xl">₹ {Math.round(calculateTotal().total).toLocaleString('en-IN')}</span>
+                            <span className="font-bold text-primary text-2xl">₹ {getPayableAmount().toLocaleString('en-IN')}</span>
                         </div>
                     </div>
                 </motion.div>
@@ -903,50 +943,107 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                                                     type="text"
                                                     value={voucher}
                                                     onChange={(e) => setVoucher(e.target.value)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "Enter") {
+                                                            e.preventDefault(); // don't submit the booking form
+                                                            applyVoucher();
+                                                        }
+                                                    }}
                                                     placeholder="Enter voucher code"
-                                                    className="flex-1 px-4 py-3 rounded-xl border-2 border-white/10 bg-surface-800 text-white outline-none focus:border-primary transition-all uppercase"
+                                                    disabled={!!appliedVoucher}
+                                                    className="flex-1 px-4 py-3 rounded-xl border-2 border-white/10 bg-surface-800 text-white outline-none focus:border-primary transition-all uppercase disabled:opacity-60"
                                                 />
-                                                <button
-                                                    type="button"
-                                                    onClick={applyVoucher}
-                                                    className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-colors"
-                                                >
-                                                    Apply
-                                                </button>
+                                                {appliedVoucher ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => { clearVoucher(""); setVoucher(""); }}
+                                                        className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-colors"
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        onClick={applyVoucher}
+                                                        disabled={isApplyingVoucher || !voucher.trim()}
+                                                        className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                                    >
+                                                        {isApplyingVoucher && <Loader2 className="w-4 h-4 animate-spin" />}
+                                                        Apply
+                                                    </button>
+                                                )}
                                             </div>
-                                            {voucherMessage && (
-                                                <p className={`text-sm mt-2 ${voucherMessage.includes("success") ? "text-green-400" : "text-red-400"}`}>
+                                            {voucherMessage && voucherMessage !== "Validating..." && (
+                                                <p className={`text-sm mt-2 ${voucherOk ? "text-green-400" : "text-red-400"}`}>
                                                     {voucherMessage}
                                                 </p>
                                             )}
                                         </div>
 
                                         {/* Totals */}
-                                        <div className="border-t border-white/10 pt-6">
-                                            <div className="flex justify-between mb-2 text-white/50">
-                                                <span>Subtotal</span>
-                                                <span>₹ {totals.subtotal.toLocaleString('en-IN')}</span>
-                                            </div>
-                                            <div className="flex justify-between mb-4 text-white/50">
-                                                <span>GST (18%)</span>
-                                                <span>₹ {Math.round(totals.gst).toLocaleString('en-IN')}</span>
-                                            </div>
-
-                                            {/* Discount Display */}
-                                            {discount > 0 && (
-                                                <div className="flex justify-between mb-4 text-green-400">
-                                                    <span>Discount Applied</span>
-                                                    <span>- ₹ {Math.round(discount).toLocaleString('en-IN')}</span>
+                                        {voucherQuote && voucherQuote.voucher ? (
+                                            <div className="border-t border-white/10 pt-6">
+                                                <div className="flex justify-between mb-2 text-white/50">
+                                                    <span>Subtotal</span>
+                                                    <span>₹ {voucherQuote.subtotal.toLocaleString('en-IN')}</span>
                                                 </div>
-                                            )}
 
-                                            <div className="flex justify-between items-center pt-4 border-t border-white/10">
-                                                <span className="text-2xl font-black text-white">Total Amount</span>
-                                                <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
-                                                    ₹ {Math.round(Math.max(0, totals.total - discount)).toLocaleString('en-IN')}
-                                                </span>
+                                                {/* How the voucher was applied */}
+                                                <div className="mb-3 rounded-xl border border-green-400/30 bg-green-400/10 p-4">
+                                                    <div className="flex justify-between text-green-400 font-bold">
+                                                        <span>Voucher {voucherQuote.voucher.code} · {voucherQuote.voucher.offer}</span>
+                                                        <span>- ₹ {voucherQuote.discount.toLocaleString('en-IN')}</span>
+                                                    </div>
+                                                    {voucherQuote.voucher.lines.map((line) => (
+                                                        <div key={line.label} className="flex justify-between text-sm text-green-300/90 mt-1">
+                                                            <span>{line.label} (₹ {line.unit_price.toLocaleString('en-IN')} each)</span>
+                                                            <span>- ₹ {line.amount.toLocaleString('en-IN')}</span>
+                                                        </div>
+                                                    ))}
+                                                    <p className="text-xs text-white/60 mt-2">{voucherQuote.voucher.explanation}</p>
+                                                    {voucherQuote.voucher.discount_type === "BUY_X_GET_Y" && (
+                                                        <p className="text-xs text-white/50 mt-1">Free jump tickets only — grip socks are charged for every jumper.</p>
+                                                    )}
+                                                </div>
+
+                                                <div className="flex justify-between mb-2 text-white/50">
+                                                    <span>Amount after discount</span>
+                                                    <span>₹ {voucherQuote.taxable_amount.toLocaleString('en-IN')}</span>
+                                                </div>
+                                                <div className="flex justify-between mb-4 text-white/50">
+                                                    <span>GST ({voucherQuote.gst_rate}%)</span>
+                                                    <span>₹ {Math.round(voucherQuote.gst).toLocaleString('en-IN')}</span>
+                                                </div>
+
+                                                <div className="flex justify-between items-center pt-4 border-t border-white/10">
+                                                    <span className="text-2xl font-black text-white">Total Amount</span>
+                                                    <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
+                                                        ₹ {Math.round(voucherQuote.payable).toLocaleString('en-IN')}
+                                                    </span>
+                                                </div>
+                                                <p className="text-right text-sm text-green-400 mt-2">
+                                                    You save ₹ {Math.max(0, Math.round(totals.total) - Math.round(voucherQuote.payable)).toLocaleString('en-IN')} (incl. GST)
+                                                </p>
                                             </div>
-                                        </div>
+                                        ) : (
+                                            <div className="border-t border-white/10 pt-6">
+                                                <div className="flex justify-between mb-2 text-white/50">
+                                                    <span>Subtotal</span>
+                                                    <span>₹ {totals.subtotal.toLocaleString('en-IN')}</span>
+                                                </div>
+                                                <div className="flex justify-between mb-4 text-white/50">
+                                                    <span>GST (18%)</span>
+                                                    <span>₹ {Math.round(totals.gst).toLocaleString('en-IN')}</span>
+                                                </div>
+
+                                                <div className="flex justify-between items-center pt-4 border-t border-white/10">
+                                                    <span className="text-2xl font-black text-white">Total Amount</span>
+                                                    <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
+                                                        ₹ {Math.round(totals.total).toLocaleString('en-IN')}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <motion.button
@@ -987,7 +1084,7 @@ export const BookingWizard = ({ onSubmit, cmsContent = [] }: BookingWizardProps)
                                     <PaymentStep
                                         bookingId={createdBookingId}
                                         bookingType="session"
-                                        amount={Math.round(Math.max(0, totals.total - discount))}
+                                        amount={getPayableAmount()}
                                         bookingDetails={{
                                             date: formData.date,
                                             time: formData.time,
